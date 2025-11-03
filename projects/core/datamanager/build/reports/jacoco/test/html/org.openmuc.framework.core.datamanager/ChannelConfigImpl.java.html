@@ -1,0 +1,854 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChannelConfigImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">ChannelConfigImpl.java</span></div><h1>ChannelConfigImpl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.config.DeviceConfig;
+import org.openmuc.framework.config.IdCollisionException;
+import org.openmuc.framework.config.ParseException;
+import org.openmuc.framework.config.ServerMapping;
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.dataaccess.ChannelState;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public final class ChannelConfigImpl implements ChannelConfig, LogChannel {
+<span class="fc" id="L46">    private static final Pattern timePattern = Pattern.compile(&quot;^([0-9]+)(ms|s|m|h)?$&quot;);</span>
+    ChannelImpl channel;
+    DeviceConfigImpl deviceParent;
+    ChannelState state;
+    private String id;
+<span class="nc" id="L51">    private String channelAddress = null;</span>
+<span class="nc" id="L52">    private String description = null;</span>
+<span class="nc" id="L53">    private String unit = null;</span>
+<span class="nc" id="L54">    private ValueType valueType = null;</span>
+<span class="nc" id="L55">    private Integer valueTypeLength = null;</span>
+<span class="nc" id="L56">    private Double scalingFactor = null;</span>
+<span class="nc" id="L57">    private Double valueOffset = null;</span>
+<span class="nc" id="L58">    private Boolean listening = null;</span>
+<span class="nc" id="L59">    private Integer samplingInterval = null;</span>
+<span class="nc" id="L60">    private Integer samplingTimeOffset = null;</span>
+<span class="nc" id="L61">    private String samplingGroup = null;</span>
+    private String settings;
+<span class="nc" id="L63">    private Boolean loggingEvent = null;</span>
+<span class="nc" id="L64">    private Integer loggingInterval = null;</span>
+<span class="nc" id="L65">    private Integer loggingTimeOffset = null;</span>
+<span class="nc" id="L66">    private String loggingSettings = null;</span>
+<span class="nc" id="L67">    private Boolean disabled = null;</span>
+<span class="nc" id="L68">    private List&lt;ServerMapping&gt; serverMappings = null;</span>
+    private String reader;
+
+<span class="nc" id="L71">    ChannelConfigImpl(String id, DeviceConfigImpl deviceParent) {</span>
+<span class="nc" id="L72">        this.id = id;</span>
+<span class="nc" id="L73">        this.deviceParent = deviceParent;</span>
+<span class="nc" id="L74">    }</span>
+
+    static void addChannelFromDomNode(Node channelConfigNode, DeviceConfig parentConfig) throws ParseException {
+
+<span class="nc" id="L78">        String id = ChannelConfigImpl.getAttributeValue(channelConfigNode, &quot;id&quot;);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L80">            throw new ParseException(&quot;channel has no id attribute&quot;);</span>
+        }
+
+        ChannelConfigImpl config;
+
+        try {
+<span class="nc" id="L86">            config = (ChannelConfigImpl) parentConfig.addChannel(id);</span>
+<span class="nc" id="L87">        } catch (Exception e) {</span>
+<span class="nc" id="L88">            throw new ParseException(e);</span>
+<span class="nc" id="L89">        }</span>
+
+<span class="nc" id="L91">        NodeList channelChildren = channelConfigNode.getChildNodes();</span>
+
+        try {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">            for (int i = 0; i &lt; channelChildren.getLength(); i++) {</span>
+<span class="nc" id="L95">                Node childNode = channelChildren.item(i);</span>
+<span class="nc" id="L96">                String childName = childNode.getNodeName();</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                if (childName.equals(&quot;#text&quot;)) {</span>
+<span class="nc" id="L99">                    continue;</span>
+                }
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                else if (childName.equals(&quot;description&quot;)) {</span>
+<span class="nc" id="L102">                    config.setDescription(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L104" title="All 2 branches missed.">                else if (childName.equals(&quot;channelAddress&quot;)) {</span>
+<span class="nc" id="L105">                    config.setChannelAddress(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                else if (childName.equals(&quot;loggingSettings&quot;)) {</span>
+<span class="nc" id="L108">                    config.setLoggingSettings(childNode.getTextContent());</span>
+<span class="nc" id="L109">                    config.setReader(getAttributeValue(childNode, &quot;reader&quot;));</span>
+                }
+<span class="nc bnc" id="L111" title="All 2 branches missed.">                else if (childName.equals(&quot;serverMapping&quot;)) {</span>
+<span class="nc" id="L112">                    NamedNodeMap attributes = childNode.getAttributes();</span>
+<span class="nc" id="L113">                    Node nameAttribute = attributes.getNamedItem(&quot;id&quot;);</span>
+
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                    if (nameAttribute != null) {</span>
+<span class="nc" id="L116">                        config.addServerMapping(</span>
+<span class="nc" id="L117">                                new ServerMapping(nameAttribute.getTextContent(), childNode.getTextContent()));</span>
+                    }
+                    else {
+<span class="nc" id="L120">                        throw new ParseException(&quot;No id attribute specified for serverMapping.&quot;);</span>
+                    }
+<span class="nc" id="L122">                }</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                else if (childName.equals(&quot;unit&quot;)) {</span>
+<span class="nc" id="L124">                    config.setUnit(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                else if (childName.equals(&quot;valueType&quot;)) {</span>
+<span class="nc" id="L127">                    String valueTypeString = childNode.getTextContent().toUpperCase();</span>
+
+                    try {
+<span class="nc" id="L130">                        config.valueType = ValueType.valueOf(valueTypeString);</span>
+<span class="nc" id="L131">                    } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L132">                        throw new ParseException(&quot;found unknown channel value type:&quot; + valueTypeString);</span>
+<span class="nc" id="L133">                    }</span>
+
+<span class="nc bnc" id="L135" title="All 4 branches missed.">                    if (config.valueType == ValueType.BYTE_ARRAY || config.valueType == ValueType.STRING) {</span>
+<span class="nc" id="L136">                        String valueTypeLengthString = getAttributeValue(childNode, &quot;length&quot;);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                        if (valueTypeLengthString == null) {</span>
+<span class="nc" id="L138">                            throw new ParseException(</span>
+<span class="nc" id="L139">                                    &quot;length of &quot; + config.valueType.toString() + &quot; value type was not specified&quot;);</span>
+                        }
+<span class="nc" id="L141">                        config.valueTypeLength = timeStringToMillis(valueTypeLengthString);</span>
+                    }
+
+<span class="nc" id="L144">                }</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">                else if (childName.equals(&quot;scalingFactor&quot;)) {</span>
+<span class="nc" id="L146">                    config.setScalingFactor(Double.parseDouble(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                else if (childName.equals(&quot;valueOffset&quot;)) {</span>
+<span class="nc" id="L149">                    config.setValueOffset(Double.parseDouble(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L151" title="All 2 branches missed.">                else if (childName.equals(&quot;listening&quot;)) {</span>
+<span class="nc" id="L152">                    config.setListening(Boolean.parseBoolean(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L154" title="All 2 branches missed.">                else if (childName.equals(&quot;samplingInterval&quot;)) {</span>
+<span class="nc" id="L155">                    config.setSamplingInterval(timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L157" title="All 2 branches missed.">                else if (childName.equals(&quot;samplingTimeOffset&quot;)) {</span>
+<span class="nc" id="L158">                    config.setSamplingTimeOffset(timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                else if (childName.equals(&quot;samplingGroup&quot;)) {</span>
+<span class="nc" id="L161">                    config.setSamplingGroup(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L163" title="All 2 branches missed.">                else if (childName.equals(&quot;settings&quot;)) {</span>
+<span class="nc" id="L164">                    config.setSettings(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                else if (childName.equals(&quot;loggingInterval&quot;)) {</span>
+<span class="nc" id="L167">                    config.setLoggingInterval(timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L169" title="All 2 branches missed.">                else if (childName.equals(&quot;loggingTimeOffset&quot;)) {</span>
+<span class="nc" id="L170">                    config.setLoggingTimeOffset(timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L172" title="All 2 branches missed.">                else if (childName.equals(&quot;loggingEvent&quot;)) {</span>
+<span class="nc" id="L173">                    config.setLoggingEvent(Boolean.parseBoolean(childNode.getTextContent()));</span>
+
+                }
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                else if (childName.equals(&quot;disabled&quot;)) {</span>
+<span class="nc" id="L177">                    config.setDisabled(Boolean.parseBoolean(childNode.getTextContent()));</span>
+                }
+                else {
+<span class="nc" id="L180">                    throw new ParseException(&quot;found unknown tag:&quot; + childName);</span>
+                }
+            }
+<span class="nc" id="L183">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L184">            throw new ParseException(e);</span>
+<span class="nc" id="L185">        } catch (IllegalStateException e) {</span>
+<span class="nc" id="L186">            throw new ParseException(e);</span>
+<span class="nc" id="L187">        }</span>
+<span class="nc" id="L188">    }</span>
+
+    static String getAttributeValue(Node element, String attributeName) {
+<span class="nc" id="L191">        NamedNodeMap attributes = element.getAttributes();</span>
+
+<span class="nc" id="L193">        Node nameAttribute = attributes.getNamedItem(attributeName);</span>
+
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (nameAttribute == null) {</span>
+<span class="nc" id="L196">            return null;</span>
+        }
+<span class="nc" id="L198">        return nameAttribute.getTextContent();</span>
+    }
+
+    static String millisToTimeString(final int timeInMillis) {
+<span class="fc bfc" id="L202" title="All 2 branches covered.">        if (timeInMillis &lt;= 0) {</span>
+<span class="fc" id="L203">            return &quot;0&quot;;</span>
+        }
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        if ((timeInMillis % 1000) != 0) {</span>
+<span class="fc" id="L206">            return timeToString(&quot;ms&quot;, timeInMillis);</span>
+        }
+
+<span class="fc" id="L209">        int timeInS = timeInMillis / 1000;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if ((timeInS % 60) == 0) {</span>
+<span class="fc" id="L211">            int timeInM = timeInS / 60;</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if ((timeInM % 60) == 0) {</span>
+<span class="fc" id="L213">                int timeInH = timeInM / 60;</span>
+<span class="fc" id="L214">                return timeToString(&quot;h&quot;, timeInH);</span>
+            }
+<span class="fc" id="L216">            return timeToString(&quot;m&quot;, timeInM);</span>
+        }
+<span class="fc" id="L218">        return timeToString(&quot;s&quot;, timeInS);</span>
+    }
+
+    private static String timeToString(String timeUnit, int time) {
+<span class="fc" id="L222">        return MessageFormat.format(&quot;{0,number,#}{1}&quot;, time, timeUnit);</span>
+    }
+
+    static Integer timeStringToMillis(String timeString) throws ParseException {
+<span class="pc bpc" id="L226" title="1 of 4 branches missed.">        if (timeString == null || timeString.isEmpty()) {</span>
+<span class="fc" id="L227">            return null;</span>
+        }
+
+<span class="fc" id="L230">        Matcher timeMatcher = timePattern.matcher(timeString);</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (!timeMatcher.matches()) {</span>
+<span class="fc" id="L232">            throw new ParseException(MessageFormat.format(&quot;Unknown time string: ''{0}''.&quot;, timeString));</span>
+        }
+
+<span class="fc" id="L235">        String timeNumStr = timeMatcher.group(1);</span>
+<span class="fc" id="L236">        Long timeNum = parseTimeNumFrom(timeNumStr);</span>
+
+<span class="fc" id="L238">        String timeUnit = timeMatcher.group(2);</span>
+<span class="fc" id="L239">        final TimeUnit milliseconds = TimeUnit.MILLISECONDS;</span>
+
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if (timeUnit == null) {</span>
+<span class="fc" id="L242">            return timeNum.intValue();</span>
+        }
+
+<span class="pc bpc" id="L245" title="1 of 5 branches missed.">        switch (timeUnit) {</span>
+        case &quot;s&quot;:
+<span class="fc" id="L247">            return (int) milliseconds.convert(timeNum, TimeUnit.SECONDS);</span>
+
+        case &quot;m&quot;:
+<span class="fc" id="L250">            return (int) milliseconds.convert(timeNum, TimeUnit.MINUTES);</span>
+
+        case &quot;h&quot;:
+<span class="fc" id="L253">            return (int) milliseconds.convert(timeNum, TimeUnit.HOURS);</span>
+
+        case &quot;ms&quot;:
+<span class="fc" id="L256">            return timeNum.intValue();</span>
+        default:
+            // can not reach this case: string pattern does not allow this.
+<span class="nc" id="L259">            throw new ParseException(&quot;Unknown time unit: &quot; + timeUnit);</span>
+        }
+
+    }
+
+    private static Long parseTimeNumFrom(String timeNumStr) throws ParseException {
+        try {
+<span class="fc" id="L266">            return Long.parseLong(timeNumStr);</span>
+<span class="nc" id="L267">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L268">            throw new ParseException(e);</span>
+        }
+    }
+
+    static void checkIdSyntax(String id) {
+<span class="nc bnc" id="L273" title="All 2 branches missed.">        if (id.matches(&quot;[a-zA-Z0-9_-]+&quot;)) {</span>
+<span class="nc" id="L274">            return;</span>
+        }
+
+<span class="nc" id="L277">        String msg = MessageFormat.format(</span>
+                &quot;Invalid ID: \&quot;{0}\&quot;. An ID may not be the empty string and must contain only ASCII letters, digits, hyphens and underscores.&quot;,
+                id);
+<span class="nc" id="L280">        throw new IllegalArgumentException(msg);</span>
+    }
+
+    @Override
+    public String getId() {
+<span class="nc" id="L285">        return id;</span>
+    }
+
+    @Override
+    public void setId(String id) throws IdCollisionException {
+<span class="nc bnc" id="L290" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L291">            throw new IllegalArgumentException(&quot;The channel ID may not be null&quot;);</span>
+        }
+<span class="nc" id="L293">        ChannelConfigImpl.checkIdSyntax(id);</span>
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        if (deviceParent.driverParent.rootConfigParent.channelConfigsById.containsKey(id)) {</span>
+<span class="nc" id="L296">            throw new IdCollisionException(&quot;Collision with channel ID:&quot; + id);</span>
+        }
+
+<span class="nc" id="L299">        deviceParent.channelConfigsById.put(id, deviceParent.channelConfigsById.remove(this.id));</span>
+<span class="nc" id="L300">        deviceParent.driverParent.rootConfigParent.channelConfigsById.put(id,</span>
+<span class="nc" id="L301">                deviceParent.driverParent.rootConfigParent.channelConfigsById.remove(this.id));</span>
+
+<span class="nc" id="L303">        this.id = id;</span>
+<span class="nc" id="L304">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L308">        return description;</span>
+    }
+
+    @Override
+    public void setDescription(String description) {
+<span class="nc" id="L313">        this.description = description;</span>
+<span class="nc" id="L314">    }</span>
+
+    @Override
+    public String getChannelAddress() {
+<span class="nc" id="L318">        return channelAddress;</span>
+    }
+
+    @Override
+    public void setChannelAddress(String address) {
+<span class="nc" id="L323">        channelAddress = address;</span>
+<span class="nc" id="L324">    }</span>
+
+    @Override
+    public String getUnit() {
+<span class="nc" id="L328">        return unit;</span>
+    }
+
+    @Override
+    public void setUnit(String unit) {
+<span class="nc" id="L333">        this.unit = unit;</span>
+<span class="nc" id="L334">    }</span>
+
+    @Override
+    public ValueType getValueType() {
+<span class="nc" id="L338">        return valueType;</span>
+    }
+
+    @Override
+    public void setValueType(ValueType valueType) {
+<span class="nc" id="L343">        this.valueType = valueType;</span>
+<span class="nc" id="L344">    }</span>
+
+    @Override
+    public Integer getValueTypeLength() {
+<span class="nc" id="L348">        return valueTypeLength;</span>
+    }
+
+    @Override
+    public void setValueTypeLength(Integer length) {
+<span class="nc" id="L353">        valueTypeLength = length;</span>
+<span class="nc" id="L354">    }</span>
+
+    @Override
+    public Double getScalingFactor() {
+<span class="nc" id="L358">        return scalingFactor;</span>
+    }
+
+    @Override
+    public void setScalingFactor(Double factor) {
+<span class="nc" id="L363">        scalingFactor = factor;</span>
+<span class="nc" id="L364">    }</span>
+
+    @Override
+    public Double getValueOffset() {
+<span class="nc" id="L368">        return valueOffset;</span>
+    }
+
+    @Override
+    public void setValueOffset(Double offset) {
+<span class="nc" id="L373">        valueOffset = offset;</span>
+<span class="nc" id="L374">    }</span>
+
+    @Override
+    public Boolean isListening() {
+<span class="nc" id="L378">        return listening;</span>
+    }
+
+    @Override
+    public void setListening(Boolean listening) {
+<span class="nc bnc" id="L383" title="All 8 branches missed.">        if (samplingInterval != null &amp;&amp; listening != null &amp;&amp; listening &amp;&amp; samplingInterval &gt; 0) {</span>
+<span class="nc" id="L384">            throw new IllegalStateException(&quot;Listening may not be enabled while sampling is enabled.&quot;);</span>
+        }
+<span class="nc" id="L386">        this.listening = listening;</span>
+<span class="nc" id="L387">    }</span>
+
+    @Override
+    public Integer getSamplingInterval() {
+<span class="nc" id="L391">        return samplingInterval;</span>
+    }
+
+    @Override
+    public void setSamplingInterval(Integer samplingInterval) {
+<span class="nc bnc" id="L396" title="All 8 branches missed.">        if (listening != null &amp;&amp; samplingInterval != null &amp;&amp; isListening() &amp;&amp; samplingInterval &gt; 0) {</span>
+<span class="nc" id="L397">            throw new IllegalStateException(&quot;Sampling may not be enabled while listening is enabled.&quot;);</span>
+        }
+<span class="nc" id="L399">        this.samplingInterval = samplingInterval;</span>
+<span class="nc" id="L400">    }</span>
+
+    @Override
+    public Integer getSamplingTimeOffset() {
+<span class="nc" id="L404">        return samplingTimeOffset;</span>
+    }
+
+    @Override
+    public void setSamplingTimeOffset(Integer samplingTimeOffset) {
+<span class="nc bnc" id="L409" title="All 4 branches missed.">        if (samplingTimeOffset != null &amp;&amp; samplingTimeOffset &lt; 0) {</span>
+<span class="nc" id="L410">            throw new IllegalArgumentException(&quot;The sampling time offset may not be negative.&quot;);</span>
+        }
+<span class="nc" id="L412">        this.samplingTimeOffset = samplingTimeOffset;</span>
+<span class="nc" id="L413">    }</span>
+
+    @Override
+    public String getSamplingGroup() {
+<span class="nc" id="L417">        return samplingGroup;</span>
+    }
+
+    @Override
+    public void setSamplingGroup(String group) {
+<span class="nc" id="L422">        samplingGroup = group;</span>
+<span class="nc" id="L423">    }</span>
+
+    @Override
+    public String getSettings() {
+<span class="nc" id="L427">        return settings;</span>
+    }
+
+    @Override
+    public void setSettings(String settings) {
+<span class="nc" id="L432">        this.settings = settings;</span>
+<span class="nc" id="L433">    }</span>
+
+    @Override
+    public Integer getLoggingInterval() {
+<span class="nc" id="L437">        return loggingInterval;</span>
+    }
+
+    @Override
+    public void setLoggingInterval(Integer loggingInterval) {
+<span class="nc" id="L442">        this.loggingInterval = loggingInterval;</span>
+<span class="nc" id="L443">    }</span>
+
+    @Override
+    public void setLoggingEvent(Boolean loggingEvent) {
+<span class="nc" id="L447">        this.loggingEvent = loggingEvent;</span>
+<span class="nc" id="L448">    }</span>
+
+    @Override
+    public Boolean isLoggingEvent() {
+<span class="nc" id="L452">        return this.loggingEvent;</span>
+    }
+
+    @Override
+    public String getLoggingSettings() {
+<span class="nc" id="L457">        return loggingSettings;</span>
+    }
+
+    @Override
+    public void setLoggingSettings(String loggingSettings) {
+<span class="nc" id="L462">        this.loggingSettings = loggingSettings;</span>
+<span class="nc" id="L463">    }</span>
+
+    @Override
+    public String getReader() {
+<span class="nc" id="L467">        return reader;</span>
+    }
+
+    @Override
+    public void setReader(String reader) {
+<span class="nc" id="L472">        this.reader = reader;</span>
+<span class="nc" id="L473">    }</span>
+
+    @Override
+    public Integer getLoggingTimeOffset() {
+<span class="nc" id="L477">        return loggingTimeOffset;</span>
+    }
+
+    @Override
+    public void setLoggingTimeOffset(Integer loggingTimeOffset) {
+<span class="nc bnc" id="L482" title="All 4 branches missed.">        if (loggingTimeOffset != null &amp;&amp; loggingTimeOffset &lt; 0) {</span>
+<span class="nc" id="L483">            throw new IllegalArgumentException(&quot;The logging time offset may not be negative.&quot;);</span>
+        }
+<span class="nc" id="L485">        this.loggingTimeOffset = loggingTimeOffset;</span>
+<span class="nc" id="L486">    }</span>
+
+    @Override
+    public Boolean isDisabled() {
+<span class="nc" id="L490">        return disabled;</span>
+    }
+
+    @Override
+    public void setDisabled(Boolean disabled) {
+<span class="nc" id="L495">        this.disabled = disabled;</span>
+<span class="nc" id="L496">    }</span>
+
+    @Override
+    public void delete() {
+<span class="nc" id="L500">        deviceParent.channelConfigsById.remove(id);</span>
+<span class="nc" id="L501">        clear();</span>
+<span class="nc" id="L502">    }</span>
+
+    @Override
+    public List&lt;ServerMapping&gt; getServerMappings() {
+<span class="nc bnc" id="L506" title="All 2 branches missed.">        if (serverMappings != null) {</span>
+<span class="nc" id="L507">            return this.serverMappings;</span>
+        }
+        else {
+<span class="nc" id="L510">            return new ArrayList&lt;&gt;();</span>
+        }
+    }
+
+    void clear() {
+<span class="nc" id="L515">        deviceParent.driverParent.rootConfigParent.channelConfigsById.remove(id);</span>
+<span class="nc" id="L516">        deviceParent = null;</span>
+<span class="nc" id="L517">    }</span>
+
+    @Override
+    public DeviceConfig getDevice() {
+<span class="nc" id="L521">        return deviceParent;</span>
+    }
+
+    Element getDomElement(Document document) {
+<span class="nc" id="L525">        Element parentElement = document.createElement(&quot;channel&quot;);</span>
+<span class="nc" id="L526">        parentElement.setAttribute(&quot;id&quot;, id);</span>
+
+        Element childElement;
+
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        if (description != null) {</span>
+<span class="nc" id="L531">            childElement = document.createElement(&quot;description&quot;);</span>
+<span class="nc" id="L532">            childElement.setTextContent(description);</span>
+<span class="nc" id="L533">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L536" title="All 2 branches missed.">        if (channelAddress != null) {</span>
+<span class="nc" id="L537">            childElement = document.createElement(&quot;channelAddress&quot;);</span>
+<span class="nc" id="L538">            childElement.setTextContent(channelAddress);</span>
+<span class="nc" id="L539">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L542" title="All 2 branches missed.">        if (serverMappings != null) {</span>
+<span class="nc bnc" id="L543" title="All 2 branches missed.">            for (ServerMapping serverMapping : serverMappings) {</span>
+<span class="nc" id="L544">                childElement = document.createElement(&quot;serverMapping&quot;);</span>
+<span class="nc" id="L545">                childElement.setAttribute(&quot;id&quot;, serverMapping.getId());</span>
+<span class="nc" id="L546">                childElement.setTextContent(serverMapping.getServerAddress());</span>
+<span class="nc" id="L547">                parentElement.appendChild(childElement);</span>
+<span class="nc" id="L548">            }</span>
+        }
+
+<span class="nc bnc" id="L551" title="All 2 branches missed.">        if (unit != null) {</span>
+<span class="nc" id="L552">            childElement = document.createElement(&quot;unit&quot;);</span>
+<span class="nc" id="L553">            childElement.setTextContent(unit);</span>
+<span class="nc" id="L554">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L557" title="All 2 branches missed.">        if (valueType != null) {</span>
+<span class="nc" id="L558">            childElement = document.createElement(&quot;valueType&quot;);</span>
+<span class="nc" id="L559">            childElement.setTextContent(valueType.toString());</span>
+
+<span class="nc bnc" id="L561" title="All 2 branches missed.">            if (valueTypeLength != null) {</span>
+<span class="nc bnc" id="L562" title="All 4 branches missed.">                if (valueType == ValueType.BYTE_ARRAY || valueType == ValueType.STRING) {</span>
+<span class="nc" id="L563">                    childElement.setAttribute(&quot;length&quot;, valueTypeLength.toString());</span>
+                }
+            }
+<span class="nc" id="L566">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L569" title="All 2 branches missed.">        if (scalingFactor != null) {</span>
+<span class="nc" id="L570">            childElement = document.createElement(&quot;scalingFactor&quot;);</span>
+<span class="nc" id="L571">            childElement.setTextContent(Double.toString(scalingFactor));</span>
+<span class="nc" id="L572">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L575" title="All 2 branches missed.">        if (valueOffset != null) {</span>
+<span class="nc" id="L576">            childElement = document.createElement(&quot;valueOffset&quot;);</span>
+<span class="nc" id="L577">            childElement.setTextContent(Double.toString(valueOffset));</span>
+<span class="nc" id="L578">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L581" title="All 2 branches missed.">        if (listening != null) {</span>
+<span class="nc" id="L582">            childElement = document.createElement(&quot;listening&quot;);</span>
+<span class="nc" id="L583">            childElement.setTextContent(listening.toString());</span>
+<span class="nc" id="L584">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L587" title="All 2 branches missed.">        if (samplingInterval != null) {</span>
+<span class="nc" id="L588">            childElement = document.createElement(&quot;samplingInterval&quot;);</span>
+<span class="nc" id="L589">            childElement.setTextContent(millisToTimeString(samplingInterval));</span>
+<span class="nc" id="L590">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L593" title="All 2 branches missed.">        if (samplingTimeOffset != null) {</span>
+<span class="nc" id="L594">            childElement = document.createElement(&quot;samplingTimeOffset&quot;);</span>
+<span class="nc" id="L595">            childElement.setTextContent(millisToTimeString(samplingTimeOffset));</span>
+<span class="nc" id="L596">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L599" title="All 2 branches missed.">        if (samplingGroup != null) {</span>
+<span class="nc" id="L600">            childElement = document.createElement(&quot;samplingGroup&quot;);</span>
+<span class="nc" id="L601">            childElement.setTextContent(samplingGroup);</span>
+<span class="nc" id="L602">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L605" title="All 2 branches missed.">        if (settings != null) {</span>
+<span class="nc" id="L606">            childElement = document.createElement(&quot;settings&quot;);</span>
+<span class="nc" id="L607">            childElement.setTextContent(settings);</span>
+<span class="nc" id="L608">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L611" title="All 2 branches missed.">        if (loggingInterval != null) {</span>
+<span class="nc" id="L612">            childElement = document.createElement(&quot;loggingInterval&quot;);</span>
+<span class="nc" id="L613">            childElement.setTextContent(millisToTimeString(loggingInterval));</span>
+<span class="nc" id="L614">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L617" title="All 2 branches missed.">        if (loggingTimeOffset != null) {</span>
+<span class="nc" id="L618">            childElement = document.createElement(&quot;loggingTimeOffset&quot;);</span>
+<span class="nc" id="L619">            childElement.setTextContent(millisToTimeString(loggingTimeOffset));</span>
+<span class="nc" id="L620">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L623" title="All 2 branches missed.">        if (loggingEvent != null) {</span>
+<span class="nc" id="L624">            childElement = document.createElement(&quot;loggingEvent&quot;);</span>
+<span class="nc" id="L625">            childElement.setTextContent(loggingEvent.toString());</span>
+<span class="nc" id="L626">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L629" title="All 2 branches missed.">        if (loggingSettings != null) {</span>
+<span class="nc" id="L630">            childElement = document.createElement(&quot;loggingSettings&quot;);</span>
+<span class="nc" id="L631">            childElement.setTextContent(loggingSettings);</span>
+<span class="nc" id="L632">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L635" title="All 2 branches missed.">        if (disabled != null) {</span>
+<span class="nc" id="L636">            childElement = document.createElement(&quot;disabled&quot;);</span>
+<span class="nc" id="L637">            childElement.setTextContent(disabled.toString());</span>
+<span class="nc" id="L638">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc" id="L641">        return parentElement;</span>
+    }
+
+    ChannelConfigImpl clone(DeviceConfigImpl clonedParentConfig) {
+<span class="nc" id="L645">        ChannelConfigImpl configClone = new ChannelConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc" id="L647">        configClone.description = description;</span>
+<span class="nc" id="L648">        configClone.channelAddress = channelAddress;</span>
+<span class="nc" id="L649">        configClone.serverMappings = serverMappings;</span>
+<span class="nc" id="L650">        configClone.unit = unit;</span>
+<span class="nc" id="L651">        configClone.valueType = valueType;</span>
+<span class="nc" id="L652">        configClone.valueTypeLength = valueTypeLength;</span>
+<span class="nc" id="L653">        configClone.scalingFactor = scalingFactor;</span>
+<span class="nc" id="L654">        configClone.valueOffset = valueOffset;</span>
+<span class="nc" id="L655">        configClone.listening = listening;</span>
+<span class="nc" id="L656">        configClone.samplingInterval = samplingInterval;</span>
+<span class="nc" id="L657">        configClone.samplingTimeOffset = samplingTimeOffset;</span>
+<span class="nc" id="L658">        configClone.samplingGroup = samplingGroup;</span>
+<span class="nc" id="L659">        configClone.settings = settings;</span>
+<span class="nc" id="L660">        configClone.loggingInterval = loggingInterval;</span>
+<span class="nc" id="L661">        configClone.loggingTimeOffset = loggingTimeOffset;</span>
+<span class="nc" id="L662">        configClone.disabled = disabled;</span>
+<span class="nc" id="L663">        configClone.loggingEvent = loggingEvent;</span>
+<span class="nc" id="L664">        configClone.loggingSettings = loggingSettings;</span>
+<span class="nc" id="L665">        configClone.reader = reader;</span>
+
+<span class="nc" id="L667">        return configClone;</span>
+    }
+
+    ChannelConfigImpl cloneWithDefaults(DeviceConfigImpl clonedParentConfig) {
+<span class="nc" id="L671">        ChannelConfigImpl configClone = new ChannelConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc bnc" id="L673" title="All 2 branches missed.">        if (description == null) {</span>
+<span class="nc" id="L674">            configClone.description = ChannelConfig.DESCRIPTION_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L677">            configClone.description = description;</span>
+        }
+
+<span class="nc bnc" id="L680" title="All 2 branches missed.">        if (channelAddress == null) {</span>
+<span class="nc" id="L681">            configClone.channelAddress = CHANNEL_ADDRESS_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L684">            configClone.channelAddress = channelAddress;</span>
+        }
+
+<span class="nc bnc" id="L687" title="All 2 branches missed.">        if (serverMappings == null) {</span>
+<span class="nc" id="L688">            configClone.serverMappings = new ArrayList&lt;&gt;();</span>
+        }
+        else {
+<span class="nc" id="L691">            configClone.serverMappings = serverMappings;</span>
+        }
+
+<span class="nc bnc" id="L694" title="All 2 branches missed.">        if (unit == null) {</span>
+<span class="nc" id="L695">            configClone.unit = ChannelConfig.UNIT_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L698">            configClone.unit = unit;</span>
+        }
+
+<span class="nc bnc" id="L701" title="All 2 branches missed.">        if (valueType == null) {</span>
+<span class="nc" id="L702">            configClone.valueType = ChannelConfig.VALUE_TYPE_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L705">            configClone.valueType = valueType;</span>
+        }
+
+<span class="nc bnc" id="L708" title="All 2 branches missed.">        if (valueTypeLength == null) {</span>
+<span class="nc bnc" id="L709" title="All 2 branches missed.">            if (valueType == ValueType.DOUBLE) {</span>
+<span class="nc" id="L710">                configClone.valueTypeLength = 8;</span>
+            }
+<span class="nc bnc" id="L712" title="All 2 branches missed.">            else if (valueType == ValueType.BYTE_ARRAY) {</span>
+<span class="nc" id="L713">                configClone.valueTypeLength = ChannelConfig.BYTE_ARRAY_SIZE_DEFAULT;</span>
+            }
+<span class="nc bnc" id="L715" title="All 2 branches missed.">            else if (valueType == ValueType.STRING) {</span>
+<span class="nc" id="L716">                configClone.valueTypeLength = ChannelConfig.STRING_SIZE_DEFAULT;</span>
+            }
+<span class="nc bnc" id="L718" title="All 2 branches missed.">            else if (valueType == ValueType.BYTE) {</span>
+<span class="nc" id="L719">                configClone.valueTypeLength = 1;</span>
+            }
+<span class="nc bnc" id="L721" title="All 2 branches missed.">            else if (valueType == ValueType.FLOAT) {</span>
+<span class="nc" id="L722">                configClone.valueTypeLength = 4;</span>
+            }
+<span class="nc bnc" id="L724" title="All 2 branches missed.">            else if (valueType == ValueType.SHORT) {</span>
+<span class="nc" id="L725">                configClone.valueTypeLength = 2;</span>
+            }
+<span class="nc bnc" id="L727" title="All 2 branches missed.">            else if (valueType == ValueType.INTEGER) {</span>
+<span class="nc" id="L728">                configClone.valueTypeLength = 4;</span>
+            }
+<span class="nc bnc" id="L730" title="All 2 branches missed.">            else if (valueType == ValueType.LONG) {</span>
+<span class="nc" id="L731">                configClone.valueTypeLength = 8;</span>
+            }
+<span class="nc bnc" id="L733" title="All 2 branches missed.">            else if (valueType == ValueType.BOOLEAN) {</span>
+<span class="nc" id="L734">                configClone.valueTypeLength = 1;</span>
+            }
+        }
+        else {
+<span class="nc" id="L738">            configClone.valueTypeLength = valueTypeLength;</span>
+        }
+
+<span class="nc" id="L741">        configClone.scalingFactor = scalingFactor;</span>
+<span class="nc" id="L742">        configClone.valueOffset = valueOffset;</span>
+
+<span class="nc bnc" id="L744" title="All 2 branches missed.">        if (listening == null) {</span>
+<span class="nc" id="L745">            configClone.listening = ChannelConfig.LISTENING_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L748">            configClone.listening = listening;</span>
+        }
+
+<span class="nc bnc" id="L751" title="All 2 branches missed.">        if (samplingInterval == null) {</span>
+<span class="nc" id="L752">            configClone.samplingInterval = ChannelConfig.SAMPLING_INTERVAL_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L755">            configClone.samplingInterval = samplingInterval;</span>
+        }
+
+<span class="nc bnc" id="L758" title="All 2 branches missed.">        if (samplingTimeOffset == null) {</span>
+<span class="nc" id="L759">            configClone.samplingTimeOffset = ChannelConfig.SAMPLING_TIME_OFFSET_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L762">            configClone.samplingTimeOffset = samplingTimeOffset;</span>
+        }
+
+<span class="nc bnc" id="L765" title="All 2 branches missed.">        if (samplingGroup == null) {</span>
+<span class="nc" id="L766">            configClone.samplingGroup = ChannelConfig.SAMPLING_GROUP_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L769">            configClone.samplingGroup = samplingGroup;</span>
+        }
+
+<span class="nc bnc" id="L772" title="All 2 branches missed.">        if (settings == null) {</span>
+<span class="nc" id="L773">            configClone.settings = ChannelConfig.SETTINGS_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L776">            configClone.settings = settings;</span>
+        }
+
+<span class="nc bnc" id="L779" title="All 2 branches missed.">        if (loggingInterval == null) {</span>
+<span class="nc" id="L780">            configClone.loggingInterval = ChannelConfig.LOGGING_INTERVAL_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L783">            configClone.loggingInterval = loggingInterval;</span>
+        }
+
+<span class="nc bnc" id="L786" title="All 2 branches missed.">        if (loggingEvent == null) {</span>
+<span class="nc" id="L787">            configClone.loggingEvent = ChannelConfig.LOGGING_EVENT_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L790">            configClone.loggingEvent = loggingEvent;</span>
+        }
+
+<span class="nc bnc" id="L793" title="All 2 branches missed.">        if (loggingSettings == null) {</span>
+<span class="nc" id="L794">            configClone.loggingSettings = ChannelConfig.LOGGING_SETTINGS_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L797">            configClone.loggingSettings = loggingSettings;</span>
+        }
+
+<span class="nc bnc" id="L800" title="All 2 branches missed.">        if (reader == null) {</span>
+<span class="nc" id="L801">            configClone.reader = ChannelConfig.LOGGING_READER_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L804">            configClone.reader = reader;</span>
+        }
+
+<span class="nc bnc" id="L807" title="All 2 branches missed.">        if (loggingTimeOffset == null) {</span>
+<span class="nc" id="L808">            configClone.loggingTimeOffset = ChannelConfig.LOGGING_TIME_OFFSET_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L811">            configClone.loggingTimeOffset = loggingTimeOffset;</span>
+        }
+
+<span class="nc bnc" id="L814" title="All 2 branches missed.">        if (disabled == null) {</span>
+<span class="nc" id="L815">            configClone.disabled = clonedParentConfig.isDisabled();</span>
+        }
+        else {
+<span class="nc bnc" id="L818" title="All 2 branches missed.">            if (clonedParentConfig.isDisabled()) {</span>
+<span class="nc" id="L819">                configClone.disabled = false;</span>
+            }
+            else {
+<span class="nc" id="L822">                configClone.disabled = disabled;</span>
+            }
+        }
+
+<span class="nc" id="L826">        return configClone;</span>
+    }
+
+    public boolean isSampling() {
+<span class="nc bnc" id="L830" title="All 6 branches missed.">        return !disabled &amp;&amp; samplingInterval != null &amp;&amp; samplingInterval &gt; 0;</span>
+    }
+
+    @Override
+    public void addServerMapping(ServerMapping serverMapping) {
+<span class="nc bnc" id="L835" title="All 2 branches missed.">        if (serverMappings == null) {</span>
+<span class="nc" id="L836">            serverMappings = new ArrayList&lt;&gt;();</span>
+        }
+<span class="nc" id="L838">        serverMappings.add(serverMapping);</span>
+<span class="nc" id="L839">    }</span>
+
+    @Override
+    public void deleteServerMappings(String id) {
+<span class="nc bnc" id="L843" title="All 2 branches missed.">        if (serverMappings != null) {</span>
+<span class="nc" id="L844">            List&lt;ServerMapping&gt; newMappings = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L845" title="All 2 branches missed.">            for (ServerMapping serverMapping : serverMappings) {</span>
+<span class="nc bnc" id="L846" title="All 2 branches missed.">                if (!serverMapping.getId().equals(id)) {</span>
+<span class="nc" id="L847">                    newMappings.add(serverMapping);</span>
+                }
+<span class="nc" id="L849">            }</span>
+<span class="nc" id="L850">            serverMappings = newMappings;</span>
+        }
+<span class="nc" id="L852">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

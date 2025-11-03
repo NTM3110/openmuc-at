@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DriverConfigImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">DriverConfigImpl.java</span></div><h1>DriverConfigImpl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import org.openmuc.framework.config.DeviceConfig;
+import org.openmuc.framework.config.DriverConfig;
+import org.openmuc.framework.config.IdCollisionException;
+import org.openmuc.framework.config.ParseException;
+import org.openmuc.framework.driver.spi.DriverService;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public final class DriverConfigImpl implements DriverConfig {
+
+    String id;
+<span class="nc" id="L42">    Integer samplingTimeout = null;</span>
+<span class="nc" id="L43">    Integer connectRetryInterval = null;</span>
+<span class="nc" id="L44">    Boolean disabled = null;</span>
+
+<span class="nc" id="L46">    final HashMap&lt;String, DeviceConfigImpl&gt; deviceConfigsById = new LinkedHashMap&lt;&gt;();</span>
+
+    RootConfigImpl rootConfigParent;
+
+<span class="nc" id="L50">    DriverService activeDriver = null;</span>
+
+<span class="nc" id="L52">    DriverConfigImpl(String id, RootConfigImpl rootConfigParent) {</span>
+<span class="nc" id="L53">        this.id = id;</span>
+<span class="nc" id="L54">        this.rootConfigParent = rootConfigParent;</span>
+<span class="nc" id="L55">    }</span>
+
+    @Override
+    public String getId() {
+<span class="nc" id="L59">        return id;</span>
+    }
+
+    @Override
+    public void setId(String id) throws IdCollisionException {
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L65">            throw new IllegalArgumentException(&quot;The driver ID may not be null&quot;);</span>
+        }
+<span class="nc" id="L67">        ChannelConfigImpl.checkIdSyntax(id);</span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (rootConfigParent.driverConfigsById.containsKey(id)) {</span>
+<span class="nc" id="L70">            throw new IdCollisionException(&quot;Collision with the driver ID:&quot; + id);</span>
+        }
+<span class="nc" id="L72">        this.rootConfigParent.driverConfigsById.remove(this.id);</span>
+<span class="nc" id="L73">        this.rootConfigParent.driverConfigsById.put(id, this);</span>
+<span class="nc" id="L74">        this.id = id;</span>
+<span class="nc" id="L75">    }</span>
+
+    @Override
+    public Integer getSamplingTimeout() {
+<span class="nc" id="L79">        return samplingTimeout;</span>
+    }
+
+    @Override
+    public void setSamplingTimeout(Integer timeout) {
+<span class="nc bnc" id="L84" title="All 4 branches missed.">        if (timeout != null &amp;&amp; timeout &lt; 0) {</span>
+<span class="nc" id="L85">            throw new IllegalArgumentException(&quot;A negative sampling timeout is not allowed&quot;);</span>
+        }
+<span class="nc" id="L87">        samplingTimeout = timeout;</span>
+<span class="nc" id="L88">    }</span>
+
+    @Override
+    public Integer getConnectRetryInterval() {
+<span class="nc" id="L92">        return connectRetryInterval;</span>
+    }
+
+    @Override
+    public void setConnectRetryInterval(Integer interval) {
+<span class="nc bnc" id="L97" title="All 4 branches missed.">        if (interval != null &amp;&amp; interval &lt; 0) {</span>
+<span class="nc" id="L98">            throw new IllegalArgumentException(&quot;A negative connect retry interval is not allowed&quot;);</span>
+        }
+<span class="nc" id="L100">        connectRetryInterval = interval;</span>
+<span class="nc" id="L101">    }</span>
+
+    @Override
+    public Boolean isDisabled() {
+<span class="nc" id="L105">        return disabled;</span>
+    }
+
+    @Override
+    public void setDisabled(Boolean disabled) {
+<span class="nc" id="L110">        this.disabled = disabled;</span>
+<span class="nc" id="L111">    }</span>
+
+    @Override
+    public DeviceConfig addDevice(String deviceId) throws IdCollisionException {
+
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        if (deviceId == null) {</span>
+<span class="nc" id="L117">            throw new IllegalArgumentException(&quot;The device ID may not be null&quot;);</span>
+        }
+
+<span class="nc" id="L120">        ChannelConfigImpl.checkIdSyntax(deviceId);</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (rootConfigParent.deviceConfigsById.containsKey(deviceId)) {</span>
+<span class="nc" id="L123">            throw new IdCollisionException(&quot;Collision with device ID: &quot; + deviceId);</span>
+        }
+
+<span class="nc" id="L126">        DeviceConfigImpl newDevice = new DeviceConfigImpl(deviceId, this);</span>
+
+<span class="nc" id="L128">        rootConfigParent.deviceConfigsById.put(deviceId, newDevice);</span>
+<span class="nc" id="L129">        deviceConfigsById.put(deviceId, newDevice);</span>
+
+<span class="nc" id="L131">        return newDevice;</span>
+    }
+
+    @Override
+    public DeviceConfig getDevice(String deviceId) {
+<span class="nc" id="L136">        return deviceConfigsById.get(deviceId);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public Collection&lt;DeviceConfig&gt; getDevices() {
+<span class="nc" id="L142">        return (Collection&lt;DeviceConfig&gt;) (Collection&lt;?&gt;) Collections</span>
+<span class="nc" id="L143">                .unmodifiableCollection(deviceConfigsById.values());</span>
+    }
+
+    @Override
+    public void delete() {
+<span class="nc" id="L148">        rootConfigParent.driverConfigsById.remove(id);</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for (DeviceConfigImpl deviceConfig : deviceConfigsById.values()) {</span>
+<span class="nc" id="L150">            deviceConfig.clear();</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">        deviceConfigsById.clear();</span>
+<span class="nc" id="L153">        rootConfigParent = null;</span>
+<span class="nc" id="L154">    }</span>
+
+    static void addDriverFromDomNode(Node driverConfigNode, RootConfigImpl parentConfig) throws ParseException {
+
+<span class="nc" id="L158">        String id = ChannelConfigImpl.getAttributeValue(driverConfigNode, &quot;id&quot;);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L160">            throw new ParseException(&quot;driver has no id attribute&quot;);</span>
+        }
+
+        DriverConfigImpl config;
+        try {
+<span class="nc" id="L165">            config = parentConfig.addDriver(id);</span>
+<span class="nc" id="L166">        } catch (IdCollisionException e) {</span>
+<span class="nc" id="L167">            throw new ParseException(e);</span>
+<span class="nc" id="L168">        }</span>
+
+<span class="nc" id="L170">        parseDiverNode(driverConfigNode, config);</span>
+<span class="nc" id="L171">    }</span>
+
+    private static void parseDiverNode(Node driverConfigNode, DriverConfigImpl config) throws ParseException {
+<span class="nc" id="L174">        NodeList driverChildren = driverConfigNode.getChildNodes();</span>
+
+        try {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            for (int j = 0; j &lt; driverChildren.getLength(); j++) {</span>
+<span class="nc" id="L178">                Node childNode = driverChildren.item(j);</span>
+<span class="nc" id="L179">                String childName = childNode.getNodeName();</span>
+
+<span class="nc bnc" id="L181" title="All 6 branches missed.">                switch (childName) {</span>
+                case &quot;#text&quot;:
+<span class="nc" id="L183">                    continue;</span>
+
+                case &quot;device&quot;:
+<span class="nc" id="L186">                    DeviceConfigImpl.addDeviceFromDomNode(childNode, config);</span>
+<span class="nc" id="L187">                    break;</span>
+
+                case &quot;samplingTimeout&quot;:
+<span class="nc" id="L190">                    config.setSamplingTimeout(ChannelConfigImpl.timeStringToMillis(childNode.getTextContent()));</span>
+<span class="nc" id="L191">                    break;</span>
+
+                case &quot;connectRetryInterval&quot;:
+<span class="nc" id="L194">                    config.setConnectRetryInterval(ChannelConfigImpl.timeStringToMillis(childNode.getTextContent()));</span>
+<span class="nc" id="L195">                    break;</span>
+
+                case &quot;disabled&quot;:
+<span class="nc" id="L198">                    String disabledString = childNode.getTextContent();</span>
+<span class="nc" id="L199">                    config.disabled = Boolean.parseBoolean(disabledString);</span>
+<span class="nc" id="L200">                    break;</span>
+                default:
+<span class="nc" id="L202">                    throw new ParseException(&quot;found unknown tag:&quot; + childName);</span>
+                }
+
+            }
+<span class="nc" id="L206">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L207">            throw new ParseException(e);</span>
+<span class="nc" id="L208">        }</span>
+<span class="nc" id="L209">    }</span>
+
+    Element getDomElement(Document document) {
+<span class="nc" id="L212">        Element parentElement = document.createElement(&quot;driver&quot;);</span>
+<span class="nc" id="L213">        parentElement.setAttribute(&quot;id&quot;, id);</span>
+
+        Element childElement;
+
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (samplingTimeout != null) {</span>
+<span class="nc" id="L218">            childElement = document.createElement(&quot;samplingTimeout&quot;);</span>
+<span class="nc" id="L219">            childElement.setTextContent(ChannelConfigImpl.millisToTimeString(samplingTimeout));</span>
+<span class="nc" id="L220">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">        if (connectRetryInterval != null) {</span>
+<span class="nc" id="L224">            childElement = document.createElement(&quot;connectRetryInterval&quot;);</span>
+<span class="nc" id="L225">            childElement.setTextContent(ChannelConfigImpl.millisToTimeString(connectRetryInterval));</span>
+<span class="nc" id="L226">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (disabled != null) {</span>
+<span class="nc" id="L230">            childElement = document.createElement(&quot;disabled&quot;);</span>
+<span class="nc" id="L231">            childElement.setTextContent(disabled.toString());</span>
+<span class="nc" id="L232">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        for (DeviceConfigImpl deviceConfig : deviceConfigsById.values()) {</span>
+<span class="nc" id="L236">            parentElement.appendChild(deviceConfig.getDomElement(document));</span>
+<span class="nc" id="L237">        }</span>
+
+<span class="nc" id="L239">        return parentElement;</span>
+    }
+
+    DriverConfigImpl clone(RootConfigImpl clonedParentConfig) {
+<span class="nc" id="L243">        DriverConfigImpl configClone = new DriverConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc" id="L245">        configClone.samplingTimeout = samplingTimeout;</span>
+<span class="nc" id="L246">        configClone.connectRetryInterval = connectRetryInterval;</span>
+<span class="nc" id="L247">        configClone.disabled = disabled;</span>
+
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        for (DeviceConfigImpl deviceConfig : deviceConfigsById.values()) {</span>
+<span class="nc" id="L250">            configClone.deviceConfigsById.put(deviceConfig.getId(), deviceConfig.clone(configClone));</span>
+<span class="nc" id="L251">        }</span>
+<span class="nc" id="L252">        return configClone;</span>
+    }
+
+    DriverConfigImpl cloneWithDefaults(RootConfigImpl clonedParentConfig) {
+<span class="nc" id="L256">        DriverConfigImpl configClone = new DriverConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        if (samplingTimeout == null) {</span>
+<span class="nc" id="L259">            configClone.samplingTimeout = SAMPLING_TIMEOUT_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L262">            configClone.samplingTimeout = samplingTimeout;</span>
+        }
+
+<span class="nc bnc" id="L265" title="All 2 branches missed.">        if (connectRetryInterval == null) {</span>
+<span class="nc" id="L266">            configClone.connectRetryInterval = CONNECT_RETRY_INTERVAL_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L269">            configClone.connectRetryInterval = connectRetryInterval;</span>
+        }
+
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        if (disabled == null) {</span>
+<span class="nc" id="L273">            configClone.disabled = DISABLED_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L276">            configClone.disabled = disabled;</span>
+        }
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        for (DeviceConfigImpl deviceConfig : deviceConfigsById.values()) {</span>
+<span class="nc" id="L280">            configClone.deviceConfigsById.put(deviceConfig.getId(), deviceConfig.cloneWithDefaults(configClone));</span>
+<span class="nc" id="L281">        }</span>
+<span class="nc" id="L282">        return configClone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

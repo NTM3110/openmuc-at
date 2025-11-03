@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatatypeConversion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus.util</a> &gt; <span class="el_source">DatatypeConversion.java</span></div><h1>DatatypeConversion.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus.util;
+
+/**
+ * Since Java supports only signed data types, this class provides methods to convert byte arrays in signed and unsigned
+ * integers and vice versa (UNIT8, INT8, UNIT16, INT16, UINT32, INT32). These conversions are usually needed when
+ * receiving messages from a hardware or sending messages to a hardware respectively.
+ * 
+ */
+<span class="nc" id="L29">public class DatatypeConversion {</span>
+
+    private static final int INT64_BYTE_LENGTH = 8;
+    private static final int INT32_BYTE_LENGTH = 4;
+    private static final int INT16_BYTE_LENGTH = 2;
+    private static final int INT8_BYTE_LENGTH = 1;
+
+<span class="nc" id="L36">    public static enum ByteSelect {</span>
+<span class="nc" id="L37">        LOW_BYTE,</span>
+<span class="nc" id="L38">        HIGH_BYTE</span>
+    }
+
+<span class="fc" id="L41">    public static enum EndianInput {</span>
+<span class="fc" id="L42">        BYTES_ARE_LITTLE_ENDIAN,</span>
+<span class="fc" id="L43">        BYTES_ARE_BIG_ENDIAN</span>
+    }
+
+<span class="fc" id="L46">    public static enum EndianOutput {</span>
+<span class="fc" id="L47">        BYTES_AS_LITTLE_ENDIAN,</span>
+<span class="fc" id="L48">        BYTES_AS_BIG_ENDIAN</span>
+    }
+
+    /**
+     * Reverses the byte order. If the given byte[] are in big endian order you will get little endian order and vice
+     * versa
+     * &lt;p&gt;
+     * Example:&lt;br&gt;
+     * input: bytes = {0x0A, 0x0B, 0x0C, 0x0D}&lt;br&gt;
+     * output: bytes = {0x0D, 0x0C, 0x0B, 0x0A}&lt;br&gt;
+     * 
+     * @param bytes
+     *            byte[] to reverse
+     */
+    public static void reverseByteOrder(byte[] bytes) {
+<span class="fc" id="L63">        int indexLength = bytes.length - 1;</span>
+<span class="fc" id="L64">        int halfLength = bytes.length / 2;</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for (int i = 0; i &lt; halfLength; i++) {</span>
+<span class="fc" id="L66">            int index = indexLength - i;</span>
+<span class="fc" id="L67">            byte temp = bytes[i];</span>
+<span class="fc" id="L68">            bytes[i] = bytes[index];</span>
+<span class="fc" id="L69">            bytes[index] = temp;</span>
+        }
+<span class="fc" id="L71">    }</span>
+
+    /**
+     * Reverses the byte order. &lt;br&gt;
+     * Equal to reverseByteOrder Method but it doesn't change the input bytes. Method is working on a copy of input
+     * bytes so it does
+     * 
+     * @param bytes
+     *            byte[] to reverse
+     * @return reversed bytes
+     */
+    public static byte[] reverseByteOrderNewArray(byte[] bytes) {
+<span class="fc" id="L83">        byte[] reversedBytes = bytes.clone();</span>
+<span class="fc" id="L84">        reverseByteOrder(reversedBytes);</span>
+<span class="fc" id="L85">        return reversedBytes;</span>
+    }
+
+    /**
+     * Converts bytes to signed Int64
+     * 
+     * @param bytes
+     *            8 bytes where byte[0] is most significant byte and byte[7] is the least significant byte
+     * @param endian
+     *            endian byte order
+     * @return bytes as singed int 64
+     */
+    public static long bytes_To_SignedInt64(byte[] bytes, EndianInput endian) {
+<span class="pc bpc" id="L98" title="2 of 4 branches missed.">        if (bytes.length &gt; 0 &amp;&amp; bytes.length &lt;= INT64_BYTE_LENGTH) {</span>
+<span class="fc" id="L99">            long returnValue = 0;</span>
+<span class="fc" id="L100">            int length = bytes.length - 1;</span>
+
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">            if (endian.equals(EndianInput.BYTES_ARE_LITTLE_ENDIAN)) {</span>
+<span class="nc" id="L103">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            for (int i = 0; i &lt;= length; ++i) {</span>
+<span class="fc" id="L107">                int shift = length - i &lt;&lt; 3;</span>
+<span class="fc" id="L108">                returnValue |= (long) (bytes[i] &amp; 0xff) &lt;&lt; shift;</span>
+            }
+<span class="fc" id="L110">            return returnValue;</span>
+        }
+        else {
+<span class="nc" id="L113">            throw new IllegalArgumentException(</span>
+                    &quot;Unable to convert bytes due to wrong number of bytes. Minimum 1 byte, maximum &quot; + INT64_BYTE_LENGTH
+                            + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts signed Int64 (long) to 8 bytes
+     * 
+     * @param value
+     *            signed Int64
+     * @param endian
+     *            endian byte order
+     * @return 8 bytes where the most significant byte is byte[0] and the least significant byte is byte[7]
+     */
+    public static byte[] singedInt64_To_Bytes(long value, EndianOutput endian) {
+<span class="fc" id="L129">        byte[] bytes = new byte[INT64_BYTE_LENGTH];</span>
+<span class="fc" id="L130">        bytes[0] = (byte) ((value &amp; 0xFF00000000000000L) &gt;&gt; 56);</span>
+<span class="fc" id="L131">        bytes[1] = (byte) ((value &amp; 0x00FF000000000000L) &gt;&gt; 48);</span>
+<span class="fc" id="L132">        bytes[2] = (byte) ((value &amp; 0x0000FF0000000000L) &gt;&gt; 40);</span>
+<span class="fc" id="L133">        bytes[3] = (byte) ((value &amp; 0x000000FF00000000L) &gt;&gt; 32);</span>
+<span class="fc" id="L134">        bytes[4] = (byte) ((value &amp; 0x00000000FF000000L) &gt;&gt; 24);</span>
+<span class="fc" id="L135">        bytes[5] = (byte) ((value &amp; 0x0000000000FF0000L) &gt;&gt; 16);</span>
+<span class="fc" id="L136">        bytes[6] = (byte) ((value &amp; 0x000000000000FF00L) &gt;&gt; 8);</span>
+<span class="fc" id="L137">        bytes[7] = (byte) (value &amp; 0x00000000000000FFL);</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (endian.equals(EndianOutput.BYTES_AS_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L140">            reverseByteOrder(bytes);</span>
+        }
+
+<span class="fc" id="L143">        return bytes;</span>
+    }
+
+    /**
+     * Converts bytes to signed Int32
+     * 
+     * @param bytes
+     *            4 bytes where byte[0] is most significant byte and byte[3] is the least significant byte
+     * @param endian
+     *            endian byte order
+     * @return bytes as signed int 32
+     */
+    public static int bytes_To_SignedInt32(byte[] bytes, EndianInput endian) {
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">        if (bytes.length == INT32_BYTE_LENGTH) {</span>
+<span class="fc" id="L157">            int returnValue = 0;</span>
+<span class="fc" id="L158">            int length = bytes.length - 1;</span>
+
+<span class="fc bfc" id="L160" title="All 2 branches covered.">            if (endian.equals(EndianInput.BYTES_ARE_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L161">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            for (int i = 0; i &lt;= length; ++i) {</span>
+<span class="fc" id="L165">                int shift = length - i &lt;&lt; 3;</span>
+<span class="fc" id="L166">                returnValue |= (long) (bytes[i] &amp; 0xff) &lt;&lt; shift;</span>
+            }
+<span class="fc" id="L168">            return returnValue;</span>
+        }
+        else {
+<span class="nc" id="L171">            throw new IllegalArgumentException(</span>
+                    &quot;Unable to convert bytes due to wrong number of bytes. Minimum 1 byte, maximum &quot; + INT32_BYTE_LENGTH
+                            + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts bytes to unsigned Int32
+     * 
+     * @param bytes
+     *            4 bytes where byte[0] is most significant byte and byte[3] least significant byte
+     * @param endian
+     *            endian byte order
+     * @return unsigned Int32 as long
+     */
+    public static long bytes_To_UnsignedInt32(byte[] bytes, EndianInput endian) {
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if (bytes.length == INT32_BYTE_LENGTH) {</span>
+<span class="fc bfc" id="L188" title="All 2 branches covered.">            if (endian.equals(EndianInput.BYTES_ARE_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L189">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="fc" id="L192">            int firstbyte = 0x000000FF &amp; (bytes[0]);</span>
+<span class="fc" id="L193">            int secondByte = 0x000000FF &amp; (bytes[1]);</span>
+<span class="fc" id="L194">            int thirdByte = 0x000000FF &amp; (bytes[2]);</span>
+<span class="fc" id="L195">            int forthByte = 0x000000FF &amp; (bytes[3]);</span>
+<span class="fc" id="L196">            return (firstbyte &lt;&lt; 24 | secondByte &lt;&lt; 16 | thirdByte &lt;&lt; 8 | forthByte) &amp; 0xFFFFFFFFL;</span>
+        }
+        else {
+<span class="nc" id="L199">            throw new IllegalArgumentException(&quot;Unable to convert bytes due to wrong number of bytes. &quot;</span>
+                    + INT32_BYTE_LENGTH + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts unsigned Int32 to 4 bytes
+     * 
+     * @param value
+     *            unsigned Int32 (long)
+     * @param endian
+     *            endian byte order
+     * @return 4 bytes where the most significant byte is byte[0] and the least significant byte is byte[3]
+     */
+    public static byte[] unsingedInt32_To_Bytes(long value, EndianOutput endian) {
+
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        if (value &lt; 0) {</span>
+<span class="nc" id="L216">            throw new IllegalArgumentException(&quot;Invalid value: &quot; + value + &quot; Only positive values are allowed!&quot;);</span>
+        }
+
+<span class="fc" id="L219">        byte[] bytes = new byte[INT32_BYTE_LENGTH];</span>
+<span class="fc" id="L220">        bytes[0] = (byte) ((value &amp; 0xFF000000L) &gt;&gt; 24);</span>
+<span class="fc" id="L221">        bytes[1] = (byte) ((value &amp; 0x00FF0000L) &gt;&gt; 16);</span>
+<span class="fc" id="L222">        bytes[2] = (byte) ((value &amp; 0x0000FF00L) &gt;&gt; 8);</span>
+<span class="fc" id="L223">        bytes[3] = (byte) (value &amp; 0x000000FFL);</span>
+
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if (endian.equals(EndianOutput.BYTES_AS_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L226">            reverseByteOrder(bytes);</span>
+        }
+
+<span class="fc" id="L229">        return bytes;</span>
+    }
+
+    /**
+     * Converts signed Int32 to 4 bytes
+     * 
+     * @param value
+     *            signed Int32
+     * @param endian
+     *            endian byte order
+     * @return 4 bytes where the most significant byte is byte[0] and the least significant byte is byte[3]
+     */
+    public static byte[] singedInt32_To_Bytes(int value, EndianOutput endian) {
+
+<span class="fc" id="L243">        byte[] bytes = new byte[INT32_BYTE_LENGTH];</span>
+<span class="fc" id="L244">        bytes[0] = (byte) ((value &amp; 0xFF000000L) &gt;&gt; 24);</span>
+<span class="fc" id="L245">        bytes[1] = (byte) ((value &amp; 0x00FF0000L) &gt;&gt; 16);</span>
+<span class="fc" id="L246">        bytes[2] = (byte) ((value &amp; 0x0000FF00L) &gt;&gt; 8);</span>
+<span class="fc" id="L247">        bytes[3] = (byte) (value &amp; 0x000000FFL);</span>
+
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if (endian.equals(EndianOutput.BYTES_AS_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L250">            reverseByteOrder(bytes);</span>
+        }
+
+<span class="fc" id="L253">        return bytes;</span>
+    }
+
+    /**
+     * Converts bytes to signed Int16
+     * 
+     * @param bytes
+     *            2 bytes where byte[0] is most significant byte and byte[1] is the least significant byte
+     * @param endian
+     *            endian byte order
+     * @return signed Int16
+     */
+    public static int bytes_To_SignedInt16(byte[] bytes, EndianInput endian) {
+<span class="pc bpc" id="L266" title="1 of 2 branches missed.">        if (bytes.length == INT16_BYTE_LENGTH) {</span>
+<span class="fc" id="L267">            short returnValue = 0;</span>
+<span class="fc" id="L268">            int length = bytes.length - 1;</span>
+
+<span class="fc bfc" id="L270" title="All 2 branches covered.">            if (endian.equals(EndianInput.BYTES_ARE_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L271">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="fc bfc" id="L274" title="All 2 branches covered.">            for (int i = 0; i &lt;= length; ++i) {</span>
+<span class="fc" id="L275">                int shift = length - i &lt;&lt; 3;</span>
+<span class="fc" id="L276">                returnValue |= (long) (bytes[i] &amp; 0xff) &lt;&lt; shift;</span>
+            }
+<span class="fc" id="L278">            return returnValue;</span>
+        }
+        else {
+<span class="nc" id="L281">            throw new IllegalArgumentException(&quot;Unable to convert bytes due to wrong number of bytes. &quot;</span>
+                    + INT16_BYTE_LENGTH + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts bytes to unsigned Int16
+     * 
+     * @param bytes
+     *            2 bytes where byte[0] is most significant byte and byte[1] least significant byte
+     * @param endian
+     *            endian byte order
+     * @return unsigned Int16
+     */
+    public static int bytes_To_UnsignedInt16(byte[] bytes, EndianInput endian) {
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">        if (bytes.length == INT16_BYTE_LENGTH) {</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">            if (endian.equals(EndianInput.BYTES_ARE_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L298">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="fc" id="L301">            int firstbyte = 0x000000FF &amp; (byte) 0x00;</span>
+<span class="fc" id="L302">            int secondByte = 0x000000FF &amp; (byte) 0x00;</span>
+<span class="fc" id="L303">            int thirdByte = 0x000000FF &amp; (bytes[0]);</span>
+<span class="fc" id="L304">            int forthByte = 0x000000FF &amp; (bytes[1]);</span>
+<span class="fc" id="L305">            return (firstbyte &lt;&lt; 24 | secondByte &lt;&lt; 16 | thirdByte &lt;&lt; 8 | forthByte) &amp; 0xFFFFFFFF;</span>
+        }
+        else {
+<span class="nc" id="L308">            throw new IllegalArgumentException(</span>
+                    &quot;Unable to convert bytes due to wrong number of bytes. Minimum 1, maximum &quot; + INT16_BYTE_LENGTH
+                            + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts unsigned Int16 to 2 bytes
+     * 
+     * @param value
+     *            unsigned Int16
+     * @param endian
+     *            endian byte order
+     * @return 2 bytes where the most significant byte is byte[0] and the least significant byte is byte[1]
+     */
+    public static byte[] unsingedInt16_To_Bytes(int value, EndianOutput endian) {
+
+<span class="pc bpc" id="L325" title="1 of 2 branches missed.">        if (value &lt; 0) {</span>
+<span class="nc" id="L326">            throw new IllegalArgumentException(&quot;Invalid value: &quot; + value + &quot; Only positive values are allowed!&quot;);</span>
+        }
+
+<span class="fc" id="L329">        byte[] bytes = new byte[INT16_BYTE_LENGTH];</span>
+<span class="fc" id="L330">        bytes[0] = (byte) ((value &amp; 0x0000FF00) &gt;&gt; 8);</span>
+<span class="fc" id="L331">        bytes[1] = (byte) ((value &amp; 0x000000FF));</span>
+
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        if (endian.equals(EndianOutput.BYTES_AS_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L334">            reverseByteOrder(bytes);</span>
+        }
+
+<span class="fc" id="L337">        return bytes;</span>
+    }
+
+    /**
+     * Converts signed Int16 to 2 bytes
+     * 
+     * @param value
+     *            signed Int16
+     * @param endian
+     *            endian byte order
+     * @return 2 bytes where the most significant byte is byte[0] and the least significant byte is byte[1]
+     */
+    public static byte[] singedInt16_To_Bytes(int value, EndianOutput endian) {
+
+<span class="fc" id="L351">        byte[] bytes = new byte[INT16_BYTE_LENGTH];</span>
+<span class="fc" id="L352">        bytes[0] = (byte) ((value &amp; 0x0000FF00) &gt;&gt; 8);</span>
+<span class="fc" id="L353">        bytes[1] = (byte) ((value &amp; 0x000000FF));</span>
+
+<span class="fc bfc" id="L355" title="All 2 branches covered.">        if (endian.equals(EndianOutput.BYTES_AS_LITTLE_ENDIAN)) {</span>
+<span class="fc" id="L356">            reverseByteOrder(bytes);</span>
+        }
+
+<span class="fc" id="L359">        return bytes;</span>
+    }
+
+    /**
+     * Converts bytes to signed Int8
+     * 
+     * @param bytes
+     *            1 byte
+     * @return signed Int8
+     */
+    public static int bytes_To_SignedInt8(byte[] bytes) {
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">        if (bytes.length == INT8_BYTE_LENGTH) {</span>
+<span class="fc" id="L371">            byte returnValue = 0;</span>
+<span class="fc" id="L372">            int length = bytes.length - 1;</span>
+
+<span class="fc bfc" id="L374" title="All 2 branches covered.">            for (int i = 0; i &lt;= length; ++i) {</span>
+<span class="fc" id="L375">                int shift = length - i &lt;&lt; 3;</span>
+<span class="fc" id="L376">                returnValue |= (long) (bytes[i] &amp; 0xff) &lt;&lt; shift;</span>
+            }
+<span class="fc" id="L378">            return returnValue;</span>
+        }
+        else {
+<span class="nc" id="L381">            throw new IllegalArgumentException(&quot;Unable to convert bytes due to wrong number of bytes. &quot;</span>
+                    + INT8_BYTE_LENGTH + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    /**
+     * Converts the specified byte of an byte array to unsigned int
+     * 
+     * @param data
+     *            byte array which contains
+     * @param index
+     *            index of the byte which should be returned as unsigned int8. Index can be used for little and big
+     *            endian support.
+     * @return bytes as unsigned int 8
+     */
+    public static int bytes_To_UnsignedInt8(byte[] data, int index) {
+
+<span class="nc bnc" id="L398" title="All 4 branches missed.">        if ((index &lt; 0) || (index &gt;= data.length)) {</span>
+<span class="nc" id="L399">            throw new IndexOutOfBoundsException(&quot;Negative index. Index must be &gt;= 0&quot;);</span>
+        }
+
+<span class="nc" id="L402">        return bytes_To_UnsignedInt8(data[index]);</span>
+
+    }
+
+    /**
+     * Converts a single byte to unsigned Int8
+     * 
+     * @param singleByte
+     *            byte to convert
+     * 
+     * @return unsigned Int8
+     */
+    public static int bytes_To_UnsignedInt8(byte singleByte) {
+<span class="nc" id="L415">        int value = 0x000000FF &amp; (singleByte);</span>
+<span class="nc" id="L416">        return value;</span>
+    }
+
+    /**
+     * Converts unsigned Int8 to 1 byte
+     * 
+     * @param value
+     *            unsigned Int8
+     * @return 1 byte
+     */
+    public static byte[] unsingedInt8_To_Bytes(int value) {
+
+<span class="pc bpc" id="L428" title="1 of 2 branches missed.">        if (value &lt; 0) {</span>
+<span class="nc" id="L429">            throw new IllegalArgumentException(&quot;Invalid value: &quot; + value + &quot; Only positive values are allowed!&quot;);</span>
+        }
+
+<span class="fc" id="L432">        byte[] bytes = new byte[INT8_BYTE_LENGTH];</span>
+<span class="fc" id="L433">        bytes[0] = (byte) ((value &amp; 0x000000FF));</span>
+<span class="fc" id="L434">        return bytes;</span>
+    }
+
+    /**
+     * Converts signed Int8 to 1 bytes
+     * 
+     * @param value
+     *            signed Int8
+     * @return 1 byte
+     */
+    public static byte[] singedInt8_To_Bytes(int value) {
+
+<span class="fc" id="L446">        byte[] bytes = new byte[INT8_BYTE_LENGTH];</span>
+<span class="fc" id="L447">        bytes[0] = (byte) ((value &amp; 0x000000FF));</span>
+
+<span class="fc" id="L449">        return bytes;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

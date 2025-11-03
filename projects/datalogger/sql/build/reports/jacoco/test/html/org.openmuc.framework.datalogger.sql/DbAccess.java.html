@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DbAccess.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-sql</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.sql</a> &gt; <span class="el_source">DbAccess.java</span></div><h1>DbAccess.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.sql;
+
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.POSTGRESQL;
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.VALUE;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openmuc.framework.data.BooleanValue;
+import org.openmuc.framework.data.ByteArrayValue;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.StringValue;
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.datalogger.sql.utils.PropertyHandlerProvider;
+import org.openmuc.framework.datalogger.sql.utils.Settings;
+import org.openmuc.framework.lib.osgi.config.PropertyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class DbAccess {
+
+<span class="pc" id="L49">    private final Logger logger = LoggerFactory.getLogger(DbAccess.class);</span>
+    private final String url;
+    private final DbConnector dbConnector;
+
+<span class="nc" id="L53">    public DbAccess() {</span>
+<span class="nc" id="L54">        dbConnector = new DbConnector();</span>
+<span class="nc" id="L55">        PropertyHandler propertyHandler = PropertyHandlerProvider.getInstance().getPropertyHandler();</span>
+<span class="nc" id="L56">        url = propertyHandler.getString(Settings.URL);</span>
+<span class="nc bnc" id="L57" title="All 4 branches missed.">        if (url.contains(&quot;h2&quot;) &amp;&amp; url.contains(&quot;tcp&quot;)) {</span>
+<span class="nc" id="L58">            dbConnector.startH2Server();</span>
+        }
+<span class="nc" id="L60">    }</span>
+
+<span class="fc" id="L62">    private DbAccess(DbConnector connector) { // for testing</span>
+<span class="fc" id="L63">        url = &quot;&quot;;</span>
+<span class="fc" id="L64">        this.dbConnector = connector;</span>
+<span class="fc" id="L65">    }</span>
+
+    static protected DbAccess getTestInstance(DbConnector connector) {
+<span class="fc" id="L68">        return new DbAccess(connector);</span>
+    }
+
+    /**
+     * Converts StringBuilder to String
+     *
+     * @param sb
+     *            StringBuilder to convert
+     */
+    public void executeSQL(StringBuilder sb) {
+<span class="nc" id="L78">        String sql = sb.toString();</span>
+<span class="nc" id="L79">        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (!dbConnector.isConnected()) {</span>
+<span class="nc" id="L81">            dbConnector.getConnectionToDb();</span>
+        }
+<span class="nc" id="L83">        synchronized (dbConnector) {</span>
+<span class="nc" id="L84">            synchronizeStatement(sql);</span>
+<span class="nc" id="L85">        }</span>
+<span class="nc" id="L86">    }</span>
+
+    private void synchronizeStatement(String sql) {
+<span class="nc" id="L89">        try (Statement statement = dbConnector.createStatementWithConnection()) {</span>
+<span class="nc" id="L90">            statement.execute(sql);</span>
+<span class="nc" id="L91">        } catch (SQLException e) {</span>
+<span class="nc" id="L92">            logger.error(MessageFormat.format(&quot;Error executing SQL: \n{0}&quot;, sql), e.getMessage());</span>
+<span class="nc" id="L93">            logger.error(MessageFormat.format(&quot;SQLState:     {0}&quot;, e.getSQLState()));</span>
+<span class="nc" id="L94">            logger.error(MessageFormat.format(&quot;VendorError:  {0}&quot;, e.getErrorCode()));</span>
+<span class="nc" id="L95">        }</span>
+<span class="nc" id="L96">    }</span>
+
+    public ResultSet executeQuery(StringBuilder sb) throws SQLException {
+<span class="nc" id="L99">        Statement statement = dbConnector.createStatementWithConnection();</span>
+<span class="nc" id="L100">        return statement.executeQuery(sb.toString());</span>
+    }
+
+    public boolean timeScaleIsActive() {
+<span class="nc" id="L104">        StringBuilder sbExtensions = new StringBuilder(&quot;SELECT * FROM pg_extension;&quot;);</span>
+
+<span class="nc" id="L106">        try (ResultSet resultSet = dbConnector.createStatementWithConnection().executeQuery(sbExtensions.toString())) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">            while (resultSet.next()) {</span>
+<span class="nc" id="L108">                return resultSet.getString(&quot;extname&quot;).contains(&quot;timescale&quot;);</span>
+            }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">        } catch (SQLException e) {</span>
+<span class="nc" id="L111">            logger.error(e.getMessage());</span>
+<span class="nc" id="L112">        }</span>
+<span class="nc" id="L113">        return false;</span>
+    }
+
+    /**
+     * Queries the database for a columns length and then returns it as a list of ints
+     *
+     * @param columns
+     *            List containing all column names
+     * @param table
+     *            name of the table
+     * @return a list containing each columns length
+     */
+    public List&lt;Integer&gt; getColumnLength(List&lt;String&gt; columns, String table) {
+<span class="nc" id="L126">        ArrayList&lt;Integer&gt; columnsLength = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        if (url.contains(POSTGRESQL)) {</span>
+<span class="nc" id="L129">            table = table.toLowerCase();</span>
+        }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        for (String column : columns) {</span>
+<span class="nc" id="L132">            StringBuilder sbVarcharLength = new StringBuilder();</span>
+<span class="nc" id="L133">            sbVarcharLength.append(&quot;select character_maximum_length from information_schema.columns&quot;)</span>
+<span class="nc" id="L134">                    .append(&quot; where table_name = '&quot; + table + &quot;' AND column_name = '&quot; + column.toLowerCase() + &quot;';&quot;);</span>
+
+            try {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">                if (!dbConnector.isConnected()) {</span>
+<span class="nc" id="L138">                    dbConnector.getConnectionToDb();</span>
+                }
+<span class="nc" id="L140">                ResultSet rsLength = executeQuery(sbVarcharLength);</span>
+<span class="nc" id="L141">                rsLength.next();</span>
+<span class="nc" id="L142">                columnsLength.add(rsLength.getInt(1));</span>
+<span class="nc" id="L143">            } catch (SQLException e) {</span>
+<span class="nc" id="L144">                logger.debug(e.getMessage());</span>
+<span class="nc" id="L145">                columnsLength.add(0);</span>
+<span class="nc" id="L146">            }</span>
+<span class="nc" id="L147">        }</span>
+<span class="nc" id="L148">        return columnsLength;</span>
+    }
+
+    public void closeConnection() {
+<span class="nc" id="L152">        dbConnector.closeConnection();</span>
+<span class="nc" id="L153">    }</span>
+
+    /**
+     * Retrieves data from database and adds it to records
+     */
+
+    public List&lt;Record&gt; queryRecords(StringBuilder sb, ValueType valuetype) {
+        // retrieve numeric values from database and add them to the records list
+<span class="fc" id="L161">        List&lt;Record&gt; records = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (!dbConnector.isConnected()) {</span>
+<span class="fc" id="L163">            dbConnector.getConnectionToDb();</span>
+        }
+<span class="fc" id="L165">        try (ResultSet resultSet = executeQuery(sb)) {</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">            while (resultSet.next()) {</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">                if (valuetype == ValueType.STRING) {</span>
+<span class="nc" id="L168">                    Record rc = new Record(new StringValue(resultSet.getString(VALUE)),</span>
+<span class="nc" id="L169">                            resultSet.getTimestamp(&quot;time&quot;).getTime(), Flag.VALID);</span>
+<span class="nc" id="L170">                    records.add(rc);</span>
+<span class="nc" id="L171">                }</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">                else if (valuetype == ValueType.BYTE_ARRAY) {</span>
+<span class="nc" id="L173">                    Record rc = new Record(new ByteArrayValue(resultSet.getBytes(VALUE)),</span>
+<span class="nc" id="L174">                            resultSet.getTimestamp(&quot;time&quot;).getTime(), Flag.VALID);</span>
+<span class="nc" id="L175">                    records.add(rc);</span>
+<span class="nc" id="L176">                }</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                else if (valuetype == ValueType.BOOLEAN) {</span>
+<span class="nc" id="L178">                    Record rc = new Record(new BooleanValue(resultSet.getBoolean(VALUE)),</span>
+<span class="nc" id="L179">                            resultSet.getTimestamp(&quot;time&quot;).getTime(), Flag.VALID);</span>
+<span class="nc" id="L180">                    records.add(rc);</span>
+<span class="nc" id="L181">                }</span>
+                else {
+<span class="fc" id="L183">                    Record rc = new Record(new DoubleValue(resultSet.getDouble(VALUE)),</span>
+<span class="fc" id="L184">                            resultSet.getTimestamp(&quot;time&quot;).getTime(), Flag.VALID);</span>
+<span class="fc" id="L185">                    records.add(rc);</span>
+<span class="fc" id="L186">                }</span>
+            }
+<span class="nc" id="L188">        } catch (SQLException e) {</span>
+<span class="nc" id="L189">            String sql = sb.toString();</span>
+<span class="nc" id="L190">            logger.error(MessageFormat.format(&quot;Error executing SQL: \n{0}&quot;, sql), e.getMessage());</span>
+<span class="fc" id="L191">        }</span>
+
+<span class="fc" id="L193">        return records;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

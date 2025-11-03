@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SqlValues.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-sql</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.sql.utils</a> &gt; <span class="el_source">SqlValues.java</span></div><h1>SqlValues.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.sql.utils;
+
+import java.sql.JDBCType;
+import java.util.Arrays;
+import java.util.List;
+
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.data.ValueType;
+
+public class SqlValues {
+
+<span class="fc" id="L33">    public static final List&lt;String&gt; COLUMNS = Arrays.asList(&quot;channelid&quot;, &quot;channelAdress&quot;, &quot;loggingInterval&quot;,</span>
+            &quot;loggingTimeOffset&quot;, &quot;unit&quot;, &quot;valueType&quot;, &quot;scalingFactor&quot;, &quot;valueOffset&quot;, &quot;listening&quot;, &quot;loggingEvent&quot;,
+            &quot;samplingInterval&quot;, &quot;samplingTimeOffset&quot;, &quot;samplingGroup&quot;, &quot;disabled&quot;, &quot;description&quot;);
+    public static final String POSTGRESQL = &quot;postgresql&quot;;
+    public static final String POSTGRES = &quot;postgres&quot;;
+    public static final String MYSQL = &quot;mysql&quot;;
+    public static final String NULL = &quot;) NULL,&quot;;
+    public static final String AND = &quot;' AND '&quot;;
+    public static final String VALUE = &quot;value&quot;;
+<span class="fc" id="L42">    private static final char[] hexArray = &quot;0123456789ABCDEF&quot;.toCharArray();</span>
+
+    private SqlValues() {
+    }
+
+    public static JDBCType getType(ValueType valueType) {
+<span class="nc bnc" id="L48" title="All 10 branches missed.">        switch (valueType) {</span>
+        case BOOLEAN:
+<span class="nc" id="L50">            return JDBCType.BOOLEAN;</span>
+        case BYTE_ARRAY:
+<span class="nc" id="L52">            return JDBCType.LONGVARBINARY;</span>
+        case DOUBLE:
+<span class="nc" id="L54">            return JDBCType.FLOAT;</span>
+        case FLOAT:
+<span class="nc" id="L56">            return JDBCType.DOUBLE;</span>
+        case INTEGER:
+<span class="nc" id="L58">            return JDBCType.INTEGER;</span>
+        case LONG:
+<span class="nc" id="L60">            return JDBCType.BIGINT;</span>
+        case SHORT:
+<span class="nc" id="L62">            return JDBCType.SMALLINT;</span>
+        case BYTE:
+<span class="nc" id="L64">            return JDBCType.SMALLINT;</span>
+        case STRING:
+<span class="nc" id="L66">            return JDBCType.VARCHAR;</span>
+        default:
+<span class="nc" id="L68">            return JDBCType.DOUBLE;</span>
+        }
+    }
+
+    public static void appendValue(Value value, StringBuilder sb) {
+
+<span class="pc bpc" id="L74" title="9 of 10 branches missed.">        switch (value.getClass().getSimpleName()) {</span>
+        case &quot;BooleanValue&quot;:
+<span class="nc" id="L76">            sb.append(value.asBoolean());</span>
+<span class="nc" id="L77">            break;</span>
+        case &quot;ByteValue&quot;:
+<span class="nc" id="L79">            sb.append(value.asByte());</span>
+<span class="nc" id="L80">            break;</span>
+        case &quot;ByteArrayValue&quot;:
+<span class="nc" id="L82">            byteArrayToHexString(sb, value.asByteArray());</span>
+<span class="nc" id="L83">            break;</span>
+        case &quot;DoubleValue&quot;:
+<span class="fc" id="L85">            sb.append(value.asDouble());</span>
+<span class="fc" id="L86">            break;</span>
+        case &quot;FloatValue&quot;:
+<span class="nc" id="L88">            sb.append(value.asFloat());</span>
+<span class="nc" id="L89">            break;</span>
+        case &quot;IntValue&quot;:
+<span class="nc" id="L91">            sb.append(value.asInt());</span>
+<span class="nc" id="L92">            break;</span>
+        case &quot;LongValue&quot;:
+<span class="nc" id="L94">            sb.append(value.asLong());</span>
+<span class="nc" id="L95">            break;</span>
+        case &quot;ShortValue&quot;:
+<span class="nc" id="L97">            sb.append(value.asShort());</span>
+<span class="nc" id="L98">            break;</span>
+        case &quot;StringValue&quot;:
+<span class="nc" id="L100">            sb.append('\'').append(value.asString()).append('\'');</span>
+<span class="nc" id="L101">            break;</span>
+        default:
+            break;
+        }
+<span class="fc" id="L105">    }</span>
+
+    private static void byteArrayToHexString(StringBuilder sb, byte[] byteArray) {
+<span class="nc" id="L108">        char[] hexChars = new char[byteArray.length * 2];</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">        for (int j = 0; j &lt; byteArray.length; j++) {</span>
+<span class="nc" id="L110">            int v = byteArray[j] &amp; 0xFF;</span>
+<span class="nc" id="L111">            hexChars[j * 2] = hexArray[v &gt;&gt;&gt; 4];</span>
+<span class="nc" id="L112">            hexChars[j * 2 + 1] = hexArray[v &amp; 0x0F];</span>
+        }
+<span class="nc" id="L114">        sb.append('\'').append(hexChars).append('\'');</span>
+<span class="nc" id="L115">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

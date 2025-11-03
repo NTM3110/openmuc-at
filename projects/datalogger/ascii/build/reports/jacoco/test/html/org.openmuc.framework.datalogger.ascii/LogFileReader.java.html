@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogFileReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii</a> &gt; <span class="el_source">LogFileReader.java</span></div><h1>LogFileReader.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.openmuc.framework.data.ByteArrayValue;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.StringValue;
+import org.openmuc.framework.datalogger.ascii.utils.Const;
+import org.openmuc.framework.datalogger.ascii.utils.LoggerUtils;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LogFileReader {
+
+<span class="fc" id="L46">    private static final Logger logger = LoggerFactory.getLogger(LogFileReader.class);</span>
+
+    private final String[] ids;
+    private final String path;
+    private final int loggingInterval;
+    private final int logTimeOffset;
+    private int unixTimestampColumn;
+    private long startTimestamp;
+    private long endTimestamp;
+    private long firstTimestampFromFile;
+
+    /**
+     * LogFileReader Constructor
+     *
+     * @param path
+     *            the path to the files to read from
+     * @param logChannel
+     *            the channel to read from
+     */
+<span class="fc" id="L65">    public LogFileReader(String path, LogChannel logChannel) {</span>
+
+<span class="fc" id="L67">        this.path = path;</span>
+<span class="fc" id="L68">        ids = new String[] { logChannel.getId(), Const.TIMESTAMP_STRING };</span>
+<span class="fc" id="L69">        this.loggingInterval = logChannel.getLoggingInterval();</span>
+<span class="fc" id="L70">        this.logTimeOffset = logChannel.getLoggingTimeOffset();</span>
+<span class="fc" id="L71">        firstTimestampFromFile = -1;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Get the values between start time stamp and end time stamp
+     *
+     * @param startTimestamp
+     *            start time stamp
+     * @param endTimestamp
+     *            end time stamp
+     * @return All records of the given time span
+     */
+    public Map&lt;String, List&lt;Record&gt;&gt; getValues(long startTimestamp, long endTimestamp) {
+
+<span class="fc" id="L85">        this.startTimestamp = startTimestamp;</span>
+<span class="fc" id="L86">        this.endTimestamp = endTimestamp;</span>
+
+<span class="fc" id="L88">        List&lt;String&gt; filenames = LoggerUtils.getFilenames(loggingInterval, logTimeOffset, this.startTimestamp,</span>
+                this.endTimestamp);
+<span class="fc" id="L90">        Map&lt;String, List&lt;Record&gt;&gt; recordsMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        for (String id : ids) {</span>
+<span class="fc" id="L92">            recordsMap.put(id, new ArrayList&lt;&gt;());</span>
+        }
+
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        for (int i = 0; i &lt; filenames.size(); i++) {</span>
+<span class="fc" id="L96">            Boolean nextFile = false;</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L98">                logger.trace(&quot;using &quot; + filenames.get(i));</span>
+            }
+
+            String filepath;
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">            if (path.endsWith(File.separator)) {</span>
+<span class="fc" id="L103">                filepath = path + filenames.get(i);</span>
+            }
+            else {
+<span class="nc" id="L106">                filepath = path + File.separatorChar + filenames.get(i);</span>
+            }
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">            if (i &gt; 0) {</span>
+<span class="fc" id="L110">                nextFile = true;</span>
+            }
+<span class="fc" id="L112">            processFile(recordsMap, filepath, nextFile);</span>
+        }
+<span class="fc" id="L114">        return recordsMap;</span>
+    }
+
+    /**
+     * Get all records of the given file
+     * 
+     * @param filePath
+     *            to be read from
+     * @return All records in the given file as a Map of String channelId and List of records for this channel
+     */
+    public Map&lt;String, List&lt;Record&gt;&gt; getValues(String filePath) {
+<span class="fc" id="L125">        this.startTimestamp = 0;</span>
+<span class="fc" id="L126">        this.endTimestamp = 9223372036854775807l; // max long</span>
+<span class="fc" id="L127">        Map&lt;String, List&lt;Record&gt;&gt; recordsMap = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        for (String id : ids) {</span>
+<span class="fc" id="L129">            recordsMap.put(id, new ArrayList&lt;&gt;());</span>
+        }
+<span class="fc" id="L131">        recordsMap = processFile(recordsMap, filePath, true);</span>
+<span class="fc" id="L132">        return recordsMap;</span>
+    }
+
+    /**
+     * get a single record from single channel of time stamp
+     *
+     * @param timestamp
+     *            time stamp
+     * @return Record on success, otherwise null
+     */
+    public Map&lt;String, Record&gt; getValue(long timestamp) {
+
+        // Returns a record which lays within the interval [timestamp, timestamp +
+        // loggingInterval]
+        // The interval is necessary for a requested time stamp which lays between the
+        // time stamps of two logged values
+        // e.g.: t_request = 7, t1_logged = 5, t2_logged = 10, loggingInterval = 5
+        // method will return the record of t2_logged because this lays within the
+        // interval [7,12]
+        // If the t_request matches exactly a logged time stamp, then the according
+        // record is returned.
+
+<span class="fc" id="L154">        Map&lt;String, List&lt;Record&gt;&gt; recordsMap = getValues(timestamp, timestamp);</span>
+<span class="fc" id="L155">        Map&lt;String, Record&gt; recordMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        for (Entry&lt;String, List&lt;Record&gt;&gt; entries : recordsMap.entrySet()) {</span>
+<span class="fc" id="L158">            List&lt;Record&gt; recordList = entries.getValue();</span>
+            Record record;
+
+<span class="pc bpc" id="L161" title="1 of 4 branches missed.">            if (recordList == null || recordList.size() == 0) {</span>
+                // no record found for requested timestamp
+<span class="fc" id="L163">                record = null;// new Record(Flag.UNKNOWN_ERROR);</span>
+            }
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">            else if (recordsMap.size() == 1) {</span>
+                // t_request lays between two logged values
+<span class="nc" id="L167">                record = recordList.get(0);</span>
+            }
+            else {
+<span class="fc" id="L170">                record = new Record(Flag.UNKNOWN_ERROR);</span>
+            }
+<span class="fc" id="L172">            recordMap.put(entries.getKey(), record);</span>
+<span class="fc" id="L173">        }</span>
+
+<span class="fc" id="L175">        return recordMap;</span>
+    }
+
+    /**
+     * Reads the file line by line
+     *
+     * @param filepath
+     *            file path
+     * @param nextFile
+     *            if it is the next file and not the first between a time span
+     * @return records on success, otherwise null
+     */
+    private Map&lt;String, List&lt;Record&gt;&gt; processFile(Map&lt;String, List&lt;Record&gt;&gt; recordsMap, String filepath,
+            Boolean nextFile) {
+
+<span class="fc" id="L190">        String line = null;</span>
+<span class="fc" id="L191">        long currentPosition = 0;</span>
+        long rowSize;
+<span class="fc" id="L193">        long firstTimestamp = 0;</span>
+<span class="fc" id="L194">        String firstValueLine = null;</span>
+<span class="fc" id="L195">        long currentTimestamp = 0;</span>
+
+<span class="fc" id="L197">        RandomAccessFile raf = LoggerUtils.getRandomAccessFile(new File(filepath), &quot;r&quot;);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if (raf == null) {</span>
+<span class="fc" id="L199">            return null;</span>
+        }
+        try {
+<span class="fc" id="L202">            Map&lt;String, Integer&gt; channelsColumnsMap = null;</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            while (channelsColumnsMap == null) {</span>
+<span class="fc" id="L204">                line = raf.readLine();</span>
+<span class="fc" id="L205">                channelsColumnsMap = LoggerUtils.getColumnNumbersByNames(line, ids);</span>
+            }
+<span class="fc" id="L207">            unixTimestampColumn = channelsColumnsMap.get(Const.TIMESTAMP_STRING);</span>
+<span class="fc" id="L208">            firstValueLine = raf.readLine();</span>
+
+<span class="fc" id="L210">            rowSize = firstValueLine.length() + 1l; // +1 because of &quot;\n&quot;</span>
+
+            // rewind the position to the start of the firstValue line
+<span class="fc" id="L213">            currentPosition = raf.getFilePointer() - rowSize;</span>
+
+<span class="fc" id="L215">            firstTimestamp = (long) (Double.valueOf((firstValueLine.split(Const.SEPARATOR))[unixTimestampColumn])</span>
+                    * 1000);
+
+<span class="fc bfc" id="L218" title="All 4 branches covered.">            if (nextFile || startTimestamp &lt; firstTimestamp) {</span>
+<span class="fc" id="L219">                startTimestamp = firstTimestamp;</span>
+            }
+
+<span class="pc bpc" id="L222" title="1 of 2 branches missed.">            if (startTimestamp &gt;= firstTimestamp) {</span>
+<span class="fc" id="L223">                long filepos = getFilePosition(loggingInterval, startTimestamp, firstTimestamp, currentPosition,</span>
+                        rowSize);
+<span class="fc" id="L225">                raf.seek(filepos);</span>
+
+<span class="fc" id="L227">                currentTimestamp = startTimestamp;</span>
+
+<span class="fc bfc" id="L229" title="All 4 branches covered.">                while ((line = raf.readLine()) != null &amp;&amp; currentTimestamp &lt;= endTimestamp) {</span>
+
+<span class="fc" id="L231">                    processLine(line, channelsColumnsMap, recordsMap);</span>
+<span class="fc" id="L232">                    currentTimestamp += loggingInterval;</span>
+                }
+<span class="fc" id="L234">                raf.close();</span>
+<span class="fc" id="L235">            }</span>
+            else {
+<span class="nc" id="L237">                recordsMap = null; // because the column of the channel was not identified</span>
+            }
+<span class="nc" id="L239">        } catch (IOException e) {</span>
+<span class="nc" id="L240">            logger.error(e.getMessage());</span>
+<span class="nc" id="L241">            recordsMap = null;</span>
+<span class="fc" id="L242">        }</span>
+<span class="fc" id="L243">        return recordsMap;</span>
+    }
+
+    /**
+     * Process the line: ignore comments, read records
+     *
+     * @param line
+     *            the line to process
+     * @param recordsMap
+     *            list of records
+     */
+    private void processLine(String line, Map&lt;String, Integer&gt; channelsColumnsMap,
+            Map&lt;String, List&lt;Record&gt;&gt; recordsMap) {
+
+<span class="pc bpc" id="L257" title="1 of 2 branches missed.">        if (!line.startsWith(Const.COMMENT_SIGN)) {</span>
+<span class="fc" id="L258">            readRecordsFromLine(line, channelsColumnsMap, recordsMap);</span>
+        }
+<span class="fc" id="L260">    }</span>
+
+    /**
+     * read the records from a line.
+     *
+     * @param line
+     *            to read
+     * @return Records read from line
+     */
+    private void readRecordsFromLine(String line, Map&lt;String, Integer&gt; channelsColumnsMap,
+            Map&lt;String, List&lt;Record&gt;&gt; recordsMap) {
+
+<span class="fc" id="L272">        String columnValue[] = line.split(Const.SEPARATOR);</span>
+
+        try {
+<span class="fc" id="L275">            Double timestampS = Double.parseDouble(columnValue[unixTimestampColumn]);</span>
+
+<span class="fc" id="L277">            long timestampMS = ((Double) (timestampS * (1000))).longValue();</span>
+
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">            if (isTimestampPartOfRequestedInterval(timestampMS)) {</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">                for (Entry&lt;String, Integer&gt; entry : channelsColumnsMap.entrySet()) {</span>
+<span class="fc" id="L281">                    Record record = convertLogfileEntryToRecord(columnValue[entry.getValue()].trim(), timestampMS);</span>
+<span class="fc" id="L282">                    List&lt;Record&gt; list = recordsMap.get(entry.getKey());</span>
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">                    if (list == null) {</span>
+<span class="nc" id="L284">                        recordsMap.put(entry.getKey(), new ArrayList&lt;&gt;());</span>
+<span class="nc" id="L285">                        list = recordsMap.get(entry.getKey());</span>
+                    }
+<span class="fc" id="L287">                    list.add(record);</span>
+<span class="fc" id="L288">                }</span>
+            }
+            else {
+<span class="nc bnc" id="L291" title="All 2 branches missed.">                if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L292">                    SimpleDateFormat sdf = new SimpleDateFormat(&quot;HH:mm:ss.SSS&quot;);</span>
+<span class="nc" id="L293">                    logger.trace(&quot;timestampMS: &quot; + sdf.format(timestampMS) + &quot; &quot; + timestampMS);</span>
+                }
+            }
+<span class="nc" id="L296">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L297">            logger.warn(&quot;It's not a timestamp.\n&quot;, e.getMessage());</span>
+<span class="nc" id="L298">        } catch (ArrayIndexOutOfBoundsException e) {</span>
+<span class="nc" id="L299">            logger.error(&quot;Array Index Out Of Bounds Exception. &quot;, e);</span>
+<span class="pc" id="L300">        }</span>
+<span class="fc" id="L301">    }</span>
+
+    /**
+     * Checks if the time stamp read from file is part of the requested logging interval
+     *
+     * @param lineTimestamp
+     *            time stamp to check if it is part of the time span
+     * @return true if it is a part of the requested interval, if not false.
+     */
+    private boolean isTimestampPartOfRequestedInterval(long lineTimestamp) {
+<span class="fc" id="L311">        boolean result = false;</span>
+
+        // TODO tidy up, move to better place, is asked each line!
+<span class="fc bfc" id="L314" title="All 2 branches covered.">        if (firstTimestampFromFile == -1) {</span>
+<span class="fc" id="L315">            firstTimestampFromFile = lineTimestamp;</span>
+        }
+
+<span class="pc bpc" id="L318" title="2 of 4 branches missed.">        if (lineTimestamp &gt;= startTimestamp &amp;&amp; lineTimestamp &lt;= endTimestamp) {</span>
+<span class="fc" id="L319">            result = true;</span>
+        }
+<span class="fc" id="L321">        return result;</span>
+    }
+
+    /**
+     * Get the position of the startTimestamp, without Header.
+     *
+     * @param loggingInterval
+     *            logging interval
+     * @param startTimestamp
+     *            start time stamp
+     * @return the position of the start timestamp as long.
+     */
+    private long getFilePosition(int loggingInterval, long startTimestamp, long firstTimestampOfFile,
+            long firstValuePos, long rowSize) {
+
+<span class="fc" id="L336">        long timeOffsetMs = startTimestamp - firstTimestampOfFile;</span>
+<span class="fc" id="L337">        long numberOfLinesToSkip = timeOffsetMs / loggingInterval;</span>
+
+        // if offset isn't a multiple of loggingInterval add an additional line
+<span class="fc bfc" id="L340" title="All 2 branches covered.">        if (timeOffsetMs % loggingInterval != 0) {</span>
+<span class="fc" id="L341">            ++numberOfLinesToSkip;</span>
+        }
+
+<span class="fc" id="L344">        long pos = numberOfLinesToSkip * rowSize + firstValuePos;</span>
+
+<span class="fc" id="L346">        return pos;</span>
+    }
+
+    // TODO support ints, booleans, ...
+
+    /**
+     * Converts an entry from the logging file into a record
+     *
+     * @param strValue
+     *            string value
+     * @param timestamp
+     *            time stamp
+     * @return the converted logfile entry.
+     */
+    private Record convertLogfileEntryToRecord(String strValue, long timestamp) {
+
+<span class="fc" id="L362">        Record record = null;</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if (isNumber(strValue)) {</span>
+<span class="fc" id="L364">            record = new Record(new DoubleValue(Double.parseDouble(strValue)), timestamp, Flag.VALID);</span>
+        }
+        else {
+<span class="fc" id="L367">            record = getRecordFromNonNumberValue(strValue, timestamp);</span>
+        }
+<span class="fc" id="L369">        return record;</span>
+    }
+
+    /**
+     * Returns the record from a non number value read from the logfile. This is the case if the value is an error like
+     * &quot;e0&quot; or a normal ByteArrayValue
+     *
+     * @param strValue
+     *            string value
+     * @param timestamp
+     *            time stamp
+     * @return the value in a record.
+     */
+    private Record getRecordFromNonNumberValue(String strValue, long timestamp) {
+
+<span class="fc" id="L384">        Record record = null;</span>
+
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        if (strValue.trim().startsWith(Const.ERROR)) {</span>
+
+<span class="fc" id="L388">            int errorSize = Const.ERROR.length();</span>
+<span class="fc" id="L389">            int stringLength = strValue.length();</span>
+<span class="fc" id="L390">            String errorFlag = strValue.substring(errorSize, errorSize + stringLength - errorSize);</span>
+<span class="fc" id="L391">            errorFlag = errorFlag.trim();</span>
+
+<span class="pc bpc" id="L393" title="1 of 2 branches missed.">            if (isNumber(errorFlag)) {</span>
+<span class="fc" id="L394">                record = new Record(null, timestamp, Flag.newFlag(Integer.parseInt(errorFlag)));</span>
+            }
+            else {
+<span class="nc" id="L397">                record = new Record(null, timestamp, Flag.NO_VALUE_RECEIVED_YET);</span>
+            }
+<span class="fc" id="L399">        }</span>
+<span class="nc bnc" id="L400" title="All 2 branches missed.">        else if (strValue.trim().startsWith(Const.HEXADECIMAL)) {</span>
+<span class="nc" id="L401">            record = new Record(new ByteArrayValue(strValue.trim().getBytes(Const.CHAR_SET)), timestamp, Flag.VALID);</span>
+        }
+        else {
+<span class="nc" id="L404">            record = new Record(new StringValue(strValue.trim()), timestamp, Flag.VALID);</span>
+        }
+<span class="fc" id="L406">        return record;</span>
+    }
+
+    /**
+     * Checks if the string value is a number
+     *
+     * @param strValue
+     *            string value
+     * @return True on success, otherwise false
+     */
+    private boolean isNumber(String strValue) {
+
+<span class="fc" id="L418">        boolean isDecimalSeparatorFound = false;</span>
+
+<span class="fc bfc" id="L420" title="All 4 branches covered.">        if (!Character.isDigit(strValue.charAt(0)) &amp;&amp; strValue.charAt(0) != Const.MINUS_SIGN</span>
+<span class="fc bfc" id="L421" title="All 2 branches covered.">                &amp;&amp; strValue.charAt(0) != Const.PLUS_SIGN) {</span>
+<span class="fc" id="L422">            return false;</span>
+        }
+
+<span class="fc bfc" id="L425" title="All 2 branches covered.">        for (char charactor : strValue.substring(1).toCharArray()) {</span>
+<span class="fc bfc" id="L426" title="All 2 branches covered.">            if (!Character.isDigit(charactor)) {</span>
+<span class="pc bpc" id="L427" title="2 of 4 branches missed.">                if (charactor == Const.DECIMAL_SEPARATOR &amp;&amp; !isDecimalSeparatorFound) {</span>
+<span class="fc" id="L428">                    isDecimalSeparatorFound = true;</span>
+<span class="fc" id="L429">                    continue;</span>
+                }
+<span class="nc" id="L431">                return false;</span>
+            }
+        }
+<span class="fc" id="L434">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

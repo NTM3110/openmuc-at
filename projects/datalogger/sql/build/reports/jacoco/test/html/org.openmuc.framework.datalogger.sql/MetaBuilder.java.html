@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MetaBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-sql</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.sql</a> &gt; <span class="el_source">MetaBuilder.java</span></div><h1>MetaBuilder.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.sql;
+
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.COLUMNS;
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.MYSQL;
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.NULL;
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.POSTGRES;
+import static org.openmuc.framework.datalogger.sql.utils.SqlValues.POSTGRESQL;
+
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.List;
+
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.sql.utils.PropertyHandlerProvider;
+import org.openmuc.framework.datalogger.sql.utils.Settings;
+import org.openmuc.framework.lib.osgi.config.PropertyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MetaBuilder {
+
+<span class="fc" id="L46">    private final Logger logger = LoggerFactory.getLogger(MetaBuilder.class);</span>
+    private final List&lt;LogChannel&gt; channels;
+    private final DbAccess dbAccess;
+    private StringBuilder resultComparison;
+    private StringBuilder sbMetaInsert;
+    private final String url;
+
+<span class="fc" id="L53">    public MetaBuilder(List&lt;LogChannel&gt; channels, DbAccess dbAccess) {</span>
+<span class="fc" id="L54">        this.channels = channels;</span>
+<span class="fc" id="L55">        this.dbAccess = dbAccess;</span>
+<span class="fc" id="L56">        PropertyHandler propertyHandler = PropertyHandlerProvider.getInstance().getPropertyHandler();</span>
+<span class="fc" id="L57">        url = propertyHandler.getString(Settings.URL);</span>
+<span class="fc" id="L58">    }</span>
+
+    public void writeMetaTable() {
+<span class="fc" id="L61">        StringBuilder metaStructure = createMetaStructure();</span>
+<span class="fc" id="L62">        writeMetaStructure(metaStructure);</span>
+<span class="fc" id="L63">        StringBuilder metaInserts = createInsertsForMetaTable();</span>
+
+<span class="pc bpc" id="L65" title="1 of 2 branches missed.">        if (!metaInserts.toString().isEmpty()) {</span>
+<span class="fc" id="L66">            dbAccess.executeSQL(new StringBuilder(&quot;TRUNCATE TABLE openmuc_meta ;&quot;));</span>
+<span class="fc" id="L67">            dbAccess.executeSQL(metaInserts);</span>
+        }
+<span class="fc" id="L69">    }</span>
+
+    private void writeMetaStructure(StringBuilder metaString) {
+<span class="fc" id="L72">        dbAccess.executeSQL(metaString);</span>
+
+<span class="pc bpc" id="L74" title="3 of 4 branches missed.">        if (url.contains(POSTGRESQL) &amp;&amp; !dbAccess.timeScaleIsActive()) {</span>
+<span class="nc" id="L75">            StringBuilder sbIndex = new StringBuilder(&quot;CREATE INDEX IF NOT EXISTS metaIndex ON openmuc_meta (time);&quot;);</span>
+<span class="nc" id="L76">            dbAccess.executeSQL(sbIndex);</span>
+        }
+
+<span class="pc bpc" id="L79" title="3 of 4 branches missed.">        if (url.contains(POSTGRESQL) &amp;&amp; dbAccess.timeScaleIsActive()) {</span>
+            try {
+<span class="nc" id="L81">                dbAccess.executeQuery(</span>
+                        new StringBuilder(&quot;SELECT create_hypertable('openmuc_meta', 'time', if_not_exists =&gt; TRUE);&quot;));
+<span class="nc" id="L83">            } catch (SQLException e) {</span>
+<span class="nc" id="L84">                logger.error(e.getMessage());</span>
+<span class="nc" id="L85">            }</span>
+        }
+<span class="fc" id="L87">    }</span>
+
+    private StringBuilder createMetaStructure() {
+<span class="fc" id="L90">        StringBuilder sbMeta = new StringBuilder();</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if (url.contains(POSTGRES)) {</span>
+<span class="nc" id="L92">            sbMeta.append(&quot;CREATE TABLE IF NOT EXISTS openmuc_meta (time TIMESTAMPTZ NOT NULL,\n&quot;);</span>
+        }
+        else {
+<span class="fc" id="L95">            sbMeta.append(&quot;CREATE TABLE IF NOT EXISTS openmuc_meta (time TIMESTAMP NOT NULL,\n&quot;);</span>
+        }
+
+<span class="fc" id="L98">        int channelIdLength = 30;</span>
+<span class="fc" id="L99">        int channelAdressLength = 30;</span>
+<span class="fc" id="L100">        int unitLength = 15;</span>
+<span class="fc" id="L101">        int samplingGroupLength = 30;</span>
+<span class="fc" id="L102">        int descripionLength = 30;</span>
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        for (LogChannel channel : channels) {</span>
+<span class="fc" id="L105">            channelIdLength = updateLengthIfHigher(channel.getId(), channelIdLength);</span>
+<span class="fc" id="L106">            channelAdressLength = updateLengthIfHigher(channel.getChannelAddress(), channelAdressLength);</span>
+<span class="fc" id="L107">            samplingGroupLength = updateLengthIfHigher(channel.getSamplingGroup(), samplingGroupLength);</span>
+<span class="fc" id="L108">            unitLength = updateLengthIfHigher(channel.getUnit(), unitLength);</span>
+<span class="fc" id="L109">            descripionLength = updateLengthIfHigher(channel.getDescription(), descripionLength);</span>
+<span class="fc" id="L110">        }</span>
+
+        // sbMeta.append(&quot;driverID VARCHAR(30) NULL,&quot;)
+        // .append(&quot;deviceID VARCHAR(30) NULL,&quot;)
+<span class="fc" id="L114">        sbMeta.append(&quot;channelID VARCHAR(&quot; + channelIdLength + &quot;) NOT NULL,&quot;)</span>
+<span class="fc" id="L115">                .append(&quot;channelAdress VARCHAR(&quot; + channelAdressLength + NULL)</span>
+<span class="fc" id="L116">                .append(&quot;loggingInterval VARCHAR(10) NULL,&quot;)</span>
+<span class="fc" id="L117">                .append(&quot;loggingTimeOffset VARCHAR(10) NULL,&quot;)</span>
+<span class="fc" id="L118">                .append(&quot;unit VARCHAR(&quot; + unitLength + NULL)</span>
+<span class="fc" id="L119">                .append(&quot;valueType VARCHAR(20) NULL,&quot;)</span>
+                // .append(&quot;valueTypeLength VARCHAR(5) NULL,&quot;)
+<span class="fc" id="L121">                .append(&quot;scalingFactor VARCHAR(5) NULL,&quot;)</span>
+<span class="fc" id="L122">                .append(&quot;valueOffset VARCHAR(5) NULL,&quot;)</span>
+<span class="fc" id="L123">                .append(&quot;listening VARCHAR(5) NULL,&quot;)</span>
+<span class="fc" id="L124">                .append(&quot;loggingEvent VARCHAR(5) NULL,&quot;)</span>
+<span class="fc" id="L125">                .append(&quot;samplingInterval VARCHAR(10) NULL,&quot;)</span>
+<span class="fc" id="L126">                .append(&quot;samplingTimeOffset VARCHAR(10) NULL,&quot;)</span>
+<span class="fc" id="L127">                .append(&quot;samplingGroup VARCHAR(&quot; + samplingGroupLength + NULL)</span>
+<span class="fc" id="L128">                .append(&quot;disabled VARCHAR(5) NULL,&quot;)</span>
+<span class="fc" id="L129">                .append(&quot;description VARCHAR(&quot; + descripionLength + &quot;) NULL&quot;);</span>
+
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">        if (!url.contains(POSTGRESQL)) {</span>
+<span class="fc" id="L132">            sbMeta.append(&quot;,INDEX metaIndex(time),PRIMARY KEY (channelid, time));&quot;);</span>
+        }
+        else {
+<span class="nc" id="L135">            sbMeta.append(&quot;,PRIMARY KEY (channelid, time));&quot;);</span>
+        }
+
+<span class="fc" id="L138">        return sbMeta;</span>
+    }
+
+    /**
+     * checks if the attributes length exceeds the standard value
+     *
+     * @param stringValue
+     *            Attribute of the channel
+     * @param currentLength
+     *            Current or standard column length
+     * @return column length to be used
+     */
+    private int updateLengthIfHigher(String stringValue, int currentLength) {
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if (stringValue != null) {</span>
+<span class="fc" id="L152">            int length = stringValue.length();</span>
+<span class="pc bpc" id="L153" title="1 of 2 branches missed.">            if (length &gt; currentLength) {</span>
+<span class="nc" id="L154">                currentLength = length;</span>
+            }
+        }
+<span class="fc" id="L157">        return currentLength;</span>
+    }
+
+    /**
+     * Inserts the needed data into the table openmuc_meta when there are either no prior entries in it or if the
+     * metadata has changed since the last entry
+     */
+    private StringBuilder createInsertsForMetaTable() {
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (channels.isEmpty()) {</span>
+<span class="nc" id="L166">            logger.warn(&quot;There are no channels for meta table&quot;);</span>
+        }
+
+<span class="fc" id="L169">        resultComparison = new StringBuilder();</span>
+
+<span class="fc" id="L171">        sbMetaInsert = new StringBuilder(</span>
+                &quot;INSERT INTO openmuc_meta (time,channelid,channelAdress,loggingInterval,loggingTimeOffset,unit,valueType,scalingFactor,valueOffset,listening,loggingEvent,samplingInterval,samplingTimeOffset,SamplingGroup,disabled,description) &quot;);
+
+<span class="fc" id="L174">        StringBuilder sbMetaInsertValues = new StringBuilder(&quot;VALUES (&quot;);</span>
+
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        for (LogChannel logChannel : channels) {</span>
+<span class="fc" id="L177">            sbMetaInsertValues.append(parseChannelToMetaInsert(logChannel));</span>
+<span class="fc" id="L178">        }</span>
+
+<span class="fc" id="L180">        sbMetaInsertValues.replace(sbMetaInsertValues.length() - 3, sbMetaInsertValues.length(), &quot;;&quot;);</span>
+<span class="fc" id="L181">        sbMetaInsert.append(sbMetaInsertValues);</span>
+
+        try {
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (metaEntriesChanged()) {</span>
+<span class="fc" id="L185">                return sbMetaInsert;</span>
+            }
+<span class="nc" id="L187">        } catch (SQLException e) {</span>
+<span class="nc" id="L188">            logger.warn(&quot;Exception at reading existing meta entries: {}&quot;, e.getMessage());</span>
+<span class="nc" id="L189">            return sbMetaInsert;</span>
+<span class="nc" id="L190">        }</span>
+
+<span class="nc" id="L192">        return new StringBuilder();</span>
+    }
+
+    private ResultSet getExistingEntries() throws SQLException {
+<span class="fc" id="L196">        StringBuilder sbMetaSelect = new StringBuilder(</span>
+                &quot;SELECT channelid,channelAdress,loggingInterval,loggingTimeOffset,unit,valueType,scalingFactor,valueOffset,&quot;
+                        + &quot;listening,samplingInterval,samplingTimeOffset,SamplingGroup,disabled,description FROM&quot;
+                        + &quot; openmuc_meta ;&quot;);
+        // ToDO: needed?
+        // WHERE time IN (SELECT * FROM (SELECT time FROM openmuc_meta ORDER BY time DESC LIMIT 1) as time)
+
+<span class="fc" id="L203">        return dbAccess.executeQuery(sbMetaSelect);</span>
+    }
+
+    private String parseChannelToMetaInsert(LogChannel logChannel) {
+<span class="fc" id="L207">        List&lt;Integer&gt; varcharLength = dbAccess.getColumnLength(COLUMNS, &quot;openmuc_meta&quot;);</span>
+<span class="fc" id="L208">        Timestamp sqlTimestamp = new Timestamp(System.currentTimeMillis());</span>
+<span class="fc" id="L209">        StringBuilder channelAsString = new StringBuilder();</span>
+
+<span class="fc" id="L211">        String channelAddress = logChannel.getChannelAddress();</span>
+<span class="fc" id="L212">        String scalingFactor = getScalingFactor(logChannel);</span>
+<span class="fc" id="L213">        String valueOffset = getValueOffset(logChannel);</span>
+<span class="fc" id="L214">        String listening = logChannel.isListening().toString();</span>
+<span class="fc" id="L215">        String samplingInterval = logChannel.getSamplingInterval().toString();</span>
+<span class="fc" id="L216">        String samplingTimeOffset = logChannel.getSamplingTimeOffset().toString();</span>
+<span class="fc" id="L217">        String samplingGroup = logChannel.getSamplingGroup();</span>
+<span class="fc" id="L218">        String disabled = logChannel.isDisabled().toString();</span>
+<span class="fc" id="L219">        String loggingInterval = getLoggingInterval(logChannel);</span>
+<span class="fc" id="L220">        String valueTypeLength = getValueTypeLength(logChannel);</span>
+<span class="fc" id="L221">        String loggingTimeOffset = logChannel.getLoggingTimeOffset().toString();</span>
+<span class="fc" id="L222">        String channelId = logChannel.getId();</span>
+<span class="fc" id="L223">        String unit = logChannel.getUnit();</span>
+<span class="fc" id="L224">        ValueType vType = logChannel.getValueType();</span>
+<span class="fc" id="L225">        String valueType = vType.toString();</span>
+<span class="fc" id="L226">        String loggingEvent = String.valueOf(logChannel.isLoggingEvent());</span>
+<span class="fc" id="L227">        String description = logChannel.getDescription();</span>
+
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (description.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L230">            description = &quot;-&quot;;</span>
+        }
+
+        // buggy -&gt; needed?
+        // List&lt;String&gt; newColumnNames = Arrays.asList(channelId, channelAddress, loggingInterval, loggingTimeOffset,
+        // unit,
+        // valueType, scalingFactor, valueOffset, listening, loggingEvent, samplingInterval, samplingTimeOffset,
+        // samplingGroup, disabled, description);
+        //
+        // for (int i = 0; i &lt; newColumnNames.size(); ++i) {
+        // if (varcharLength.get(i) &lt; newColumnNames.get(i).length()) {
+        // increaseDescriptionColumnLength(&quot;openmuc_meta&quot;, newColumnNames.get(i), COLUMNS.get(i));
+        // }
+        // }
+
+<span class="fc" id="L245">        resultComparison.append(channelId)</span>
+<span class="fc" id="L246">                .append(',')</span>
+<span class="fc" id="L247">                .append(channelAddress)</span>
+<span class="fc" id="L248">                .append(',')</span>
+<span class="fc" id="L249">                .append(loggingInterval)</span>
+<span class="fc" id="L250">                .append(',')</span>
+<span class="fc" id="L251">                .append(loggingTimeOffset)</span>
+<span class="fc" id="L252">                .append(',')</span>
+<span class="fc" id="L253">                .append(unit)</span>
+<span class="fc" id="L254">                .append(',')</span>
+<span class="fc" id="L255">                .append(valueType)</span>
+<span class="fc" id="L256">                .append(',')</span>
+                // .append(' ')
+                // .append(valueTypeLength)
+                // .append(',')
+<span class="fc" id="L260">                .append(scalingFactor)</span>
+<span class="fc" id="L261">                .append(',')</span>
+<span class="fc" id="L262">                .append(valueOffset)</span>
+<span class="fc" id="L263">                .append(',')</span>
+<span class="fc" id="L264">                .append(listening)</span>
+<span class="fc" id="L265">                .append(',')</span>
+<span class="fc" id="L266">                .append(loggingEvent)</span>
+<span class="fc" id="L267">                .append(',')</span>
+<span class="fc" id="L268">                .append(samplingInterval)</span>
+<span class="fc" id="L269">                .append(',')</span>
+<span class="fc" id="L270">                .append(samplingTimeOffset)</span>
+<span class="fc" id="L271">                .append(',')</span>
+<span class="fc" id="L272">                .append(samplingGroup)</span>
+<span class="fc" id="L273">                .append(',')</span>
+<span class="fc" id="L274">                .append(disabled)</span>
+<span class="fc" id="L275">                .append(',')</span>
+<span class="fc" id="L276">                .append(description)</span>
+<span class="fc" id="L277">                .append(',');</span>
+
+<span class="fc" id="L279">        channelAsString.append('\'')</span>
+<span class="fc" id="L280">                .append(sqlTimestamp)</span>
+<span class="fc" id="L281">                .append(&quot;',\'&quot;)</span>
+<span class="fc" id="L282">                .append(channelId)</span>
+<span class="fc" id="L283">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L284">                .append(channelAddress)</span>
+<span class="fc" id="L285">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L286">                .append(loggingInterval)</span>
+<span class="fc" id="L287">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L288">                .append(loggingTimeOffset)</span>
+<span class="fc" id="L289">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L290">                .append(unit)</span>
+<span class="fc" id="L291">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L292">                .append(valueType)</span>
+<span class="fc" id="L293">                .append(&quot;','&quot;)</span>
+                // .append(' ')
+                // .append(valueTypeLength)
+                // .append(&quot;','&quot;)
+<span class="fc" id="L297">                .append(scalingFactor)</span>
+<span class="fc" id="L298">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L299">                .append(valueOffset)</span>
+<span class="fc" id="L300">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L301">                .append(listening)</span>
+<span class="fc" id="L302">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L303">                .append(loggingEvent)</span>
+<span class="fc" id="L304">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L305">                .append(samplingInterval)</span>
+<span class="fc" id="L306">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L307">                .append(samplingTimeOffset)</span>
+<span class="fc" id="L308">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L309">                .append(samplingGroup)</span>
+<span class="fc" id="L310">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L311">                .append(disabled)</span>
+<span class="fc" id="L312">                .append(&quot;','&quot;)</span>
+<span class="fc" id="L313">                .append(description)</span>
+<span class="fc" id="L314">                .append(&quot;'), (&quot;);</span>
+
+<span class="fc" id="L316">        return channelAsString.toString();</span>
+    }
+
+    private boolean metaEntriesChanged() throws SQLException {
+<span class="fc" id="L320">        ResultSet existingEntries = getExistingEntries();</span>
+<span class="fc" id="L321">        ResultSetMetaData metaOfExistingEntries = existingEntries.getMetaData();</span>
+<span class="fc" id="L322">        int colCount = metaOfExistingEntries.getColumnCount();</span>
+<span class="fc" id="L323">        boolean noEntriesExists = true;</span>
+<span class="pc bpc" id="L324" title="1 of 2 branches missed.">        if (colCount &lt;= 0) {</span>
+<span class="fc" id="L325">            return true;</span>
+        }
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        while (existingEntries.next()) {</span>
+<span class="nc" id="L329">            noEntriesExists = false;</span>
+<span class="nc" id="L330">            StringBuilder entry = new StringBuilder();</span>
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            for (int index = 1; index &lt;= colCount; index++) {</span>
+<span class="nc" id="L333">                entry.append(existingEntries.getString(index));</span>
+<span class="nc" id="L334">                entry.append(&quot;,&quot;);</span>
+            }
+<span class="nc bnc" id="L336" title="All 4 branches missed.">            if (entry != null &amp;&amp; !resultComparison.toString().contains(entry)) {</span>
+<span class="nc" id="L337">                return true;</span>
+            }
+<span class="nc" id="L339">        }</span>
+
+<span class="nc" id="L341">        return noEntriesExists;</span>
+    }
+
+    /**
+     * returns the value offset attribute of the channel
+     *
+     * @param logChannel
+     *            channel to be logged
+     * @return the value offset attribute of the channel
+     */
+    private String getValueOffset(LogChannel logChannel) {
+        String valueOffset;
+<span class="pc bpc" id="L353" title="1 of 2 branches missed.">        if (logChannel.getValueOffset() == null) {</span>
+<span class="nc" id="L354">            valueOffset = &quot;0&quot;;</span>
+        }
+        else {
+<span class="fc" id="L357">            valueOffset = logChannel.getValueOffset().toString();</span>
+        }
+<span class="fc" id="L359">        return valueOffset;</span>
+    }
+
+    /**
+     * returns the scaling factor attribute of the channel
+     *
+     * @param logChannel
+     *            channel to be logged
+     * @return the scaling factor attribute of the channel
+     */
+    private String getScalingFactor(LogChannel logChannel) {
+        String scalingFactor;
+<span class="pc bpc" id="L371" title="1 of 2 branches missed.">        if (logChannel.getScalingFactor() == null) {</span>
+<span class="nc" id="L372">            scalingFactor = &quot;0&quot;;</span>
+        }
+        else {
+<span class="fc" id="L375">            scalingFactor = logChannel.getScalingFactor().toString();</span>
+        }
+<span class="fc" id="L377">        return scalingFactor;</span>
+    }
+
+    /**
+     * returns the logging interval attribute of the channel
+     *
+     * @param logChannel
+     *            channel to be logged
+     * @return the logging interval attribute of the channel
+     */
+    private String getLoggingInterval(LogChannel logChannel) {
+        String loggingInterval;
+<span class="pc bpc" id="L389" title="1 of 2 branches missed.">        if (logChannel.getLoggingInterval() == null) {</span>
+<span class="nc" id="L390">            loggingInterval = &quot;0&quot;;</span>
+        }
+        else {
+<span class="fc" id="L393">            loggingInterval = logChannel.getLoggingInterval().toString();</span>
+        }
+<span class="fc" id="L395">        return loggingInterval;</span>
+    }
+
+    /**
+     * returns the valuetype length attribute of the channel
+     *
+     * @param logChannel
+     *            channel to be logged
+     * @return the valuetype length attribute of the channel
+     */
+    private String getValueTypeLength(LogChannel logChannel) {
+        String valueTypeLength;
+<span class="pc bpc" id="L407" title="1 of 2 branches missed.">        if (logChannel.getValueTypeLength() == null) {</span>
+<span class="nc" id="L408">            valueTypeLength = &quot;0&quot;;</span>
+        }
+        else {
+<span class="fc" id="L411">            valueTypeLength = logChannel.getValueTypeLength().toString();</span>
+        }
+<span class="fc" id="L413">        return valueTypeLength;</span>
+    }
+
+    /**
+     * Increases the length of a column
+     *
+     * @param table
+     *            Table to be altered
+     * @param column
+     *            Length to be set for the column
+     * @param columnName
+     *            Column to be altered
+     */
+    private void increaseDescriptionColumnLength(String table, String column, String columnName) {
+<span class="nc" id="L427">        StringBuilder sbNewVarcharLength = new StringBuilder();</span>
+
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (url.contains(MYSQL)) {</span>
+<span class="nc" id="L430">            sbNewVarcharLength.append(&quot;ALTER TABLE &quot; + table + &quot; MODIFY &quot; + columnName + &quot; VARCHAR (&quot;);</span>
+        }
+        else {
+<span class="nc" id="L433">            sbNewVarcharLength.append(&quot;ALTER TABLE &quot; + table + &quot; ALTER COLUMN &quot; + columnName + &quot; TYPE VARCHAR (&quot;);</span>
+        }
+
+<span class="nc" id="L436">        sbNewVarcharLength.append(column.length()).append(&quot;);&quot;);</span>
+<span class="nc" id="L437">        dbAccess.executeSQL(sbNewVarcharLength);</span>
+<span class="nc" id="L438">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

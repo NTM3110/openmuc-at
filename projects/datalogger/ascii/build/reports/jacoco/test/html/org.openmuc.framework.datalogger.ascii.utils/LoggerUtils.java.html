@@ -1,0 +1,883 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoggerUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii.utils</a> &gt; <span class="el_source">LoggerUtils.java</span></div><h1>LoggerUtils.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii.utils;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.TreeMap;
+
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.datalogger.ascii.LogFileHeader;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LoggerUtils {
+
+<span class="fc" id="L60">    private static final Logger logger = LoggerFactory.getLogger(LoggerUtils.class);</span>
+<span class="fc" id="L61">    private static final char[] hexArray = &quot;0123456789ABCDEF&quot;.toCharArray();</span>
+
+    private LoggerUtils() {
+    }
+
+    /**
+     * Returns all filenames of the given time span defined by the two dates
+     *
+     * @param loggingInterval
+     *            logging interval
+     * @param logTimeOffset
+     *            logging time offset
+     * @param startTimestamp
+     *            start time stamp
+     * @param endTimestamp
+     *            end time stamp
+     * @return a list of strings with all files names
+     */
+    public static List&lt;String&gt; getFilenames(int loggingInterval, int logTimeOffset, long startTimestamp,
+            long endTimestamp) {
+
+<span class="fc" id="L82">        Calendar calendarStart = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L83">        calendarStart.setTimeInMillis(startTimestamp);</span>
+<span class="fc" id="L84">        Calendar calendarEnd = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L85">        calendarEnd.setTimeInMillis(endTimestamp);</span>
+
+        // Rename timespanToFilenames....
+        // Filename YYYYMMDD_&lt;LoggingInterval&gt;.dat
+<span class="fc" id="L89">        List&lt;String&gt; filenames = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L90" title="All 4 branches covered.">        while (calendarStart.before(calendarEnd) || calendarStart.equals(calendarEnd)) {</span>
+<span class="fc" id="L91">            String filename = buildFilename(loggingInterval, logTimeOffset, calendarStart);</span>
+<span class="fc" id="L92">            filenames.add(filename);</span>
+
+            // set date to 00:00:00 of the next day
+<span class="fc" id="L95">            calendarStart.add(Calendar.DAY_OF_MONTH, 1);</span>
+<span class="fc" id="L96">            calendarStart.set(Calendar.HOUR_OF_DAY, 0);</span>
+<span class="fc" id="L97">            calendarStart.set(Calendar.MINUTE, 0);</span>
+<span class="fc" id="L98">            calendarStart.set(Calendar.SECOND, 0);</span>
+<span class="fc" id="L99">            calendarStart.set(Calendar.MILLISECOND, 0);</span>
+<span class="fc" id="L100">        }</span>
+<span class="fc" id="L101">        return filenames;</span>
+    }
+
+    /**
+     * Returns the filename, with the help of the timestamp and the interval.
+     *
+     * @param loggingInterval
+     *            logging interval
+     * @param logTimeOffset
+     *            logging time offset
+     * @param timestamp
+     *            timestamp
+     * @return a filename from timestamp (date) and interval
+     */
+    public static String getFilename(int loggingInterval, int logTimeOffset, long timestamp) {
+
+<span class="fc" id="L117">        Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L118">        calendar.setTimeInMillis(timestamp);</span>
+<span class="fc" id="L119">        return buildFilename(loggingInterval, logTimeOffset, calendar);</span>
+    }
+
+    /**
+     * Builds the Logfile name from logging interval, logging time offset and the date of the calendar
+     *
+     * @param loggingInterval
+     *            logging interval
+     * @param logTimeOffset
+     *            logging time offset
+     * @param calendar
+     *            Calendar for the time of the file name
+     * @return logging file name
+     */
+    public static String buildFilename(int loggingInterval, int logTimeOffset, Calendar calendar) {
+
+<span class="fc" id="L135">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L136">        sb.append(String.format(Const.DATE_FORMAT, calendar));</span>
+<span class="fc" id="L137">        sb.append(Const.TIME_SEPERATOR);</span>
+<span class="fc" id="L138">        sb.append(String.valueOf(loggingInterval));</span>
+
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if (logTimeOffset != 0) {</span>
+<span class="fc" id="L141">            sb.append(Const.TIME_SEPERATOR);</span>
+<span class="fc" id="L142">            sb.append(logTimeOffset);</span>
+        }
+<span class="fc" id="L144">        sb.append(Const.EXTENSION);</span>
+<span class="fc" id="L145">        return sb.toString();</span>
+    }
+
+    /**
+     * Builds the Logfile name from string interval_timeOffset and the date of the calendar
+     *
+     * @param intervalTimeOffset
+     *            the IntervallTimeOffset
+     * @param calendar
+     *            Calendar for the time of the file name
+     * @return logfile name
+     */
+    public static String buildFilename(String intervalTimeOffset, Calendar calendar) {
+
+<span class="fc" id="L159">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L160">        sb.append(String.format(Const.DATE_FORMAT, calendar));</span>
+<span class="fc" id="L161">        sb.append(Const.TIME_SEPERATOR);</span>
+<span class="fc" id="L162">        sb.append(intervalTimeOffset);</span>
+
+<span class="fc" id="L164">        sb.append(Const.EXTENSION);</span>
+<span class="fc" id="L165">        return sb.toString();</span>
+    }
+
+    /**
+     * Checks if it has a next container entry.
+     *
+     * @param containers
+     *            a list with LogRecordContainer
+     * @param i
+     *            the current position of the list
+     * @return true if it has a next container entry, if not else.
+     */
+    public static boolean hasNext(List&lt;LoggingRecord&gt; containers, int i) {
+
+<span class="fc" id="L179">        boolean result = false;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (i &lt;= containers.size() - 2) {</span>
+<span class="fc" id="L181">            result = true;</span>
+        }
+<span class="fc" id="L183">        return result;</span>
+    }
+
+    /**
+     * This method rename all *.dat files with the date from today in directoryPath into a *.old0, *.old1, ...
+     *
+     * @param directoryPath
+     *            directory path
+     * @param calendar
+     *            Calendar for the time of the file name
+     */
+    public static void renameAllFilesToOld(String directoryPath, Calendar calendar) {
+
+<span class="nc" id="L196">        String date = String.format(Const.DATE_FORMAT, calendar);</span>
+
+<span class="nc" id="L198">        File dir = new File(directoryPath);</span>
+<span class="nc" id="L199">        File[] files = dir.listFiles();</span>
+
+<span class="nc bnc" id="L201" title="All 4 branches missed.">        if (files != null &amp;&amp; files.length &gt; 0) {</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            for (File file : files) {</span>
+<span class="nc" id="L204">                String currentName = file.getName();</span>
+<span class="nc bnc" id="L205" title="All 4 branches missed.">                if (currentName.startsWith(date) &amp;&amp; currentName.endsWith(Const.EXTENSION)) {</span>
+
+<span class="nc" id="L207">                    String newName = new StringBuilder()</span>
+<span class="nc" id="L208">                            .append(currentName.substring(0, currentName.length() - Const.EXTENSION.length()))</span>
+<span class="nc" id="L209">                            .append(Const.EXTENSION_OLD)</span>
+<span class="nc" id="L210">                            .toString();</span>
+<span class="nc" id="L211">                    int j = 0;</span>
+
+<span class="nc" id="L213">                    File fileWithNewName = new File(directoryPath + newName + j);</span>
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                    while (fileWithNewName.exists()) {</span>
+<span class="nc" id="L216">                        ++j;</span>
+<span class="nc" id="L217">                        fileWithNewName = new File(directoryPath + newName + j);</span>
+                    }
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                    if (!file.renameTo(fileWithNewName)) {</span>
+<span class="nc" id="L220">                        logger.error(&quot;Could not rename file to &quot;, newName);</span>
+                    }
+                }
+            }
+        }
+        else {
+<span class="nc" id="L226">            logger.error(&quot;No file found in &quot; + directoryPath);</span>
+        }
+<span class="nc" id="L228">    }</span>
+
+    /**
+     * This method renames a singel &amp;lt;date&amp;gt;_&amp;lt;loggerInterval&amp;gt;_&amp;lt;loggerTimeOffset&amp;gt;.dat file into a *.old0,
+     * *.old1, ...
+     *
+     * @param directoryPath
+     *            directory path
+     * @param loggerIntervalLoggerTimeOffset
+     *            logger interval with logger time offset as String separated with underline
+     * @param calendar
+     *            calendar of the day
+     */
+    public static void renameFileToOld(String directoryPath, String loggerIntervalLoggerTimeOffset, Calendar calendar) {
+
+<span class="nc" id="L243">        File file = new File(directoryPath + buildFilename(loggerIntervalLoggerTimeOffset, calendar));</span>
+
+<span class="nc bnc" id="L245" title="All 2 branches missed.">        if (file.exists()) {</span>
+<span class="nc" id="L246">            String currentName = file.getName();</span>
+
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L249">                logger.trace(MessageFormat.format(&quot;Header not identical. Rename file {0} to old.&quot;, currentName));</span>
+            }
+
+<span class="nc" id="L252">            String newName = currentName.substring(0, currentName.length() - Const.EXTENSION.length());</span>
+<span class="nc" id="L253">            newName += Const.EXTENSION_OLD;</span>
+<span class="nc" id="L254">            int j = 0;</span>
+
+<span class="nc" id="L256">            File fileWithNewName = new File(directoryPath + newName + j);</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            while (fileWithNewName.exists()) {</span>
+<span class="nc" id="L259">                ++j;</span>
+<span class="nc" id="L260">                fileWithNewName = new File(directoryPath + newName + j);</span>
+            }
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            if (!file.renameTo(fileWithNewName)) {</span>
+<span class="nc" id="L263">                logger.error(&quot;Could not rename file to &quot; + newName);</span>
+            }
+        }
+<span class="nc" id="L266">    }</span>
+
+    /**
+     * Returns the calendar from today with the first hour, minute, second and millisecond.
+     *
+     * @param today
+     *            the current calendar
+     * @return the calendar from today with the first hour, minute, second and millisecond
+     */
+    public static Calendar getCalendarTodayZero(Calendar today) {
+
+<span class="nc" id="L277">        Calendar calendarZero = new GregorianCalendar(Locale.getDefault());</span>
+<span class="nc" id="L278">        calendarZero.set(today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DATE), 0, 0, 0);</span>
+<span class="nc" id="L279">        calendarZero.set(Calendar.MILLISECOND, 0);</span>
+
+<span class="nc" id="L281">        return calendarZero;</span>
+    }
+
+    /**
+     * This method adds a blank spaces to a StringBuilder object.
+     *
+     * @param length
+     *            length of the value to add the spaces
+     * @param size
+     *            maximal allowed size
+     * @param sb
+     *            StringBuilder object to add the spaces
+     */
+    public static void addSpaces(int length, int size, StringBuilder sb) {
+
+<span class="fc" id="L296">        int i = length;</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">        while (i &lt; size) {</span>
+<span class="fc" id="L298">            sb.append(' ');</span>
+<span class="fc" id="L299">            ++i;</span>
+        }
+<span class="fc" id="L301">    }</span>
+
+    /**
+     * This method adds a string value up with blank spaces from left to right.
+     *
+     * @param sb
+     *            StringBuilder in wich the spaces will appended
+     * @param number
+     *            the number of spaces
+     */
+    public static void appendSpaces(StringBuilder sb, int number) {
+
+<span class="fc bfc" id="L313" title="All 2 branches covered.">        for (int i = 0; i &lt; number; ++i) {</span>
+<span class="fc" id="L314">            sb.append(' ');</span>
+        }
+<span class="fc" id="L316">    }</span>
+
+    /**
+     * Construct a error value with standard error prefix and the flag as number.
+     *
+     * @param flag
+     *            the wished error flag
+     * @param sbValue
+     *            string buffer to add the error flag
+     */
+    public static void buildError(StringBuilder sbValue, Flag flag) {
+<span class="fc" id="L327">        sbValue.setLength(0);</span>
+<span class="fc" id="L328">        sbValue.append(Const.ERROR).append(flag.getCode());</span>
+<span class="fc" id="L329">    }</span>
+
+    /**
+     * Get the column number by name.
+     *
+     * @param line
+     *            the line to search
+     * @param name
+     *            the name to search in line
+     * @return the column number as int.
+     */
+    public static int getColumnNumberByName(String line, String name) {
+
+<span class="nc" id="L342">        int channelColumn = -1;</span>
+
+        // erst Zeile ohne Kommentar finden, dann den Spaltennamen suchen und dessen Possitionsnummer zurueckgeben.
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (!line.startsWith(Const.COMMENT_SIGN)) {</span>
+<span class="nc" id="L346">            String[] columns = line.split(Const.SEPARATOR);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">            for (int i = 0; i &lt; columns.length; i++) {</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">                if (name.equals(columns[i])) {</span>
+<span class="nc" id="L349">                    return i;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L354">        return channelColumn;</span>
+    }
+
+    /**
+     * Get the columns number by names.
+     *
+     * @param line
+     *            the line to search
+     * @param names
+     *            the name to search in line
+     * @return the column numbers mapped with the name.
+     */
+    public static Map&lt;String, Integer&gt; getColumnNumbersByNames(String line, String[] names) {
+
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        if (line.startsWith(Const.COMMENT_SIGN)) {</span>
+<span class="fc" id="L369">            return null;</span>
+        }
+
+<span class="fc" id="L372">        Map&lt;String, Integer&gt; channelColumnsMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L373">        String[] columns = line.split(Const.SEPARATOR);</span>
+
+<span class="fc bfc" id="L375" title="All 2 branches covered.">        for (int i = 0; i &lt; columns.length; ++i) {</span>
+<span class="fc bfc" id="L376" title="All 2 branches covered.">            for (String name : names) {</span>
+<span class="fc bfc" id="L377" title="All 2 branches covered.">                if (columns[i].equals(name)) {</span>
+<span class="fc" id="L378">                    channelColumnsMap.put(name, i);</span>
+                }
+            }
+        }
+<span class="fc" id="L382">        return channelColumnsMap;</span>
+    }
+
+    /**
+     * Get the column number by name, in comments. It searches the line by his self. The BufferdReader has to be on the
+     * begin of the file.
+     *
+     * @param name
+     *            the name to search
+     * @param br
+     *            the BufferedReader
+     * @return column number as int, -1 if name not found
+     * @throws IOException
+     *             throws IOException If an I/O error occurs
+     */
+    public static int getCommentColumnNumberByName(String name, BufferedReader br) throws IOException {
+
+<span class="nc" id="L399">        String line = br.readLine();</span>
+
+<span class="nc bnc" id="L401" title="All 4 branches missed.">        while (line != null &amp;&amp; line.startsWith(Const.COMMENT_SIGN)) {</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">            if (line.contains(name)) {</span>
+<span class="nc" id="L403">                String[] columns = line.split(Const.SEPARATOR);</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">                for (int i = 0; i &lt; columns.length; i++) {</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">                    if (name.equals(columns[i])) {</span>
+<span class="nc" id="L406">                        return i;</span>
+                    }
+                }
+            }
+            try {
+<span class="nc" id="L411">                line = br.readLine();</span>
+<span class="nc" id="L412">            } catch (NullPointerException e) {</span>
+<span class="nc" id="L413">                return -1;</span>
+<span class="nc" id="L414">            }</span>
+        }
+<span class="nc" id="L416">        return -1;</span>
+    }
+
+    /**
+     * Get the value which is coded in the comment
+     *
+     * @param colNumber
+     *            the number of the channel
+     * @param column
+     *            the column
+     * @param br
+     *            a BufferedReader
+     * @return the value of a column of a specific col_num
+     * @throws IOException
+     *             If an I/O error occurs
+     */
+    public static String getCommentValue(int colNumber, int column, BufferedReader br) throws IOException {
+
+<span class="nc" id="L434">        final String columnName = String.format(&quot;%03d&quot;, colNumber);</span>
+
+<span class="nc" id="L436">        String line = br.readLine();</span>
+<span class="nc bnc" id="L437" title="All 4 branches missed.">        for (; line != null &amp;&amp; line.startsWith(Const.COMMENT_SIGN); line = br.readLine()) {</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">            if (!line.startsWith(Const.COMMENT_SIGN + columnName)) {</span>
+<span class="nc" id="L439">                continue;</span>
+            }
+
+<span class="nc" id="L442">            return line.split(Const.SEPARATOR)[column];</span>
+        }
+<span class="nc" id="L444">        return &quot;&quot;;</span>
+    }
+
+    /**
+     * Identifies the ValueType of a logger value on a specific col_no
+     *
+     * @param columnNumber
+     *            column number
+     * @param dataFile
+     *            the logger data file
+     * @return the ValueType from col_num x
+     */
+    public static ValueType identifyValueType(int columnNumber, File dataFile) {
+
+<span class="nc" id="L458">        String valueTypeWithSize = getValueTypeAsString(columnNumber, dataFile);</span>
+<span class="nc" id="L459">        String[] valueTypeWithSizeArray = valueTypeWithSize.split(Const.VALUETYPE_ENDSIGN);</span>
+<span class="nc" id="L460">        String valueType = valueTypeWithSizeArray[0].split(Const.VALUETYPE_SIZE_SEPARATOR)[0];</span>
+<span class="nc" id="L461">        return ValueType.valueOf(valueType);</span>
+    }
+
+    public static int getValueTypeLengthFromFile(int columnNumber, File dataFile) {
+
+<span class="nc" id="L466">        String valueType = getValueTypeAsString(columnNumber, dataFile);</span>
+<span class="nc" id="L467">        return getByteStringLength(valueType);</span>
+    }
+
+    private static String getValueTypeAsString(int columnNumber, File dataFile) {
+
+<span class="nc" id="L472">        try (BufferedReader br = new BufferedReader(</span>
+                new InputStreamReader(new FileInputStream(dataFile), Const.CHAR_SET));) {
+
+<span class="nc" id="L475">            int column = LoggerUtils.getCommentColumnNumberByName(Const.COMMENT_NAME, br);</span>
+
+<span class="nc bnc" id="L477" title="All 2 branches missed.">            if (column == -1) {</span>
+<span class="nc" id="L478">                String msg = MessageFormat.format(&quot;No element with name \&quot;{0}\&quot; found.&quot;, Const.COMMENT_NAME);</span>
+<span class="nc" id="L479">                throw new NoSuchElementException(msg);</span>
+            }
+
+<span class="nc" id="L482">            return LoggerUtils.getCommentValue(columnNumber, column, br).split(Const.VALUETYPE_ENDSIGN)[0];</span>
+
+<span class="nc" id="L484">        } catch (IOException e) {</span>
+<span class="nc" id="L485">            logger.error(&quot;Failed to get Value type as string.&quot;, e);</span>
+        }
+<span class="nc" id="L487">        return &quot;&quot;;</span>
+    }
+
+    /**
+     * Returns the predefined size of a ValueType.
+     *
+     * @param valueType
+     *            the type to get the predefined size
+     * @return predefined size of a ValueType as int.
+     */
+    public static int getLengthOfValueType(ValueType valueType) {
+
+<span class="pc bpc" id="L499" title="2 of 8 branches missed.">        switch (valueType) {</span>
+        case DOUBLE:
+<span class="fc" id="L501">            return Const.VALUE_SIZE_DOUBLE;</span>
+        case FLOAT:
+<span class="fc" id="L503">            return Const.VALUE_SIZE_DOUBLE;</span>
+        case INTEGER:
+<span class="fc" id="L505">            return Const.VALUE_SIZE_INTEGER;</span>
+        case LONG:
+<span class="fc" id="L507">            return Const.VALUE_SIZE_LONG;</span>
+        case SHORT:
+<span class="fc" id="L509">            return Const.VALUE_SIZE_SHORT;</span>
+        case BYTE_ARRAY:
+<span class="nc" id="L511">            return Const.VALUE_SIZE_MINIMAL;</span>
+        case STRING:
+<span class="nc" id="L513">            return Const.VALUE_SIZE_MINIMAL;</span>
+        case BOOLEAN:
+        case BYTE:
+        default:
+<span class="fc" id="L517">            return Const.VALUE_SIZE_MINIMAL;</span>
+        }
+    }
+
+    /**
+     * Converts a byte array to an hexadecimal string
+     *
+     * @param sb
+     *            to add hex string
+     * @param byteArray
+     *            the byte array to convert
+     */
+    public static void byteArrayToHexString(StringBuilder sb, byte[] byteArray) {
+<span class="fc" id="L530">        char[] hexChars = new char[byteArray.length * 2];</span>
+<span class="fc bfc" id="L531" title="All 2 branches covered.">        for (int j = 0; j &lt; byteArray.length; j++) {</span>
+<span class="fc" id="L532">            int v = byteArray[j] &amp; 0xFF;</span>
+<span class="fc" id="L533">            hexChars[j * 2] = hexArray[v &gt;&gt;&gt; 4];</span>
+<span class="fc" id="L534">            hexChars[j * 2 + 1] = hexArray[v &amp; 0x0F];</span>
+        }
+<span class="fc" id="L536">        sb.append(hexChars);</span>
+<span class="fc" id="L537">    }</span>
+
+    /**
+     * Constructs the timestamp for every log value into a StringBuilder.
+     *
+     * @param sb
+     *            the StringBuilder to add the logger timestamp
+     * @param calendar
+     *            Calendar with the wished time
+     */
+    public static void setLoggerTimestamps(StringBuilder sb, Calendar calendar) {
+
+<span class="fc" id="L549">        double unixtimestampSeconds = calendar.getTimeInMillis() / 1000.0; // double for milliseconds, nanoseconds</span>
+
+<span class="fc" id="L551">        sb.append(String.format(Const.DATE_FORMAT, calendar));</span>
+<span class="fc" id="L552">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L553">        sb.append(String.format(Const.TIME_FORMAT, calendar));</span>
+<span class="fc" id="L554">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L555">        sb.append(String.format(Locale.ENGLISH, &quot;%10.3f&quot;, unixtimestampSeconds));</span>
+<span class="fc" id="L556">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L557">    }</span>
+
+    /**
+     * Constructs the timestamp for every log value into a StringBuilder.
+     *
+     * @param sb
+     *            the StringBuilder to add the logger timestamp
+     * @param unixTimeStamp
+     *            unix time stamp in ms
+     */
+    public static void setLoggerTimestamps(StringBuilder sb, long unixTimeStamp) {
+
+<span class="fc" id="L569">        Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L570">        calendar.setTimeInMillis(unixTimeStamp);</span>
+<span class="fc" id="L571">        double unixtimestampSeconds = unixTimeStamp / 1000.0; // double for milliseconds, nanoseconds</span>
+
+<span class="fc" id="L573">        sb.append(String.format(Const.DATE_FORMAT, calendar));</span>
+<span class="fc" id="L574">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L575">        sb.append(String.format(Const.TIME_FORMAT, calendar));</span>
+<span class="fc" id="L576">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L577">        sb.append(String.format(Locale.ENGLISH, &quot;%10.3f&quot;, unixtimestampSeconds));</span>
+<span class="fc" id="L578">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L579">    }</span>
+
+    public static String getHeaderFromFile(String filePath) {
+
+        BufferedReader br;
+        try {
+<span class="nc" id="L585">            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(filePath)), Const.CHAR_SET));</span>
+<span class="nc" id="L586">        } catch (IOException e1) {</span>
+<span class="nc" id="L587">            return &quot;&quot;;</span>
+<span class="nc" id="L588">        }</span>
+
+<span class="nc" id="L590">        StringBuilder sb = new StringBuilder();</span>
+
+        try {
+<span class="nc" id="L593">            String line = br.readLine();</span>
+
+<span class="nc bnc" id="L595" title="All 2 branches missed.">            if (line != null) {</span>
+<span class="nc" id="L596">                sb.append(line);</span>
+<span class="nc bnc" id="L597" title="All 4 branches missed.">                while (line != null &amp;&amp; line.startsWith(Const.COMMENT_SIGN)) {</span>
+<span class="nc" id="L598">                    sb.append(Const.LINESEPARATOR);</span>
+<span class="nc" id="L599">                    line = br.readLine();</span>
+<span class="nc" id="L600">                    sb.append(line);</span>
+                }
+            }
+<span class="nc" id="L603">        } catch (IOException e) {</span>
+<span class="nc" id="L604">            logger.error(&quot;Problems to handle file: &quot; + filePath, e);</span>
+        } finally {
+
+            try {
+<span class="nc" id="L608">                br.close();</span>
+<span class="nc" id="L609">            } catch (IOException e) {</span>
+<span class="nc" id="L610">                logger.error(&quot;Cannot close file: &quot; + filePath, e);</span>
+<span class="nc" id="L611">            }</span>
+        }
+<span class="nc" id="L613">        return sb.toString();</span>
+    }
+
+    /**
+     * Returns a RandomAccessFile of the specified file.
+     *
+     * @param file
+     *            file get the RandomAccessFile
+     * @param accessMode
+     *            access mode
+     * @return the RandomAccessFile of the specified file, {@code null} if an error occured.
+     */
+    public static RandomAccessFile getRandomAccessFile(File file, String accessMode) {
+        try {
+<span class="fc" id="L627">            return new RandomAccessFile(file, accessMode);</span>
+<span class="fc" id="L628">        } catch (FileNotFoundException e) {</span>
+<span class="fc" id="L629">            logger.warn(&quot;Requested logfile: '{}' not found.&quot;, file.getAbsolutePath());</span>
+        }
+
+<span class="fc" id="L632">        return null;</span>
+    }
+
+    public static PrintWriter getPrintWriter(File file, boolean append) throws IOException {
+
+<span class="fc" id="L637">        PrintWriter writer = null;</span>
+        try {
+<span class="fc" id="L639">            writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file, append), Const.CHAR_SET));</span>
+<span class="nc" id="L640">        } catch (IOException e) {</span>
+<span class="nc" id="L641">            logger.error(&quot;Cannot open file: &quot; + file.getAbsolutePath());</span>
+<span class="nc" id="L642">            throw new IOException(e);</span>
+<span class="fc" id="L643">        }</span>
+<span class="fc" id="L644">        return writer;</span>
+    }
+
+    public static Map&lt;String, Boolean&gt; areHeadersIdentical(String loggerDirectory, List&lt;LogChannel&gt; channels,
+            Calendar calendar) {
+
+<span class="nc" id="L650">        Map&lt;String, Boolean&gt; areHeadersIdentical = new TreeMap&lt;&gt;();</span>
+<span class="nc" id="L651">        Map&lt;String, List&lt;LogChannel&gt;&gt; logChannelMap = new TreeMap&lt;&gt;();</span>
+
+<span class="nc" id="L653">        String key = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        for (LogChannel logChannel : channels) {</span>
+
+<span class="nc bnc" id="L657" title="All 2 branches missed.">            if (logChannel.getLoggingTimeOffset() != 0) {</span>
+<span class="nc" id="L658">                key = logChannel.getLoggingInterval() + Const.TIME_SEPERATOR_STRING + logChannel.getLoggingTimeOffset();</span>
+            }
+            else {
+<span class="nc" id="L661">                key = logChannel.getLoggingInterval().toString();</span>
+            }
+
+<span class="nc bnc" id="L664" title="All 2 branches missed.">            if (!logChannelMap.containsKey(key)) {</span>
+<span class="nc" id="L665">                List&lt;LogChannel&gt; logChannelList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L666">                logChannelList.add(logChannel);</span>
+<span class="nc" id="L667">                logChannelMap.put(key, logChannelList);</span>
+<span class="nc" id="L668">            }</span>
+            else {
+<span class="nc" id="L670">                logChannelMap.get(key).add(logChannel);</span>
+            }
+<span class="nc" id="L672">        }</span>
+
+        List&lt;LogChannel&gt; logChannels;
+
+<span class="nc bnc" id="L676" title="All 2 branches missed.">        for (Entry&lt;String, List&lt;LogChannel&gt;&gt; entry : logChannelMap.entrySet()) {</span>
+
+<span class="nc" id="L678">            key = entry.getKey();</span>
+<span class="nc" id="L679">            logChannels = entry.getValue();</span>
+<span class="nc" id="L680">            String fileName = LoggerUtils.buildFilename(key, calendar);</span>
+
+<span class="nc" id="L682">            String headerGenerated = LogFileHeader.getIESDataFormatHeaderString(fileName, logChannels);</span>
+<span class="nc" id="L683">            String oldHeader = LoggerUtils.getHeaderFromFile(loggerDirectory + fileName) + Const.LINESEPARATOR;</span>
+<span class="nc" id="L684">            boolean isHeaderIdentical = headerGenerated.equals(oldHeader);</span>
+<span class="nc" id="L685">            areHeadersIdentical.put(key, isHeaderIdentical);</span>
+<span class="nc" id="L686">        }</span>
+
+<span class="nc" id="L688">        return areHeadersIdentical;</span>
+    }
+
+    /**
+     * * fills a AsciiLogg file up.
+     *
+     * @param out
+     *            the output stream to write on
+     * @param unixTimeStamp
+     *            unix time stamp
+     * @param loggingInterval
+     *            logging interval
+     * @param numberOfFillUpLines
+     *            the number to fill up lines
+     * @param errorValues
+     *            the error value set in the line
+     * @return returns the unix time stamp of the last filled up line
+     */
+    public static long fillUp(PrintWriter out, long unixTimeStamp, long loggingInterval, long numberOfFillUpLines,
+            StringBuilder errorValues) {
+
+<span class="fc" id="L709">        StringBuilder line = new StringBuilder();</span>
+<span class="fc bfc" id="L710" title="All 2 branches covered.">        for (int i = 0; i &lt; numberOfFillUpLines; ++i) {</span>
+
+<span class="fc" id="L712">            line.setLength(0);</span>
+<span class="fc" id="L713">            unixTimeStamp += loggingInterval;</span>
+<span class="fc" id="L714">            setLoggerTimestamps(line, unixTimeStamp);</span>
+<span class="fc" id="L715">            line.append(errorValues);</span>
+<span class="fc" id="L716">            line.append(Const.LINESEPARATOR);</span>
+
+<span class="fc" id="L718">            out.append(line);</span>
+        }
+
+<span class="fc" id="L721">        return unixTimeStamp;</span>
+    }
+
+    public static long getNumberOfFillUpLines(long lastUnixTimeStamp, long loggingInterval) {
+
+<span class="fc" id="L726">        long numberOfFillUpLines = 0;</span>
+<span class="fc" id="L727">        long currentUnixTimeStamp = System.currentTimeMillis();</span>
+
+<span class="fc" id="L729">        numberOfFillUpLines = (currentUnixTimeStamp - lastUnixTimeStamp) / loggingInterval;</span>
+
+<span class="fc" id="L731">        return numberOfFillUpLines;</span>
+    }
+
+    /**
+     * Returns the error value as a StringBuilder.
+     *
+     * @param lineArray
+     *            a ascii line as a array with error code
+     * @return StringBuilder with appended error
+     */
+    public static StringBuilder getErrorValues(String[] lineArray) {
+
+<span class="fc" id="L743">        StringBuilder errorValues = new StringBuilder();</span>
+<span class="fc" id="L744">        int arrayLength = lineArray.length;</span>
+<span class="fc" id="L745">        int errorCodeLength = Const.ERROR.length() + 2;</span>
+<span class="fc" id="L746">        int separatorLength = Const.SEPARATOR.length();</span>
+<span class="fc" id="L747">        int length = 0;</span>
+
+<span class="fc bfc" id="L749" title="All 2 branches covered.">        for (int i = 3; i &lt; arrayLength; ++i) {</span>
+
+<span class="fc" id="L751">            length = lineArray[i].length();</span>
+<span class="fc" id="L752">            length -= errorCodeLength;</span>
+<span class="pc bpc" id="L753" title="1 of 2 branches missed.">            if (i &gt; arrayLength - 1) {</span>
+<span class="nc" id="L754">                length -= separatorLength;</span>
+            }
+<span class="fc" id="L756">            appendSpaces(errorValues, length);</span>
+<span class="fc" id="L757">            errorValues.append(Const.ERROR);</span>
+<span class="fc" id="L758">            errorValues.append(Flag.DATA_LOGGING_NOT_ACTIVE.getCode());</span>
+
+<span class="pc bpc" id="L760" title="1 of 2 branches missed.">            if (i &lt; arrayLength - 1) {</span>
+<span class="nc" id="L761">                errorValues.append(Const.SEPARATOR);</span>
+            }
+        }
+<span class="fc" id="L764">        return errorValues;</span>
+    }
+
+    /**
+     * Get the length from a type+length tuple. Example: &quot;Byte_String,95&quot;
+     *
+     * @param string
+     *            has to be a string with ByteType and length.
+     * @param dataFile
+     *            the logger data file
+     * @return the length of a ByteString.
+     */
+    private static int getByteStringLength(String string) {
+
+<span class="nc" id="L778">        String[] stringArray = string.split(Const.VALUETYPE_SIZE_SEPARATOR);</span>
+        try {
+<span class="nc" id="L780">            return Integer.parseInt(stringArray[1]);</span>
+<span class="nc" id="L781">        } catch (NumberFormatException e) {</span>
+<span class="nc" id="L782">            logger.warn(&quot;Not able to get ValueType length from String. Set length to minimal lenght &quot;</span>
+                    + Const.VALUE_SIZE_MINIMAL + &quot;.&quot;);
+        }
+<span class="nc" id="L785">        return Const.VALUE_SIZE_MINIMAL;</span>
+    }
+
+    /**
+     * Attempt to find the latest record within the given map of records
+     * 
+     * @param recordsMap
+     *            map as given by {@link org.openmuc.framework.datalogger.ascii.LogFileReader#getValues(long, long)}
+     * @return Map of channelId and latest Record for that channel, empty map if non-existent
+     */
+    public static Map&lt;String, Record&gt; findLatestValue(Map&lt;String, List&lt;Record&gt;&gt; recordsMap) {
+<span class="fc" id="L796">        Map&lt;String, Record&gt; recordMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc bfc" id="L798" title="All 2 branches covered.">        for (Entry&lt;String, List&lt;Record&gt;&gt; entries : recordsMap.entrySet()) {</span>
+<span class="fc" id="L799">            List&lt;Record&gt; records = entries.getValue();</span>
+            // find the latest record
+<span class="fc" id="L801">            long latestTimestamp = 0;</span>
+<span class="fc" id="L802">            Record latestRecord = null;</span>
+<span class="fc bfc" id="L803" title="All 2 branches covered.">            for (Record record : records) {</span>
+<span class="fc bfc" id="L804" title="All 2 branches covered.">                if (record.getTimestamp() &gt; latestTimestamp) {</span>
+<span class="fc" id="L805">                    latestRecord = record;</span>
+<span class="fc" id="L806">                    latestTimestamp = record.getTimestamp();</span>
+                }
+<span class="fc" id="L808">            }</span>
+            // only add the latest Record to the map
+<span class="pc bpc" id="L810" title="1 of 2 branches missed.">            if (latestRecord != null) {</span>
+<span class="fc" id="L811">                recordMap.put(entries.getKey(), latestRecord);</span>
+            }
+<span class="fc" id="L813">        }</span>
+<span class="fc" id="L814">        return recordMap;</span>
+    }
+
+    /**
+     * Gets all files with the .dat extension from this folder
+     * 
+     * @return list of all data files in the folder
+     */
+    public static List&lt;File&gt; getAllDataFiles(String directoryPath) {
+<span class="fc" id="L823">        File dir = new File(directoryPath);</span>
+<span class="fc" id="L824">        File[] allFiles = dir.listFiles();</span>
+<span class="fc" id="L825">        List&lt;File&gt; files = new LinkedList&lt;&gt;();</span>
+<span class="pc bpc" id="L826" title="1 of 4 branches missed.">        if (allFiles == null || allFiles.length == 0) {</span>
+<span class="fc" id="L827">            logger.error(&quot;No file found in &quot; + directoryPath);</span>
+<span class="fc" id="L828">            return null;</span>
+        }
+<span class="fc bfc" id="L830" title="All 2 branches covered.">        for (File file : allFiles) {</span>
+<span class="fc" id="L831">            String fileName = file.getName();</span>
+<span class="pc bpc" id="L832" title="1 of 2 branches missed.">            if (fileName.endsWith(Const.EXTENSION)) {</span>
+<span class="fc" id="L833">                files.add(file);</span>
+            }
+        }
+<span class="fc" id="L836">        return files;</span>
+    }
+
+    /**
+     * Get the date of the file with given fileName by parsing. The file name must start with the date in YYYYMMDD
+     * format.
+     * 
+     * @param fileName
+     *            of the file to be parsed. Must start with the date in &quot;YYYYMMDD&quot; format
+     * @return parsed Date
+     * @throws ParseException
+     *             when parsing of the file fails.
+     */
+    public static Date getDateOfFile(String fileName) throws ParseException {
+<span class="fc" id="L850">        String dateString = fileName.substring(0, 8);</span>
+<span class="fc" id="L851">        String pattern = &quot;yyyyMMdd&quot;;</span>
+<span class="fc" id="L852">        Date date = new SimpleDateFormat(pattern).parse(dateString);</span>
+<span class="fc" id="L853">        return date;</span>
+    }
+
+    /**
+     * Get the latest file of a list of files by comparing file names The file name must start with the date in YYYYMMDD
+     * format.
+     * 
+     * @param files
+     * @return file with the latest date
+     */
+    public static File getLatestFile(List&lt;File&gt; files) {
+<span class="fc" id="L864">        long latestTimestamp = 0;</span>
+<span class="fc" id="L865">        File latestFile = null;</span>
+<span class="fc bfc" id="L866" title="All 2 branches covered.">        for (File file : files) {</span>
+<span class="fc" id="L867">            long timestamp = 0;</span>
+            try {
+<span class="fc" id="L869">                String fileName = file.getName();</span>
+<span class="fc" id="L870">                timestamp = getDateOfFile(fileName).getTime();</span>
+<span class="nc" id="L871">            } catch (ParseException ex) {</span>
+<span class="nc" id="L872">                logger.error(&quot;Data file could not be parsed... continuing with next&quot;);</span>
+<span class="nc" id="L873">                continue;</span>
+<span class="fc" id="L874">            }</span>
+<span class="fc bfc" id="L875" title="All 2 branches covered.">            if (timestamp &gt; latestTimestamp) {</span>
+<span class="fc" id="L876">                latestTimestamp = timestamp;</span>
+<span class="fc" id="L877">                latestFile = file;</span>
+            }
+<span class="fc" id="L879">        }</span>
+<span class="fc" id="L880">        return latestFile;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

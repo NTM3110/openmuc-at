@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IESDataFormatUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii.utils</a> &gt; <span class="el_source">IESDataFormatUtils.java</span></div><h1>IESDataFormatUtils.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii.utils;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
+import org.openmuc.framework.datalogger.ascii.exceptions.WrongScalingException;
+
+public class IESDataFormatUtils {
+
+    /**
+     * Convert a double value into a string with the maximal allowed length of maxLength.
+     * 
+     * @param value
+     *            the value to convert
+     * @param maxLength
+     *            The maximal allowed length with all signs.
+     * @param sbValue
+     *            StringBuffer for the return value
+     * 
+     * @throws WrongScalingException
+     *             will thrown if converted value is bigger then maxLength
+     */
+    public static void convertDoubleToStringWithMaxLength(StringBuilder sbValue, double value, int maxLength)
+            throws WrongScalingException {
+        String format;
+<span class="fc" id="L47">        double valueWork = value;</span>
+<span class="fc" id="L48">        long lValue = (long) (valueWork * 10000.0);</span>
+<span class="fc" id="L49">        valueWork = lValue / 10000.0;</span>
+
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        if (lValue &gt;= 0) {</span>
+
+<span class="pc bpc" id="L53" title="1 of 2 branches missed.">            if (lValue &gt;&gt; 63 != 0) {</span>
+<span class="nc" id="L54">                valueWork *= -1l;</span>
+            }
+<span class="fc" id="L56">            format = '+' + getFormat(valueWork);</span>
+        }
+        else {
+<span class="fc" id="L59">            format = getFormat(valueWork);</span>
+        }
+
+<span class="fc" id="L62">        DecimalFormat df = new DecimalFormat(format, new DecimalFormatSymbols(Locale.ENGLISH));</span>
+<span class="fc" id="L63">        String doubleString = df.format(valueWork);</span>
+
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (doubleString.length() &gt; maxLength) {</span>
+<span class="fc" id="L66">            throw new WrongScalingException(&quot;Double value (&quot; + value + &quot;) too large for conversion into max length &quot;</span>
+                    + maxLength + &quot;! Try to scale value.&quot;);
+        }
+<span class="fc" id="L69">        sbValue.append(doubleString);</span>
+<span class="fc" id="L70">    }</span>
+
+    private static String getFormat(double value) {
+
+<span class="fc" id="L74">        long lValue = (long) value;</span>
+        String format;
+
+<span class="fc bfc" id="L77" title="All 4 branches covered.">        if (lValue &gt; 999999 || lValue &lt; -999999) {</span>
+<span class="fc" id="L78">            format = &quot;#######0&quot;;</span>
+        }
+<span class="fc bfc" id="L80" title="All 4 branches covered.">        else if (lValue &gt; 99999 || lValue &lt; -99999) {</span>
+<span class="fc" id="L81">            format = &quot;#####0.0&quot;;</span>
+        }
+<span class="fc bfc" id="L83" title="All 4 branches covered.">        else if (lValue &gt; 9999 || lValue &lt; -9999) {</span>
+<span class="fc" id="L84">            format = &quot;####0.00&quot;;</span>
+        }
+        else {
+<span class="fc" id="L87">            format = &quot;###0.000&quot;;</span>
+        }
+
+<span class="fc" id="L90">        return format;</span>
+    }
+
+    private IESDataFormatUtils() {
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MqttLoggerSettings.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-mqtt</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.mqtt</a> &gt; <span class="el_source">MqttLoggerSettings.java</span></div><h1>MqttLoggerSettings.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.mqtt;
+
+import org.openmuc.framework.lib.osgi.config.GenericSettings;
+import org.openmuc.framework.lib.osgi.config.ServiceProperty;
+
+public class MqttLoggerSettings extends GenericSettings {
+
+    public static final String PORT = &quot;port&quot;;
+    public static final String HOST = &quot;host&quot;;
+    public static final String SSL = &quot;ssl&quot;;
+    public static final String USERNAME = &quot;username&quot;;
+    public static final String PASSWORD = &quot;password&quot;;
+    public static final String PARSER = &quot;parser&quot;;
+    public static final String MULTIPLE = &quot;multiple&quot;;
+    public static final String MAX_FILE_COUNT = &quot;maxFileCount&quot;;
+    public static final String MAX_FILE_SIZE = &quot;maxFileSize&quot;;
+    public static final String MAX_BUFFER_SIZE = &quot;maxBufferSize&quot;;
+    public static final String CONNECTION_RETRY_INTERVAL = &quot;connectionRetryInterval&quot;;
+    public static final String CONNECTION_ALIVE_INTERVAL = &quot;connectionAliveInterval&quot;;
+    public static final String PERSISTENCE_DIRECTORY = &quot;persistenceDirectory&quot;;
+    public static final String LAST_WILL_TOPIC = &quot;lastWillTopic&quot;;
+    public static final String LAST_WILL_PAYLOAD = &quot;lastWillPayload&quot;;
+    public static final String LAST_WILL_ALWAYS = &quot;lastWillAlways&quot;;
+    public static final String FIRST_WILL_TOPIC = &quot;firstWillTopic&quot;;
+    public static final String FIRST_WILL_PAYLOAD = &quot;firstWillPayload&quot;;
+    public static final String RECOVERY_CHUNK_SIZE = &quot;recoveryChunkSize&quot;;
+    public static final String RECOVERY_DELAY = &quot;recoveryDelay&quot;;
+    public static final String WEB_SOCKET = &quot;webSocket&quot;;
+
+    public MqttLoggerSettings() {
+<span class="nc" id="L52">        super();</span>
+        // properties for connection
+<span class="nc" id="L54">        properties.put(PORT, new ServiceProperty(PORT, &quot;port for MQTT communication&quot;, &quot;1883&quot;, true));</span>
+<span class="nc" id="L55">        properties.put(HOST, new ServiceProperty(HOST, &quot;URL of MQTT broker&quot;, &quot;localhost&quot;, true));</span>
+<span class="nc" id="L56">        properties.put(SSL, new ServiceProperty(SSL, &quot;usage of ssl true/false&quot;, &quot;false&quot;, true));</span>
+<span class="nc" id="L57">        properties.put(USERNAME, new ServiceProperty(USERNAME, &quot;name of your MQTT account&quot;, null, false));</span>
+<span class="nc" id="L58">        properties.put(PASSWORD, new ServiceProperty(PASSWORD, &quot;password of your MQTT account&quot;, null, false));</span>
+<span class="nc" id="L59">        properties.put(PARSER,</span>
+                new ServiceProperty(PARSER, &quot;identifier of needed parser implementation&quot;, &quot;openmuc&quot;, true));
+<span class="nc" id="L61">        properties.put(WEB_SOCKET, new ServiceProperty(WEB_SOCKET, &quot;usage of WebSocket true/false&quot;, &quot;false&quot;, true));</span>
+
+        // properties for recovery / file buffering
+<span class="nc" id="L64">        properties.put(CONNECTION_RETRY_INTERVAL,</span>
+                new ServiceProperty(CONNECTION_RETRY_INTERVAL, &quot;connection retry interval in s&quot;, &quot;10&quot;, true));
+<span class="nc" id="L66">        properties.put(CONNECTION_ALIVE_INTERVAL,</span>
+                new ServiceProperty(CONNECTION_ALIVE_INTERVAL, &quot;connection alive interval in s&quot;, &quot;10&quot;, true));
+<span class="nc" id="L68">        properties.put(PERSISTENCE_DIRECTORY, new ServiceProperty(PERSISTENCE_DIRECTORY,</span>
+                &quot;directory for file buffered messages&quot;, &quot;data/logger/mqtt&quot;, false));
+<span class="nc" id="L70">        properties.put(MULTIPLE, new ServiceProperty(MULTIPLE,</span>
+                &quot;if true compose log records of different channels to one mqtt message&quot;, &quot;false&quot;, true));
+<span class="nc" id="L72">        properties.put(MAX_FILE_COUNT,</span>
+                new ServiceProperty(MAX_FILE_COUNT, &quot;file buffering: number of files to be created&quot;, &quot;2&quot;, true));
+<span class="nc" id="L74">        properties.put(MAX_FILE_SIZE,</span>
+                new ServiceProperty(MAX_FILE_SIZE, &quot;file buffering: file size in kB&quot;, &quot;5000&quot;, true));
+<span class="nc" id="L76">        properties.put(MAX_BUFFER_SIZE,</span>
+                new ServiceProperty(MAX_BUFFER_SIZE, &quot;file buffering: buffer size in kB&quot;, &quot;1000&quot;, true));
+<span class="nc" id="L78">        properties.put(RECOVERY_CHUNK_SIZE, new ServiceProperty(RECOVERY_CHUNK_SIZE,</span>
+                &quot;number of messages which will be recovered simultaneously, 0 = disabled&quot;, &quot;0&quot;, false));
+<span class="nc" id="L80">        properties.put(RECOVERY_DELAY, new ServiceProperty(RECOVERY_DELAY,</span>
+                &quot;delay between recovery chunk sending in ms, 0 = disabled&quot;, &quot;0&quot;, false));
+
+        // properties for LAST WILL / FIRST WILL
+<span class="nc" id="L84">        properties.put(LAST_WILL_TOPIC,</span>
+                new ServiceProperty(LAST_WILL_TOPIC, &quot;topic on which lastWillPayload will be published&quot;, &quot;&quot;, false));
+<span class="nc" id="L86">        properties.put(LAST_WILL_PAYLOAD, new ServiceProperty(LAST_WILL_PAYLOAD,</span>
+                &quot;payload which will be published after (unwanted) disconnect&quot;, &quot;&quot;, false));
+<span class="nc" id="L88">        properties.put(LAST_WILL_ALWAYS, new ServiceProperty(LAST_WILL_ALWAYS,</span>
+                &quot;send the last will also on planned disconnects&quot;, &quot;false&quot;, false));
+<span class="nc" id="L90">        properties.put(FIRST_WILL_TOPIC,</span>
+                new ServiceProperty(FIRST_WILL_TOPIC, &quot;topic on which firstWillPayload will be published&quot;, &quot;&quot;, false));
+<span class="nc" id="L92">        properties.put(FIRST_WILL_PAYLOAD,</span>
+                new ServiceProperty(FIRST_WILL_PAYLOAD, &quot;payload which will be published after connect&quot;, &quot;&quot;, false));
+
+<span class="nc" id="L95">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

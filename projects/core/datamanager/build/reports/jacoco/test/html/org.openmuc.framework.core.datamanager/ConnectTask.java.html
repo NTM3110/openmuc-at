@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConnectTask.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">ConnectTask.java</span></div><h1>ConnectTask.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.DriverService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class ConnectTask extends DeviceTask {
+
+<span class="nc" id="L32">    private static final Logger logger = LoggerFactory.getLogger(ConnectTask.class);</span>
+
+<span class="nc" id="L34">    public ConnectTask(DriverService driver, Device device, DataManager dataManager) {</span>
+<span class="nc" id="L35">        this.driver = driver;</span>
+<span class="nc" id="L36">        this.device = device;</span>
+<span class="nc" id="L37">        this.dataManager = dataManager;</span>
+<span class="nc" id="L38">    }</span>
+
+    @Override
+    public void run() {
+
+        try {
+<span class="nc" id="L44">            device.connection = driver.connect(device.deviceConfig.getDeviceAddress(),</span>
+<span class="nc" id="L45">                    device.deviceConfig.getSettings());</span>
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">            if (logger.isDebugEnabled()) {</span>
+<span class="nc" id="L48">                logger.debug(&quot;Driver {} connected.&quot;, driver.getInfo().getId());</span>
+            }
+<span class="nc" id="L50">        } catch (ConnectionException e) {</span>
+<span class="nc" id="L51">            logger.warn(&quot;Unable to connect to device {} because {}.\nWill try again in {} ms.&quot;,</span>
+<span class="nc" id="L52">                    device.deviceConfig.getId(), e.getMessage(), device.deviceConfig.getConnectRetryInterval());</span>
+<span class="nc" id="L53">            logger.debug(&quot;Trace&quot;, e);</span>
+<span class="nc" id="L54">            synchronized (dataManager.connectionFailures) {</span>
+<span class="nc" id="L55">                dataManager.connectionFailures.add(device);</span>
+<span class="nc" id="L56">            }</span>
+<span class="nc" id="L57">            dataManager.interrupt();</span>
+<span class="nc" id="L58">            return;</span>
+<span class="nc" id="L59">        } catch (ArgumentSyntaxException e) {</span>
+<span class="nc" id="L60">            logger.warn(</span>
+                    &quot;Unable to connect to device {} because the address or settings syntax is incorrect: {}.\nWill try again in {} ms.&quot;,
+<span class="nc" id="L62">                    device.deviceConfig.getId(), e.getMessage(), device.deviceConfig.getConnectRetryInterval());</span>
+<span class="nc" id="L63">            synchronized (dataManager.connectionFailures) {</span>
+<span class="nc" id="L64">                dataManager.connectionFailures.add(device);</span>
+<span class="nc" id="L65">            }</span>
+<span class="nc" id="L66">            dataManager.interrupt();</span>
+<span class="nc" id="L67">            return;</span>
+<span class="nc" id="L68">        } catch (Exception e) {</span>
+<span class="nc" id="L69">            logger.warn(&quot;unexpected exception thrown by connect function of driver&quot;, e);</span>
+<span class="nc" id="L70">            synchronized (dataManager.connectionFailures) {</span>
+<span class="nc" id="L71">                dataManager.connectionFailures.add(device);</span>
+<span class="nc" id="L72">            }</span>
+<span class="nc" id="L73">            dataManager.interrupt();</span>
+<span class="nc" id="L74">            return;</span>
+<span class="nc" id="L75">        }</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (device.connection == null) {</span>
+<span class="nc" id="L78">            logger.error(&quot;Drivers connect() function returned null&quot;);</span>
+<span class="nc" id="L79">            synchronized (dataManager.connectionFailures) {</span>
+<span class="nc" id="L80">                dataManager.connectionFailures.add(device);</span>
+<span class="nc" id="L81">            }</span>
+<span class="nc" id="L82">            dataManager.interrupt();</span>
+<span class="nc" id="L83">            return;</span>
+        }
+
+<span class="nc" id="L86">        synchronized (dataManager.connectedDevices) {</span>
+<span class="nc" id="L87">            dataManager.connectedDevices.add(device);</span>
+<span class="nc" id="L88">        }</span>
+<span class="nc" id="L89">        dataManager.interrupt();</span>
+
+<span class="nc" id="L91">    }</span>
+
+    @Override
+    public DeviceTaskType getType() {
+<span class="nc" id="L95">        return DeviceTaskType.CONNECT;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

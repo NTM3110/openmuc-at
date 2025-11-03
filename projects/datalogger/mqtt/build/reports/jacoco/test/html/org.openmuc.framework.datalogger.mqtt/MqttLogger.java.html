@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MqttLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-mqtt</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.mqtt</a> &gt; <span class="el_source">MqttLogger.java</span></div><h1>MqttLogger.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.mqtt;
+
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.datalogger.mqtt.dto.MqttLogChannel;
+import org.openmuc.framework.datalogger.mqtt.dto.MqttLogMsg;
+import org.openmuc.framework.datalogger.mqtt.util.MqttLogMsgBuilder;
+import org.openmuc.framework.datalogger.spi.DataLoggerService;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+import org.openmuc.framework.lib.mqtt.MqttConnection;
+import org.openmuc.framework.lib.mqtt.MqttSettings;
+import org.openmuc.framework.lib.mqtt.MqttWriter;
+import org.openmuc.framework.lib.osgi.config.DictionaryPreprocessor;
+import org.openmuc.framework.lib.osgi.config.PropertyHandler;
+import org.openmuc.framework.lib.osgi.config.ServicePropertyException;
+import org.openmuc.framework.parser.spi.ParserService;
+import org.openmuc.framework.security.SslManagerInterface;
+import org.osgi.service.cm.ManagedService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MqttLogger implements DataLoggerService, ManagedService {
+
+<span class="nc" id="L51">    private static final Logger logger = LoggerFactory.getLogger(MqttLogger.class);</span>
+    private static final String LOGGER_ID = &quot;mqttlogger&quot;;
+<span class="nc" id="L53">    private final HashMap&lt;String, MqttLogChannel&gt; channelsToLog = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L54">    private final HashMap&lt;String, ParserService&gt; availableParsers = new HashMap&lt;&gt;();</span>
+    private final PropertyHandler propertyHandler;
+    private String parser;
+    private boolean isLogMultiple;
+    private MqttWriter mqttWriter;
+    private SslManagerInterface sslManager;
+<span class="nc" id="L60">    private boolean configLoaded = false;</span>
+
+<span class="nc" id="L62">    public MqttLogger() {</span>
+<span class="nc" id="L63">        String pid = MqttLogger.class.getName();</span>
+<span class="nc" id="L64">        MqttLoggerSettings settings = new MqttLoggerSettings();</span>
+<span class="nc" id="L65">        propertyHandler = new PropertyHandler(settings, pid);</span>
+<span class="nc" id="L66">        MqttSettings mqttSettings = createMqttSettings();</span>
+<span class="nc" id="L67">        MqttConnection connection = new MqttConnection(mqttSettings);</span>
+<span class="nc" id="L68">        mqttWriter = new MqttWriter(connection, getId());</span>
+<span class="nc" id="L69">    }</span>
+
+    @Override
+    public String getId() {
+<span class="nc" id="L73">        return LOGGER_ID;</span>
+    }
+
+    @Override
+    public void setChannelsToLog(List&lt;LogChannel&gt; logChannels) {
+        // FIXME Datamanger should only pass logChannels which should be logged by MQTT Logger
+        // right now all channels are passed to the data logger and dataloger has to
+        // decide/parse which channels it hast to log
+<span class="nc" id="L81">        channelsToLog.clear();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (LogChannel logChannel : logChannels) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (logChannel.getLoggingSettings().contains(LOGGER_ID)) {</span>
+<span class="nc" id="L84">                MqttLogChannel mqttLogChannel = new MqttLogChannel(logChannel);</span>
+<span class="nc" id="L85">                channelsToLog.put(logChannel.getId(), mqttLogChannel);</span>
+            }
+<span class="nc" id="L87">        }</span>
+<span class="nc" id="L88">        printChannelsConsideredByMqttLogger(logChannels);</span>
+<span class="nc" id="L89">    }</span>
+
+    /**
+     * mainly for debugging purposes
+     */
+    private void printChannelsConsideredByMqttLogger(List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L95">        StringBuilder mqttLogChannelsSb = new StringBuilder();</span>
+<span class="nc" id="L96">        mqttLogChannelsSb.append(&quot;channels configured for mqttlogging:\n&quot;);</span>
+<span class="nc" id="L97">        channelsToLog.keySet().stream().forEach(channelId -&gt; mqttLogChannelsSb.append(channelId).append(&quot;\n&quot;));</span>
+
+<span class="nc" id="L99">        StringBuilder nonMqttLogChannelsSb = new StringBuilder();</span>
+<span class="nc" id="L100">        nonMqttLogChannelsSb.append(&quot;channels not configured for mqttlogger:\n&quot;);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        for (LogChannel logChannel : logChannels) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (!logChannel.getLoggingSettings().contains(LOGGER_ID)) {</span>
+<span class="nc" id="L103">                nonMqttLogChannelsSb.append(logChannel.getId()).append(&quot;\n&quot;);</span>
+            }
+<span class="nc" id="L105">        }</span>
+
+<span class="nc" id="L107">        logger.debug(mqttLogChannelsSb.toString());</span>
+<span class="nc" id="L108">        logger.debug(nonMqttLogChannelsSb.toString());</span>
+<span class="nc" id="L109">    }</span>
+
+    @Override
+    public void logEvent(List&lt;LoggingRecord&gt; containers, long timestamp) {
+<span class="nc" id="L113">        log(containers, timestamp);</span>
+<span class="nc" id="L114">    }</span>
+
+    @Override
+    public boolean logSettingsRequired() {
+<span class="nc" id="L118">        return true;</span>
+    }
+
+    @Override
+    public void log(List&lt;LoggingRecord&gt; loggingRecordList, long timestamp) {
+
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (!isLoggerReady()) {</span>
+<span class="nc" id="L125">            logger.warn(&quot;Skipped logging values, still loading&quot;);</span>
+<span class="nc" id="L126">            return;</span>
+        }
+
+        // logger.info(&quot;============================&quot;);
+        // loggingRecordList.stream().map(LoggingRecord::getChannelId).forEach(id -&gt; logger.info(id));
+
+        // FIXME refactor OpenMUC core - actually the datamanager should only call logger.log()
+        // with channels configured for this logger. If this is the case the containsKey check could be ignored
+        // The filter serves as WORKAROUND to process only channels which were configured for mqtt logger
+<span class="nc" id="L135">        List&lt;LoggingRecord&gt; logRecordsForMqttLogger = loggingRecordList.stream()</span>
+<span class="nc" id="L136">                .filter(record -&gt; channelsToLog.containsKey(record.getChannelId()))</span>
+<span class="nc" id="L137">                .collect(Collectors.toList());</span>
+
+        // channelsToLog.values().stream().map(channel -&gt; channel.topic).distinct().count();
+
+        // Concept of the MqttLogMsgBuilder:
+        // 1. cleaner code
+        // 2. better testability: MqttLogMsgBuilder can be easily created in a test and the output of
+        // MqttLogMsgBuilder.build() can be verified. It takes the input from logger.log() method, processes it
+        // and creates ready to use messages for the mqttWriter
+<span class="nc" id="L146">        MqttLogMsgBuilder logMsgBuilder = new MqttLogMsgBuilder(channelsToLog, availableParsers.get(parser));</span>
+<span class="nc" id="L147">        List&lt;MqttLogMsg&gt; logMessages = logMsgBuilder.buildLogMsg(logRecordsForMqttLogger, isLogMultiple);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">        for (MqttLogMsg msg : logMessages) {</span>
+<span class="nc" id="L149">            logTraceMqttMessage(msg);</span>
+<span class="nc" id="L150">            mqttWriter.write(msg.topic, msg.message);</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">    }</span>
+
+    private void logTraceMqttMessage(MqttLogMsg msg) {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L156">            logger.trace(&quot;{}\n{}: {}&quot;, msg.channelId, msg.topic, new String(msg.message));</span>
+        }
+<span class="nc" id="L158">    }</span>
+
+    private boolean isParserAvailable() {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        if (availableParsers.containsKey(parser)) {</span>
+<span class="nc" id="L162">            return true;</span>
+        }
+<span class="nc" id="L164">        logger.warn(&quot;Parser with parserId {} is not available.&quot;, parser);</span>
+<span class="nc" id="L165">        return false;</span>
+    }
+
+    private boolean isLoggerReady() {
+<span class="nc bnc" id="L169" title="All 6 branches missed.">        return mqttWriter.getConnection().isReady() &amp;&amp; configLoaded &amp;&amp; isParserAvailable();</span>
+    }
+
+    @Override
+    public List&lt;Record&gt; getRecords(String channelId, long startTime, long endTime) throws IOException {
+<span class="nc" id="L174">        throw new UnsupportedOperationException();</span>
+    }
+
+    @Override
+    public Record getLatestLogRecord(String channelId) throws IOException {
+<span class="nc" id="L179">        throw new UnsupportedOperationException();</span>
+    }
+
+    /**
+     * Connect to MQTT broker
+     */
+    private void connect() {
+<span class="nc" id="L186">        MqttSettings settings = createMqttSettings();</span>
+<span class="nc" id="L187">        MqttConnection connection = new MqttConnection(settings);</span>
+<span class="nc" id="L188">        connection.setSslManager(sslManager);</span>
+<span class="nc" id="L189">        mqttWriter = new MqttWriter(connection, getId());</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (settings.isSsl()) {</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            if (isLoggerReady()) {</span>
+<span class="nc" id="L192">                logger.info(&quot;Connecting to MQTT Broker&quot;);</span>
+<span class="nc" id="L193">                mqttWriter.getConnection().connect();</span>
+            }
+            else {
+<span class="nc" id="L196">                logger.info(&quot;Writer is not ready yet&quot;);</span>
+            }
+        }
+        else {
+<span class="nc" id="L200">            logger.info(&quot;Connecting to MQTT Broker&quot;);</span>
+<span class="nc" id="L201">            mqttWriter.getConnection().connect();</span>
+        }
+<span class="nc" id="L203">    }</span>
+
+    private MqttSettings createMqttSettings() {
+        // @formatter:off
+        // do not use retained messages for logging (reason: caused the logger not to log anymore on first try, also
+        // should not be necessary for logging because we have buffering)
+<span class="nc" id="L209">        boolean retainedMessages = false;</span>
+<span class="nc" id="L210">        MqttSettings settings = new MqttSettings(</span>
+<span class="nc" id="L211">                propertyHandler.getString(MqttLoggerSettings.HOST),</span>
+<span class="nc" id="L212">                propertyHandler.getInt(MqttLoggerSettings.PORT),</span>
+<span class="nc" id="L213">                propertyHandler.getString(MqttLoggerSettings.USERNAME),</span>
+<span class="nc" id="L214">                propertyHandler.getString(MqttLoggerSettings.PASSWORD),</span>
+<span class="nc" id="L215">                propertyHandler.getBoolean(MqttLoggerSettings.SSL),</span>
+<span class="nc" id="L216">                propertyHandler.getInt(MqttLoggerSettings.MAX_BUFFER_SIZE),</span>
+<span class="nc" id="L217">                propertyHandler.getInt(MqttLoggerSettings.MAX_FILE_SIZE),</span>
+<span class="nc" id="L218">                propertyHandler.getInt(MqttLoggerSettings.MAX_FILE_COUNT),</span>
+<span class="nc" id="L219">                propertyHandler.getInt(MqttLoggerSettings.CONNECTION_RETRY_INTERVAL),</span>
+<span class="nc" id="L220">                propertyHandler.getInt(MqttLoggerSettings.CONNECTION_ALIVE_INTERVAL),</span>
+<span class="nc" id="L221">                propertyHandler.getString(MqttLoggerSettings.PERSISTENCE_DIRECTORY),</span>
+<span class="nc" id="L222">                propertyHandler.getString(MqttLoggerSettings.LAST_WILL_TOPIC),</span>
+<span class="nc" id="L223">                propertyHandler.getString(MqttLoggerSettings.LAST_WILL_PAYLOAD).getBytes(),</span>
+<span class="nc" id="L224">                propertyHandler.getBoolean(MqttLoggerSettings.LAST_WILL_ALWAYS),</span>
+<span class="nc" id="L225">                propertyHandler.getString(MqttLoggerSettings.FIRST_WILL_TOPIC),</span>
+<span class="nc" id="L226">                propertyHandler.getString(MqttLoggerSettings.FIRST_WILL_PAYLOAD).getBytes(),</span>
+<span class="nc" id="L227">                propertyHandler.getInt(MqttLoggerSettings.RECOVERY_CHUNK_SIZE),</span>
+<span class="nc" id="L228">                propertyHandler.getInt(MqttLoggerSettings.RECOVERY_DELAY),</span>
+<span class="nc" id="L229">                propertyHandler.getBoolean(MqttLoggerSettings.WEB_SOCKET</span>
+                ),retainedMessages);
+        // @formatter:on
+
+<span class="nc" id="L233">        logger.info(&quot;MqttSettings for MqttConnection \n&quot;, settings.toString());</span>
+
+<span class="nc" id="L235">        return settings;</span>
+    }
+
+    @Override
+    public void updated(Dictionary&lt;String, ?&gt; propertyDict) {
+<span class="nc" id="L240">        DictionaryPreprocessor dict = new DictionaryPreprocessor(propertyDict);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (!dict.wasIntermediateOsgiInitCall()) {</span>
+<span class="nc" id="L242">            tryProcessConfig(dict);</span>
+        }
+<span class="nc" id="L244">    }</span>
+
+    private void tryProcessConfig(DictionaryPreprocessor newConfig) {
+        try {
+<span class="nc" id="L248">            propertyHandler.processConfig(newConfig);</span>
+
+<span class="nc bnc" id="L250" title="All 4 branches missed.">            if (!propertyHandler.configChanged() &amp;&amp; propertyHandler.isDefaultConfig()) {</span>
+                // tells us:
+                // 1. if we get till here then updated(dict) was processed without errors and
+                // 2. the values from cfg file are identical to the default values
+                // logger.info(&quot;new properties: changed={}, isDefault={}&quot;, propertyHandler.configChanged(),
+                // propertyHandler.isDefaultConfig());
+<span class="nc" id="L256">                applyConfigChanges();</span>
+            }
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            if (propertyHandler.configChanged()) {</span>
+<span class="nc" id="L260">                applyConfigChanges();</span>
+            }
+<span class="nc" id="L262">        } catch (ServicePropertyException e) {</span>
+<span class="nc" id="L263">            logger.error(&quot;update properties failed&quot;, e);</span>
+<span class="nc" id="L264">            shutdown();</span>
+<span class="nc" id="L265">        }</span>
+<span class="nc" id="L266">    }</span>
+
+    private void applyConfigChanges() {
+<span class="nc" id="L269">        configLoaded = true;</span>
+<span class="nc" id="L270">        logger.info(&quot;Configuration changed - new configuration {}&quot;, propertyHandler.toString());</span>
+<span class="nc" id="L271">        parser = propertyHandler.getString(MqttLoggerSettings.PARSER);</span>
+<span class="nc" id="L272">        isLogMultiple = propertyHandler.getBoolean(MqttLoggerSettings.MULTIPLE);</span>
+<span class="nc" id="L273">        shutdown();</span>
+<span class="nc" id="L274">        connect();</span>
+<span class="nc" id="L275">    }</span>
+
+    public void shutdown() {
+        // Saves RAM buffer to file and terminates running reconnects
+<span class="nc" id="L279">        mqttWriter.shutdown();</span>
+
+<span class="nc bnc" id="L281" title="All 4 branches missed.">        if (!mqttWriter.isConnected() &amp;&amp; mqttWriter.isInitialConnect()) {</span>
+<span class="nc" id="L282">            return;</span>
+        }
+
+<span class="nc" id="L285">        logger.info(&quot;closing MQTT connection&quot;);</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">        if (mqttWriter.isConnected()) {</span>
+<span class="nc" id="L287">            mqttWriter.getConnection().disconnect();</span>
+        }
+
+<span class="nc" id="L290">    }</span>
+
+    public void addParser(String parserId, ParserService parserService) {
+<span class="nc" id="L293">        logger.info(&quot;put parserID {} to PARSERS&quot;, parserId);</span>
+<span class="nc" id="L294">        availableParsers.put(parserId, parserService);</span>
+<span class="nc" id="L295">    }</span>
+
+    public void removeParser(String parserId) {
+<span class="nc" id="L298">        availableParsers.remove(parserId);</span>
+<span class="nc" id="L299">    }</span>
+
+    public void setSslManager(SslManagerInterface instance) {
+<span class="nc" id="L302">        sslManager = instance;</span>
+<span class="nc" id="L303">        mqttWriter.getConnection().setSslManager(sslManager);</span>
+        // if sslManager is already loaded, then connect
+<span class="nc bnc" id="L305" title="All 2 branches missed.">        if (sslManager.isLoaded()) {</span>
+<span class="nc" id="L306">            shutdown();</span>
+<span class="nc" id="L307">            connect();</span>
+        }
+        // else mqttConnection connects automatically
+<span class="nc" id="L310">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RootConfigImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">RootConfigImpl.java</span></div><h1>RootConfigImpl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.config.DeviceConfig;
+import org.openmuc.framework.config.DriverConfig;
+import org.openmuc.framework.config.IdCollisionException;
+import org.openmuc.framework.config.ParseException;
+import org.openmuc.framework.config.RootConfig;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+final class RootConfigImpl implements RootConfig {
+
+<span class="nc" id="L63">    private static final Logger logger = LoggerFactory.getLogger(RootConfigImpl.class);</span>
+
+<span class="nc" id="L65">    private String dataLogSource = null;</span>
+
+<span class="nc" id="L67">    final HashMap&lt;String, DriverConfigImpl&gt; driverConfigsById = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L68">    final HashMap&lt;String, DeviceConfigImpl&gt; deviceConfigsById = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L69">    final HashMap&lt;String, ChannelConfigImpl&gt; channelConfigsById = new HashMap&lt;&gt;();</span>
+
+    // TODO really needed?:
+    List&lt;LogChannel&gt; logChannels;
+
+    @Override
+    public String getDataLogSource() {
+<span class="nc" id="L76">        return dataLogSource;</span>
+    }
+
+    @Override
+    public void setDataLogSource(String source) {
+<span class="nc" id="L81">        dataLogSource = source;</span>
+<span class="nc" id="L82">    }</span>
+
+    public static RootConfigImpl createFromFile(File configFile) throws ParseException, FileNotFoundException {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (configFile == null) {</span>
+<span class="nc" id="L86">            throw new NullPointerException(&quot;configFileName is null or the empty string.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (!configFile.exists()) {</span>
+<span class="nc" id="L90">            throw new FileNotFoundException(&quot;Config file not found.&quot;);</span>
+        }
+
+<span class="nc" id="L93">        DocumentBuilderFactory docBFac = DocumentBuilderFactory.newInstance();</span>
+<span class="nc" id="L94">        docBFac.setIgnoringComments(true);</span>
+
+<span class="nc" id="L96">        Document doc = parseDocument(configFile, docBFac);</span>
+
+<span class="nc" id="L98">        Node rootNode = doc.getDocumentElement();</span>
+
+<span class="nc bnc" id="L100" title="All 2 branches missed.">        if (!rootNode.getNodeName().equals(&quot;configuration&quot;)) {</span>
+<span class="nc" id="L101">            throw new ParseException(&quot;root node in configuration is not of type \&quot;configuration\&quot;&quot;);</span>
+        }
+
+<span class="nc bnc" id="L104" title="All 2 branches missed.">        if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L105">            logger.trace(&quot;Parsed configuration from file {}:\n{}&quot;, configFile.getAbsolutePath(),</span>
+<span class="nc" id="L106">                    getTransformedDocument(doc));</span>
+        }
+
+<span class="nc" id="L109">        return loadRootConfigFrom(rootNode);</span>
+    }
+
+    private static String getTransformedDocument(Document document) {
+        try {
+<span class="nc" id="L114">            TransformerFactory tf = TransformerFactory.newInstance();</span>
+<span class="nc" id="L115">            Transformer transformer = tf.newTransformer();</span>
+<span class="nc" id="L116">            StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L117">            transformer.transform(new DOMSource(document), new StreamResult(writer));</span>
+<span class="nc" id="L118">            return writer.getBuffer().toString();</span>
+<span class="nc" id="L119">        } catch (TransformerException e) {</span>
+<span class="nc" id="L120">            return &quot;Error while transform configuration document to string, for this trace message. Exception: &quot;</span>
+<span class="nc" id="L121">                    + e.getMessage();</span>
+        }
+
+    }
+
+    private static Document parseDocument(File configFile, DocumentBuilderFactory docBFac) throws ParseException {
+        try {
+<span class="nc" id="L128">            return docBFac.newDocumentBuilder().parse(configFile);</span>
+<span class="nc" id="L129">        } catch (ParserConfigurationException | SAXException | IOException e) {</span>
+<span class="nc" id="L130">            throw new ParseException(e);</span>
+        }
+    }
+
+    private static RootConfigImpl loadRootConfigFrom(Node domNode) throws ParseException {
+
+<span class="nc" id="L136">        RootConfigImpl rootConfig = new RootConfigImpl();</span>
+
+<span class="nc" id="L138">        NodeList rootConfigChildren = domNode.getChildNodes();</span>
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        for (int i = 0; i &lt; rootConfigChildren.getLength(); i++) {</span>
+<span class="nc" id="L141">            Node childNode = rootConfigChildren.item(i);</span>
+<span class="nc" id="L142">            String childName = childNode.getNodeName();</span>
+<span class="nc bnc" id="L143" title="All 4 branches missed.">            switch (childName) {</span>
+
+            case &quot;#text&quot;:
+<span class="nc" id="L146">                continue;</span>
+
+            case &quot;driver&quot;:
+<span class="nc" id="L149">                DriverConfigImpl.addDriverFromDomNode(childNode, rootConfig);</span>
+<span class="nc" id="L150">                break;</span>
+            case &quot;dataLogSource&quot;:
+<span class="nc" id="L152">                rootConfig.dataLogSource = childNode.getTextContent();</span>
+<span class="nc" id="L153">                break;</span>
+            default:
+<span class="nc" id="L155">                throw new ParseException(&quot;found unknown tag:&quot; + childName);</span>
+            }
+        }
+
+<span class="nc" id="L159">        return rootConfig;</span>
+    }
+
+    public void writeToFile(File configFile) throws TransformerFactoryConfigurationError, IOException,
+            ParserConfigurationException, TransformerException {
+<span class="nc" id="L164">        Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L165">        transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</span>
+<span class="nc" id="L166">        transformer.setOutputProperty(&quot;{http://xml.apache.org/xslt}indent-amount&quot;, &quot;2&quot;);</span>
+
+<span class="nc" id="L168">        StreamResult result = new StreamResult(new FileWriter(configFile));</span>
+
+<span class="nc" id="L170">        DocumentBuilder docBuild = DocumentBuilderFactory.newInstance().newDocumentBuilder();</span>
+<span class="nc" id="L171">        Document doc = docBuild.newDocument();</span>
+
+<span class="nc" id="L173">        doc.appendChild(getDomElement(doc));</span>
+<span class="nc" id="L174">        DOMSource source = new DOMSource(doc);</span>
+<span class="nc" id="L175">        transformer.transform(source, result);</span>
+
+<span class="nc" id="L177">    }</span>
+
+    private Element getDomElement(Document document) {
+<span class="nc" id="L180">        Element rootConfigElement = document.createElement(&quot;configuration&quot;);</span>
+
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if (dataLogSource != null) {</span>
+<span class="nc" id="L183">            Node loggerChild = document.createElement(&quot;dataLogSource&quot;);</span>
+<span class="nc" id="L184">            loggerChild.setTextContent(dataLogSource);</span>
+<span class="nc" id="L185">            rootConfigElement.appendChild(loggerChild);</span>
+        }
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        for (DriverConfig driverConfig : driverConfigsById.values()) {</span>
+<span class="nc" id="L189">            rootConfigElement.appendChild(((DriverConfigImpl) driverConfig).getDomElement(document));</span>
+<span class="nc" id="L190">        }</span>
+
+<span class="nc" id="L192">        return rootConfigElement;</span>
+    }
+
+    @Override
+    public DriverConfig getOrAddDriver(String id) {
+        try {
+<span class="nc" id="L198">            return addDriver(id);</span>
+<span class="nc" id="L199">        } catch (IdCollisionException e) {</span>
+<span class="nc" id="L200">            return driverConfigsById.get(id);</span>
+        }
+    }
+
+    @Override
+    public DriverConfigImpl addDriver(String id) throws IdCollisionException {
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L207">            throw new IllegalArgumentException(&quot;The driver ID may not be null.&quot;);</span>
+        }
+<span class="nc" id="L209">        ChannelConfigImpl.checkIdSyntax(id);</span>
+
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (driverConfigsById.containsKey(id)) {</span>
+<span class="nc" id="L212">            throw new IdCollisionException(&quot;Collision with the driver ID: &quot; + id);</span>
+        }
+
+<span class="nc" id="L215">        DriverConfigImpl driverConfig = new DriverConfigImpl(id, this);</span>
+<span class="nc" id="L216">        driverConfigsById.put(id, driverConfig);</span>
+<span class="nc" id="L217">        return driverConfig;</span>
+    }
+
+    @Override
+    public DriverConfig getDriver(String id) {
+<span class="nc" id="L222">        return driverConfigsById.get(id);</span>
+    }
+
+    @Override
+    public DeviceConfig getDevice(String id) {
+<span class="nc" id="L227">        return deviceConfigsById.get(id);</span>
+    }
+
+    @Override
+    public ChannelConfig getChannel(String id) {
+<span class="nc" id="L232">        return channelConfigsById.get(id);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public Collection&lt;DriverConfig&gt; getDrivers() {
+<span class="nc" id="L238">        return (Collection&lt;DriverConfig&gt;) (Collection&lt;?&gt;) Collections</span>
+<span class="nc" id="L239">                .unmodifiableCollection(driverConfigsById.values());</span>
+    }
+
+<span class="nc" id="L242">    public RootConfigImpl() {</span>
+<span class="nc" id="L243">    }</span>
+
+<span class="nc" id="L245">    public RootConfigImpl(RootConfigImpl other) {</span>
+<span class="nc" id="L246">        this.dataLogSource = other.dataLogSource;</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        for (DriverConfigImpl driverConfig : other.driverConfigsById.values()) {</span>
+<span class="nc" id="L248">            addDriver(driverConfig.clone(this));</span>
+<span class="nc" id="L249">        }</span>
+<span class="nc" id="L250">    }</span>
+
+    public RootConfigImpl cloneWithDefaults() {
+<span class="nc" id="L253">        RootConfigImpl configClone = new RootConfigImpl();</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        if (dataLogSource != null) {</span>
+<span class="nc" id="L255">            configClone.dataLogSource = dataLogSource;</span>
+        }
+        else {
+<span class="nc" id="L258">            configClone.dataLogSource = &quot;&quot;;</span>
+        }
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        for (DriverConfigImpl driverConfig : driverConfigsById.values()) {</span>
+<span class="nc" id="L261">            configClone.addDriver(driverConfig.cloneWithDefaults(configClone));</span>
+<span class="nc" id="L262">        }</span>
+<span class="nc" id="L263">        return configClone;</span>
+    }
+
+    private void addDriver(DriverConfigImpl driverConfig) {
+<span class="nc" id="L267">        driverConfigsById.put(driverConfig.getId(), driverConfig);</span>
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        for (DeviceConfigImpl deviceConfig : driverConfig.deviceConfigsById.values()) {</span>
+
+<span class="nc" id="L271">            deviceConfigsById.put(deviceConfig.getId(), deviceConfig);</span>
+
+<span class="nc bnc" id="L273" title="All 2 branches missed.">            for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L274">                channelConfigsById.put(channelConfig.getId(), channelConfig);</span>
+<span class="nc" id="L275">            }</span>
+<span class="nc" id="L276">        }</span>
+<span class="nc" id="L277">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,5 @@
+Bundle-SymbolicName=org.openmuc.framework.openmuc-driver-modbus
+Bundle-Name=OpenMUC Driver - Modbus
+Bundle-Vendor=Fraunhofer ISE
+Bundle-ClassPath=.,lib/j2mod-3.2.1.jar,lib/jSerialComm-2.10.4.jar
+Import-Package=\!android.*,\!com.fazecast.jSerialComm.android*,\!com.ghgande.j2mod*,\!com.fazecast.jSerialComm,*;version\=0

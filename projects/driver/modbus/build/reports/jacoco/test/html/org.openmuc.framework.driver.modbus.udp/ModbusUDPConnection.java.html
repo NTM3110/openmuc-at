@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusUDPConnection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus.udp</a> &gt; <span class="el_source">ModbusUDPConnection.java</span></div><h1>ModbusUDPConnection.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus.udp;
+
+import java.util.List;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.config.ChannelScanInfo;
+import org.openmuc.framework.config.ScanException;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.modbus.ModbusChannel;
+import org.openmuc.framework.driver.modbus.ModbusChannel.EAccess;
+import org.openmuc.framework.driver.modbus.ModbusConnection;
+import org.openmuc.framework.driver.modbus.util.ModbusIpDeviceAddress;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.framework.driver.spi.ChannelValueContainer;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.RecordsReceivedListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ghgande.j2mod.modbus.ModbusException;
+import com.ghgande.j2mod.modbus.ModbusIOException;
+import com.ghgande.j2mod.modbus.io.ModbusUDPTransaction;
+import com.ghgande.j2mod.modbus.net.UDPMasterConnection;
+
+/**
+ * Modbus connection using TCP for data transfer
+ */
+public class ModbusUDPConnection extends ModbusConnection {
+
+<span class="nc" id="L52">    private static final Logger logger = LoggerFactory.getLogger(ModbusUDPConnection.class);</span>
+
+    private UDPMasterConnection connection;
+    private ModbusUDPTransaction transaction;
+    private final int timeoutMs;
+
+    public ModbusUDPConnection(String deviceAddress, int timeoutMs) throws ConnectionException {
+
+<span class="nc" id="L60">        super();</span>
+<span class="nc" id="L61">        this.timeoutMs = timeoutMs;</span>
+
+<span class="nc" id="L63">        ModbusIpDeviceAddress address = new ModbusIpDeviceAddress(deviceAddress);</span>
+        try {
+<span class="nc" id="L65">            connection = new UDPMasterConnection(address.getInetAddress());</span>
+<span class="nc" id="L66">            connection.setPort(address.getPort());</span>
+<span class="nc" id="L67">            connect();</span>
+<span class="nc" id="L68">        } catch (Exception e) {</span>
+<span class="nc" id="L69">            logger.error(&quot;Unable to connect to device &quot; + deviceAddress, e);</span>
+<span class="nc" id="L70">            throw new ConnectionException();</span>
+<span class="nc" id="L71">        }</span>
+<span class="nc" id="L72">        logger.info(&quot;Modbus Device: {} connected&quot;, deviceAddress);</span>
+<span class="nc" id="L73">    }</span>
+
+    @Override
+    public void connect() throws ConnectionException {
+
+<span class="nc bnc" id="L78" title="All 4 branches missed.">        if (connection != null &amp;&amp; !connection.isConnected()) {</span>
+            try {
+<span class="nc" id="L80">                connection.connect();</span>
+<span class="nc" id="L81">            } catch (Exception e) {</span>
+<span class="nc" id="L82">                throw new ConnectionException(e);</span>
+<span class="nc" id="L83">            }</span>
+<span class="nc" id="L84">            connection.setTimeout(this.timeoutMs);</span>
+<span class="nc" id="L85">            transaction = new ModbusUDPTransaction(connection);</span>
+<span class="nc" id="L86">            setTransaction(transaction);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            if (!connection.isConnected()) {</span>
+<span class="nc" id="L88">                throw new ConnectionException(&quot;unable to connect&quot;);</span>
+            }
+        }
+<span class="nc" id="L91">    }</span>
+
+    @Override
+    public void disconnect() {
+        try {
+<span class="nc" id="L96">            logger.info(&quot;Disconnect Modbus TCP device&quot;);</span>
+<span class="nc bnc" id="L97" title="All 4 branches missed.">            if (connection != null &amp;&amp; connection.isConnected()) {</span>
+<span class="nc" id="L98">                connection.close();</span>
+<span class="nc" id="L99">                transaction = null;</span>
+            }
+<span class="nc" id="L101">        } catch (Exception e) {</span>
+<span class="nc" id="L102">            logger.error(&quot;Unable to disconnect connection&quot;, e);</span>
+<span class="nc" id="L103">        }</span>
+
+<span class="nc" id="L105">    }</span>
+
+    @Override
+    public Object read(List&lt;ChannelRecordContainer&gt; containers, Object containerListHandle, String samplingGroup)
+            throws UnsupportedOperationException, ConnectionException {
+
+        // reads channels one by one
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (samplingGroup.isEmpty()) {</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            for (ChannelRecordContainer container : containers) {</span>
+
+                // TODO consider retries in sampling timeout (e.g. one time 12000 ms or three times 4000 ms)
+                // FIXME quite inconvenient/complex to get the timeout from config, since the driver doesn't know the
+                // device id!
+
+<span class="nc" id="L119">                long receiveTime = System.currentTimeMillis();</span>
+<span class="nc" id="L120">                ModbusChannel channel = getModbusChannel(container.getChannelAddress(), EAccess.READ);</span>
+                Value value;
+
+                try {
+<span class="nc" id="L124">                    value = readChannel(channel);</span>
+
+<span class="nc bnc" id="L126" title="All 2 branches missed.">                    if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L127">                        logger.trace(&quot;Value of response: {}&quot;, value.toString());</span>
+                    }
+
+<span class="nc" id="L130">                    container.setRecord(new Record(value, receiveTime));</span>
+
+<span class="nc" id="L132">                } catch (ModbusIOException e) {</span>
+<span class="nc" id="L133">                    logger.error(&quot;ModbusIOException while reading channel:&quot; + channel.getChannelAddress()</span>
+                            + &quot; used timeout: &quot; + timeoutMs + &quot; ms&quot;, e);
+<span class="nc" id="L135">                    disconnect();</span>
+<span class="nc" id="L136">                    throw new ConnectionException(&quot;Try to solve issue with reconnect.&quot;);</span>
+
+<span class="nc" id="L138">                } catch (ModbusException e) {</span>
+<span class="nc" id="L139">                    logger.error(&quot;ModbusException while reading channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L140">                    container.setRecord(new Record(Flag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE));</span>
+<span class="nc" id="L141">                } catch (Exception e) {</span>
+                    // catch all possible exceptions and provide info about the channel
+<span class="nc" id="L143">                    logger.error(&quot;Exception while reading channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L144">                    container.setRecord(new Record(Flag.UNKNOWN_ERROR));</span>
+<span class="nc" id="L145">                }</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">                if (!connection.isConnected()) {</span>
+<span class="nc" id="L147">                    throw new ConnectionException(&quot;Lost connection.&quot;);</span>
+                }
+
+<span class="nc" id="L150">            }</span>
+        }
+        // reads whole samplingGroup at once
+        else {
+<span class="nc" id="L154">            readChannelGroupHighLevel(containers, containerListHandle, samplingGroup);</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">            if (!connection.isConnected()) {</span>
+<span class="nc" id="L156">                throw new ConnectionException(&quot;Lost connection.&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L160">        return null;</span>
+    }
+
+    @Override
+    public Object write(List&lt;ChannelValueContainer&gt; containers, Object containerListHandle)
+            throws UnsupportedOperationException, ConnectionException {
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        for (ChannelValueContainer container : containers) {</span>
+
+<span class="nc" id="L169">            ModbusChannel channel = getModbusChannel(container.getChannelAddress(), EAccess.WRITE);</span>
+
+            try {
+<span class="nc" id="L172">                writeChannel(channel, container.getValue());</span>
+<span class="nc" id="L173">                container.setFlag(Flag.VALID);</span>
+
+<span class="nc" id="L175">            } catch (ModbusIOException e) {</span>
+<span class="nc" id="L176">                logger.error(&quot;ModbusIOException while writing channel:&quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L177">                disconnect();</span>
+<span class="nc" id="L178">                throw new ConnectionException(&quot;Try to solve issue with reconnect.&quot;);</span>
+
+<span class="nc" id="L180">            } catch (ModbusException e) {</span>
+<span class="nc" id="L181">                logger.error(&quot;ModbusException while writing channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L182">                container.setFlag(Flag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE);</span>
+
+<span class="nc" id="L184">            } catch (Exception e) {</span>
+<span class="nc" id="L185">                logger.error(&quot;Exception while writing channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L186">                container.setFlag(Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L187">            }</span>
+<span class="nc" id="L188">        }</span>
+
+<span class="nc" id="L190">        return null;</span>
+    }
+
+    @Override
+    public List&lt;ChannelScanInfo&gt; scanForChannels(String settings)
+            throws UnsupportedOperationException, ArgumentSyntaxException, ScanException, ConnectionException {
+<span class="nc" id="L196">        throw new UnsupportedOperationException();</span>
+    }
+
+    @Override
+    public void startListening(List&lt;ChannelRecordContainer&gt; containers, RecordsReceivedListener listener)
+            throws UnsupportedOperationException, ConnectionException {
+<span class="nc" id="L202">        throw new UnsupportedOperationException();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

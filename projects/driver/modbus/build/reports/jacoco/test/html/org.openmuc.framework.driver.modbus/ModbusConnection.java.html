@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusConnection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">ModbusConnection.java</span></div><h1>ModbusConnection.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus;
+
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.modbus.ModbusChannel.EAccess;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.framework.driver.spi.Connection;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ghgande.j2mod.modbus.ModbusException;
+import com.ghgande.j2mod.modbus.ModbusIOException;
+import com.ghgande.j2mod.modbus.ModbusSlaveException;
+import com.ghgande.j2mod.modbus.io.ModbusSerialTransaction;
+import com.ghgande.j2mod.modbus.io.ModbusTCPTransaction;
+import com.ghgande.j2mod.modbus.io.ModbusTransaction;
+import com.ghgande.j2mod.modbus.msg.ModbusRequest;
+import com.ghgande.j2mod.modbus.msg.ModbusResponse;
+import com.ghgande.j2mod.modbus.msg.ReadCoilsRequest;
+import com.ghgande.j2mod.modbus.msg.ReadCoilsResponse;
+import com.ghgande.j2mod.modbus.msg.ReadInputDiscretesRequest;
+import com.ghgande.j2mod.modbus.msg.ReadInputDiscretesResponse;
+import com.ghgande.j2mod.modbus.msg.ReadInputRegistersRequest;
+import com.ghgande.j2mod.modbus.msg.ReadInputRegistersResponse;
+import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersRequest;
+import com.ghgande.j2mod.modbus.msg.ReadMultipleRegistersResponse;
+import com.ghgande.j2mod.modbus.msg.WriteCoilRequest;
+import com.ghgande.j2mod.modbus.msg.WriteMultipleCoilsRequest;
+import com.ghgande.j2mod.modbus.msg.WriteMultipleRegistersRequest;
+import com.ghgande.j2mod.modbus.msg.WriteSingleRegisterRequest;
+import com.ghgande.j2mod.modbus.procimg.InputRegister;
+import com.ghgande.j2mod.modbus.procimg.Register;
+import com.ghgande.j2mod.modbus.procimg.SimpleRegister;
+import com.ghgande.j2mod.modbus.util.BitVector;
+
+public abstract class ModbusConnection implements Connection {
+
+<span class="nc" id="L64">    private static final Logger logger = LoggerFactory.getLogger(ModbusConnection.class);</span>
+
+    private ModbusTransaction transaction;
+    // List do manage Channel Objects to avoid to check the syntax of each channel address for every read or write
+    private final Hashtable&lt;String, ModbusChannel&gt; modbusChannels;
+
+    private int requestTransactionId;
+<span class="nc" id="L71">    private final int MAX_RETRIES_FOR_JAMOD = 0;</span>
+<span class="nc" id="L72">    private final int MAX_RETRIES_FOR_DRIVER = 3;</span>
+
+    public abstract void connect() throws ConnectionException;
+
+<span class="nc" id="L76">    public ModbusConnection() {</span>
+
+<span class="nc" id="L78">        transaction = null;</span>
+<span class="nc" id="L79">        modbusChannels = new Hashtable&lt;&gt;();</span>
+<span class="nc" id="L80">    }</span>
+
+    public synchronized void setTransaction(ModbusTransaction transaction) {
+<span class="nc" id="L83">        this.transaction = transaction;</span>
+
+        // WORKAROUND: The jamod ModbusTCPTransaction.execute() tries maximum 3 times (default) to sent request and read
+        // response. Problematic is a &quot;java.net.SocketTimeoutException: Read timed out&quot; while trying to get the
+        // response. This exception is swallowed up by the library since it tries 3 times to get the data. Since the
+        // jamod doesn't check the transaction id of the response, we assume that this causes the mismatch between
+        // request and response.
+        // To fix this we set the retries to 0 so the SocketTimeoutException isn't swallowed by the lib and we can
+        // handle it, according to our needs
+        // TODO: We might need to implement our own retry mechanism within the driver so that the first timeout doesn't
+        // directly causes a ConnectionException
+<span class="nc" id="L94">        this.transaction.setRetries(MAX_RETRIES_FOR_JAMOD);</span>
+<span class="nc" id="L95">    }</span>
+
+    public Value readChannel(ModbusChannel channel) throws ModbusException {
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if (logger.isDebugEnabled()) {</span>
+<span class="nc" id="L100">            logger.debug(&quot;read channel: &quot; + channel.getChannelAddress());</span>
+        }
+
+<span class="nc" id="L103">        Value value = null;</span>
+
+<span class="nc bnc" id="L105" title="All 5 branches missed.">        switch (channel.getFunctionCode()) {</span>
+        case FC_01_READ_COILS:
+<span class="nc" id="L107">            value = ModbusDriverUtil.getBitVectorsValue(readCoils(channel));</span>
+<span class="nc" id="L108">            break;</span>
+        case FC_02_READ_DISCRETE_INPUTS:
+<span class="nc" id="L110">            value = ModbusDriverUtil.getBitVectorsValue(readDiscreteInputs(channel));</span>
+<span class="nc" id="L111">            break;</span>
+        case FC_03_READ_HOLDING_REGISTERS:
+<span class="nc" id="L113">            value = ModbusDriverUtil.getRegistersValue(readHoldingRegisters(channel), channel.getDatatype());</span>
+<span class="nc" id="L114">            break;</span>
+        case FC_04_READ_INPUT_REGISTERS:
+<span class="nc" id="L116">            value = ModbusDriverUtil.getRegistersValue(readInputRegisters(channel), channel.getDatatype());</span>
+<span class="nc" id="L117">            break;</span>
+        default:
+<span class="nc" id="L119">            throw new RuntimeException(&quot;FunctionCode &quot; + channel.getFunctionCode() + &quot; not supported yet&quot;);</span>
+        }
+
+<span class="nc" id="L122">        return value;</span>
+    }
+
+    public Object readChannelGroupHighLevel(List&lt;ChannelRecordContainer&gt; containers, Object containerListHandle,
+            String samplingGroup) throws ConnectionException {
+
+        // NOTE: containerListHandle is null if something changed in configuration!!!
+
+<span class="nc" id="L130">        ModbusChannelGroup channelGroup = null;</span>
+
+        // use existing channelGroup
+<span class="nc bnc" id="L133" title="All 2 branches missed.">        if (containerListHandle != null) {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            if (containerListHandle instanceof ModbusChannelGroup) {</span>
+<span class="nc" id="L135">                channelGroup = (ModbusChannelGroup) containerListHandle;</span>
+            }
+        }
+
+        // create new channelGroup
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (channelGroup == null) {</span>
+<span class="nc" id="L141">            ArrayList&lt;ModbusChannel&gt; channelList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            for (ChannelRecordContainer container : containers) {</span>
+<span class="nc" id="L143">                channelList.add(getModbusChannel(container.getChannelAddress(), EAccess.READ));</span>
+<span class="nc" id="L144">            }</span>
+<span class="nc" id="L145">            channelGroup = new ModbusChannelGroup(samplingGroup, channelList);</span>
+        }
+
+        // read all channels of the group
+        try {
+<span class="nc" id="L150">            readChannelGroup(channelGroup, containers);</span>
+
+<span class="nc" id="L152">        } catch (ModbusIOException e) {</span>
+<span class="nc" id="L153">            logger.error(&quot;ModbusIOException while reading samplingGroup:&quot; + samplingGroup, e);</span>
+<span class="nc" id="L154">            disconnect();</span>
+<span class="nc" id="L155">            throw new ConnectionException(e);</span>
+<span class="nc" id="L156">        } catch (ModbusException e) {</span>
+<span class="nc" id="L157">            logger.error(&quot;Unable to read ChannelGroup &quot; + samplingGroup, e);</span>
+
+            // set channel values and flag, otherwise the datamanager will throw a null pointer exception
+            // and the framework collapses.
+<span class="nc" id="L161">            setChannelsWithErrorFlag(containers);</span>
+<span class="nc" id="L162">        }</span>
+<span class="nc" id="L163">        return channelGroup;</span>
+    }
+
+    private void readChannelGroup(ModbusChannelGroup channelGroup, List&lt;ChannelRecordContainer&gt; containers)
+            throws ModbusException {
+
+<span class="nc bnc" id="L169" title="All 5 branches missed.">        switch (channelGroup.getFunctionCode()) {</span>
+        case FC_01_READ_COILS:
+<span class="nc" id="L171">            BitVector coils = readCoils(channelGroup);</span>
+<span class="nc" id="L172">            channelGroup.setChannelValues(coils, containers);</span>
+<span class="nc" id="L173">            break;</span>
+        case FC_02_READ_DISCRETE_INPUTS:
+<span class="nc" id="L175">            BitVector discretInput = readDiscreteInputs(channelGroup);</span>
+<span class="nc" id="L176">            channelGroup.setChannelValues(discretInput, containers);</span>
+<span class="nc" id="L177">            break;</span>
+        case FC_03_READ_HOLDING_REGISTERS:
+<span class="nc" id="L179">            Register[] registers = readHoldingRegisters(channelGroup);</span>
+<span class="nc" id="L180">            channelGroup.setChannelValues(registers, containers);</span>
+<span class="nc" id="L181">            break;</span>
+        case FC_04_READ_INPUT_REGISTERS:
+<span class="nc" id="L183">            InputRegister[] inputRegisters = readInputRegisters(channelGroup);</span>
+<span class="nc" id="L184">            channelGroup.setChannelValues(inputRegisters, containers);</span>
+<span class="nc" id="L185">            break;</span>
+        default:
+<span class="nc" id="L187">            throw new RuntimeException(&quot;FunctionCode &quot; + channelGroup.getFunctionCode() + &quot; not supported yet&quot;);</span>
+        }
+<span class="nc" id="L189">    }</span>
+
+    public void writeChannel(ModbusChannel channel, Value value) throws ModbusException, RuntimeException {
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        if (logger.isDebugEnabled()) {</span>
+<span class="nc" id="L194">            logger.debug(&quot;write channel: {}&quot;, channel.getChannelAddress());</span>
+        }
+
+<span class="nc bnc" id="L197" title="All 5 branches missed.">        switch (channel.getFunctionCode()) {</span>
+        case FC_05_WRITE_SINGLE_COIL:
+<span class="nc" id="L199">            writeSingleCoil(channel, value.asBoolean());</span>
+<span class="nc" id="L200">            break;</span>
+        case FC_15_WRITE_MULITPLE_COILS:
+<span class="nc" id="L202">            writeMultipleCoils(channel, ModbusDriverUtil.getBitVectorFromByteArray(value));</span>
+<span class="nc" id="L203">            break;</span>
+        case FC_06_WRITE_SINGLE_REGISTER:
+<span class="nc" id="L205">            writeSingleRegister(channel, new SimpleRegister(value.asShort()));</span>
+<span class="nc" id="L206">            break;</span>
+        case FC_16_WRITE_MULTIPLE_REGISTERS:
+<span class="nc" id="L208">            writeMultipleRegisters(channel, ModbusDriverUtil.valueToRegisters(value, channel.getDatatype()));</span>
+<span class="nc" id="L209">            break;</span>
+        default:
+<span class="nc" id="L211">            throw new RuntimeException(&quot;FunctionCode &quot; + channel.getFunctionCode().toString() + &quot; not supported yet&quot;);</span>
+        }
+<span class="nc" id="L213">    }</span>
+
+    public void setChannelsWithErrorFlag(List&lt;ChannelRecordContainer&gt; containers) {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        for (ChannelRecordContainer container : containers) {</span>
+<span class="nc" id="L217">            container.setRecord(new Record(null, null, Flag.DRIVER_ERROR_CHANNEL_TEMPORARILY_NOT_ACCESSIBLE));</span>
+<span class="nc" id="L218">        }</span>
+<span class="nc" id="L219">    }</span>
+
+    protected ModbusChannel getModbusChannel(String channelAddress, EAccess access) {
+
+<span class="nc" id="L223">        ModbusChannel modbusChannel = null;</span>
+
+        // check if the channel object already exists in the list
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (modbusChannels.containsKey(channelAddress)) {</span>
+<span class="nc" id="L227">            modbusChannel = modbusChannels.get(channelAddress);</span>
+
+            // if the channel object exists the access flag might has to be updated
+            // (this is case occurs when the channel is readable and writable)
+<span class="nc bnc" id="L231" title="All 2 branches missed.">            if (!modbusChannel.getAccessFlag().equals(access)) {</span>
+<span class="nc" id="L232">                modbusChannel.update(access);</span>
+            }
+        }
+        // create a new channel object
+        else {
+<span class="nc" id="L237">            modbusChannel = new ModbusChannel(channelAddress, access);</span>
+<span class="nc" id="L238">            modbusChannels.put(channelAddress, modbusChannel);</span>
+        }
+
+<span class="nc" id="L241">        return modbusChannel;</span>
+
+    }
+
+    // TODO refactoring - to evaluate the transaction id the execution should be part of the modbus tcp connection and
+    // not part of the common modbusConnection since RTU has no transaction id
+    private ModbusResponse executeReadTransaction() throws ModbusException {
+
+<span class="nc" id="L249">        ModbusResponse response = null;</span>
+
+        // see: performModbusTCPReadTransactionWithRetry()
+<span class="nc" id="L252">        response = performModbusReadTransaction();</span>
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        if (response == null) {</span>
+<span class="nc" id="L255">            throw new ModbusException(&quot;received response object is null&quot;);</span>
+        }
+        else {
+<span class="nc" id="L258">            printResponseTraceMsg(response);</span>
+        }
+
+<span class="nc" id="L261">        return response;</span>
+    }
+
+    private ModbusResponse performModbusReadTransaction() throws ModbusException {
+<span class="nc" id="L265">        printRequestTraceMsg();</span>
+<span class="nc" id="L266">        transaction.execute();</span>
+<span class="nc" id="L267">        ModbusResponse response = transaction.getResponse();</span>
+<span class="nc" id="L268">        return response;</span>
+    }
+
+    // FIXME concept with retry is not working after a java.net.SocketTimeoutException: Read timed out
+    // Problem is that the Transaction.excecute() increments the Transaction ID with each execute. Example: Request is
+    // sent with Transaction ID 30, then a timeout happens, when using the retry mechanism below it will resend the
+    // request. the jamod increases the transaction id again to 31 but then it receives the response for id 30. From the
+    // time a timeout happened the response id will be always smaller than the request id, since the jamod doesn't
+    // provide a method to read a response without sending a request.
+    private ModbusResponse performModbusTCPReadTransactionWithRetry() throws ModbusException {
+
+<span class="nc" id="L279">        ModbusResponse response = null;</span>
+
+        // NOTE: see comments about max retries in setTransaction()
+<span class="nc" id="L282">        int retries = 0;</span>
+
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        while (retries &lt; MAX_RETRIES_FOR_DRIVER) {</span>
+            // +1 because id is incremented within transaction execution
+
+            // int requestId = transaction.getTransactionID() + 1;
+<span class="nc" id="L288">            printRequestTraceMsg();</span>
+
+            try {
+<span class="nc" id="L291">                transaction.execute();</span>
+<span class="nc" id="L292">            } catch (ModbusIOException e) {</span>
+                // logger.trace(&quot;caught ModbusIOException, probably timeout, retry&quot;);
+<span class="nc" id="L294">                retries++;</span>
+<span class="nc" id="L295">                checkRetryCondition(retries);</span>
+<span class="nc" id="L296">                continue;</span>
+<span class="nc" id="L297">            }</span>
+
+<span class="nc bnc" id="L299" title="All 2 branches missed.">            if (isTransactionIdMatching()) {</span>
+<span class="nc" id="L300">                response = transaction.getResponse();</span>
+<span class="nc" id="L301">                break;</span>
+            }
+            else {
+<span class="nc" id="L304">                retries++;</span>
+<span class="nc" id="L305">                checkRetryCondition(retries);</span>
+            }
+
+        }
+
+<span class="nc" id="L310">        return response;</span>
+    }
+
+    /**
+     * 
+     * @param retries
+     * @throws ModbusIOException
+     *             if max number of retries is reached, which indicates an IO problem.
+     */
+    private void checkRetryCondition(int retries) throws ModbusIOException {
+<span class="nc" id="L320">        logger.trace(&quot;Failed to get response. Retry {}/{}&quot;, retries, MAX_RETRIES_FOR_DRIVER);</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">        if (retries == MAX_RETRIES_FOR_DRIVER) {</span>
+<span class="nc" id="L322">            throw new ModbusIOException(&quot;Unable to get response. Max number of retries reached&quot;);</span>
+        }
+<span class="nc" id="L324">    }</span>
+
+    private boolean isTransactionIdMatching() {
+
+<span class="nc" id="L328">        boolean isMatching = false;</span>
+
+<span class="nc" id="L330">        int requestId = transaction.getRequest().getTransactionID();</span>
+<span class="nc" id="L331">        int responseId = transaction.getResponse().getTransactionID();</span>
+
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        if (requestId == responseId) {</span>
+<span class="nc" id="L334">            isMatching = true;</span>
+        }
+        else {
+<span class="nc" id="L337">            logger.warn(&quot;Mismatching transaction IDs: request ({}) / response ({}). Retrying transaction...&quot;, requestId,</span>
+<span class="nc" id="L338">                    responseId);</span>
+        }
+
+<span class="nc" id="L341">        return isMatching;</span>
+    }
+
+    private void executeWriteTransaction() throws ModbusException {
+<span class="nc" id="L345">        printRequestTraceMsg();</span>
+<span class="nc" id="L346">        transaction.execute();</span>
+        // FIXME evaluate response
+<span class="nc" id="L348">        ModbusResponse response = transaction.getResponse();</span>
+<span class="nc" id="L349">        printResponseTraceMsg(response);</span>
+<span class="nc" id="L350">    }</span>
+
+    private synchronized BitVector readCoils(int startAddress, int count, int unitID) throws ModbusException {
+<span class="nc" id="L353">        ReadCoilsRequest readCoilsRequest = new ReadCoilsRequest();</span>
+<span class="nc" id="L354">        readCoilsRequest.setReference(startAddress);</span>
+<span class="nc" id="L355">        readCoilsRequest.setBitCount(count);</span>
+<span class="nc" id="L356">        readCoilsRequest.setUnitID(unitID);</span>
+
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (transaction instanceof ModbusSerialTransaction) {</span>
+<span class="nc" id="L359">            readCoilsRequest.setHeadless();</span>
+        }
+
+<span class="nc" id="L362">        transaction.setRequest(readCoilsRequest);</span>
+<span class="nc" id="L363">        ModbusResponse response = executeReadTransaction();</span>
+<span class="nc" id="L364">        BitVector bitvector = ((ReadCoilsResponse) response).getCoils();</span>
+<span class="nc" id="L365">        bitvector.forceSize(count);</span>
+<span class="nc" id="L366">        return bitvector;</span>
+    }
+
+    public BitVector readCoils(ModbusChannel channel) throws ModbusException {
+<span class="nc" id="L370">        return readCoils(channel.getStartAddress(), channel.getCount(), channel.getUnitId());</span>
+    }
+
+    public BitVector readCoils(ModbusChannelGroup channelGroup) throws ModbusException {
+<span class="nc" id="L374">        return readCoils(channelGroup.getStartAddress(), channelGroup.getCount(), channelGroup.getUnitId());</span>
+    }
+
+    private synchronized BitVector readDiscreteInputs(int startAddress, int count, int unitID) throws ModbusException {
+<span class="nc" id="L378">        ReadInputDiscretesRequest readInputDiscretesRequest = new ReadInputDiscretesRequest();</span>
+<span class="nc" id="L379">        readInputDiscretesRequest.setReference(startAddress);</span>
+<span class="nc" id="L380">        readInputDiscretesRequest.setBitCount(count);</span>
+<span class="nc" id="L381">        readInputDiscretesRequest.setUnitID(unitID);</span>
+
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (transaction instanceof ModbusSerialTransaction) {</span>
+<span class="nc" id="L384">            readInputDiscretesRequest.setHeadless();</span>
+        }
+
+<span class="nc" id="L387">        transaction.setRequest(readInputDiscretesRequest);</span>
+<span class="nc" id="L388">        ModbusResponse response = executeReadTransaction();</span>
+<span class="nc" id="L389">        BitVector bitvector = ((ReadInputDiscretesResponse) response).getDiscretes();</span>
+<span class="nc" id="L390">        bitvector.forceSize(count);</span>
+<span class="nc" id="L391">        return bitvector;</span>
+    }
+
+    public BitVector readDiscreteInputs(ModbusChannel channel) throws ModbusException {
+<span class="nc" id="L395">        return readDiscreteInputs(channel.getStartAddress(), channel.getCount(), channel.getUnitId());</span>
+    }
+
+    public BitVector readDiscreteInputs(ModbusChannelGroup channelGroup) throws ModbusException {
+<span class="nc" id="L399">        return readDiscreteInputs(channelGroup.getStartAddress(), channelGroup.getCount(), channelGroup.getUnitId());</span>
+    }
+
+    private synchronized Register[] readHoldingRegisters(int startAddress, int count, int unitID)
+            throws ModbusException {
+<span class="nc" id="L404">        ReadMultipleRegistersRequest readHoldingRegisterRequest = new ReadMultipleRegistersRequest();</span>
+<span class="nc" id="L405">        readHoldingRegisterRequest.setReference(startAddress);</span>
+<span class="nc" id="L406">        readHoldingRegisterRequest.setWordCount(count);</span>
+<span class="nc" id="L407">        readHoldingRegisterRequest.setUnitID(unitID);</span>
+
+<span class="nc bnc" id="L409" title="All 2 branches missed.">        if (transaction instanceof ModbusSerialTransaction) {</span>
+<span class="nc" id="L410">            readHoldingRegisterRequest.setHeadless();</span>
+        }
+
+<span class="nc" id="L413">        transaction.setRequest(readHoldingRegisterRequest);</span>
+<span class="nc" id="L414">        ModbusResponse response = executeReadTransaction();</span>
+<span class="nc" id="L415">        return ((ReadMultipleRegistersResponse) response).getRegisters();</span>
+    }
+
+    public Register[] readHoldingRegisters(ModbusChannel channel) throws ModbusException {
+<span class="nc" id="L419">        return readHoldingRegisters(channel.getStartAddress(), channel.getCount(), channel.getUnitId());</span>
+    }
+
+    public Register[] readHoldingRegisters(ModbusChannelGroup channelGroup) throws ModbusException {
+<span class="nc" id="L423">        return readHoldingRegisters(channelGroup.getStartAddress(), channelGroup.getCount(), channelGroup.getUnitId());</span>
+    }
+
+    /**
+     * Read InputRegisters
+     * 
+     */
+    private synchronized InputRegister[] readInputRegisters(int startAddress, int count, int unitID)
+            throws ModbusIOException, ModbusSlaveException, ModbusException {
+<span class="nc" id="L432">        ReadInputRegistersRequest readInputRegistersRequest = new ReadInputRegistersRequest();</span>
+<span class="nc" id="L433">        readInputRegistersRequest.setReference(startAddress);</span>
+<span class="nc" id="L434">        readInputRegistersRequest.setWordCount(count);</span>
+<span class="nc" id="L435">        readInputRegistersRequest.setUnitID(unitID);</span>
+
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        if (transaction instanceof ModbusSerialTransaction) {</span>
+<span class="nc" id="L438">            readInputRegistersRequest.setHeadless();</span>
+        }
+
+<span class="nc" id="L441">        transaction.setRequest(readInputRegistersRequest);</span>
+<span class="nc" id="L442">        ModbusResponse response = executeReadTransaction();</span>
+<span class="nc" id="L443">        return ((ReadInputRegistersResponse) response).getRegisters();</span>
+    }
+
+    /**
+     * Read InputRegisters for a channel
+     * 
+     * @param channel
+     *            Modbus channel
+     * @return input register array
+     * @throws ModbusException
+     *             if an modbus error occurs
+     */
+    public InputRegister[] readInputRegisters(ModbusChannel channel) throws ModbusException {
+<span class="nc" id="L456">        return readInputRegisters(channel.getStartAddress(), channel.getCount(), channel.getUnitId());</span>
+    }
+
+    /**
+     * Read InputRegisters for a channelGroup
+     * 
+     * @param channelGroup
+     *            modbus channel group
+     * @return the input register array
+     * @throws ModbusException
+     *             if an modbus error occurs
+     */
+    public InputRegister[] readInputRegisters(ModbusChannelGroup channelGroup) throws ModbusException {
+<span class="nc" id="L469">        return readInputRegisters(channelGroup.getStartAddress(), channelGroup.getCount(), channelGroup.getUnitId());</span>
+    }
+
+    public synchronized void writeSingleCoil(ModbusChannel channel, boolean state) throws ModbusException {
+<span class="nc" id="L473">        WriteCoilRequest writeCoilRequest = new WriteCoilRequest();</span>
+<span class="nc" id="L474">        writeCoilRequest.setReference(channel.getStartAddress());</span>
+<span class="nc" id="L475">        writeCoilRequest.setCoil(state);</span>
+<span class="nc" id="L476">        writeCoilRequest.setUnitID(channel.getUnitId());</span>
+<span class="nc" id="L477">        transaction.setRequest(writeCoilRequest);</span>
+<span class="nc" id="L478">        executeWriteTransaction();</span>
+<span class="nc" id="L479">    }</span>
+
+    public synchronized void writeMultipleCoils(ModbusChannel channel, BitVector coils) throws ModbusException {
+<span class="nc" id="L482">        WriteMultipleCoilsRequest writeMultipleCoilsRequest = new WriteMultipleCoilsRequest();</span>
+<span class="nc" id="L483">        writeMultipleCoilsRequest.setReference(channel.getStartAddress());</span>
+<span class="nc" id="L484">        writeMultipleCoilsRequest.setCoils(coils);</span>
+<span class="nc" id="L485">        writeMultipleCoilsRequest.setUnitID(channel.getUnitId());</span>
+<span class="nc" id="L486">        transaction.setRequest(writeMultipleCoilsRequest);</span>
+<span class="nc" id="L487">        executeWriteTransaction();</span>
+<span class="nc" id="L488">    }</span>
+
+    public synchronized void writeSingleRegister(ModbusChannel channel, Register register) throws ModbusException {
+<span class="nc" id="L491">        WriteSingleRegisterRequest writeSingleRegisterRequest = new WriteSingleRegisterRequest();</span>
+<span class="nc" id="L492">        writeSingleRegisterRequest.setReference(channel.getStartAddress());</span>
+<span class="nc" id="L493">        writeSingleRegisterRequest.setRegister(register);</span>
+<span class="nc" id="L494">        writeSingleRegisterRequest.setUnitID(channel.getUnitId());</span>
+<span class="nc" id="L495">        transaction.setRequest(writeSingleRegisterRequest);</span>
+<span class="nc" id="L496">        executeWriteTransaction();</span>
+<span class="nc" id="L497">    }</span>
+
+    public synchronized void writeMultipleRegisters(ModbusChannel channel, Register[] registers)
+            throws ModbusException {
+<span class="nc" id="L501">        WriteMultipleRegistersRequest writeMultipleRegistersRequest = new WriteMultipleRegistersRequest();</span>
+<span class="nc" id="L502">        writeMultipleRegistersRequest.setReference(channel.getStartAddress());</span>
+<span class="nc" id="L503">        writeMultipleRegistersRequest.setRegisters(registers);</span>
+<span class="nc" id="L504">        writeMultipleRegistersRequest.setUnitID(channel.getUnitId());</span>
+<span class="nc" id="L505">        transaction.setRequest(writeMultipleRegistersRequest);</span>
+<span class="nc" id="L506">        executeWriteTransaction();</span>
+<span class="nc" id="L507">    }</span>
+
+    // FIXME transaction ID unsupported by RTU since it is headless... create own debug for RTU
+    private void printRequestTraceMsg() {
+
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L513">            logger.trace(createRequestTraceMsg());</span>
+        }
+<span class="nc" id="L515">    }</span>
+
+    // FIXME: This debug message should be inside the transaction.execute() of the jamod.
+    // The problem is, that the hex message (especially the transaction ID) is set within the execute method. The hex
+    // message here shows a wrong transaction id.
+    private String createRequestTraceMsg() {
+
+<span class="nc" id="L522">        ModbusRequest request = transaction.getRequest();</span>
+
+        // Transaction ID is incremented within the transaction.execute command. To view correct transaction Id in debug
+        // output the value is incremented by one
+<span class="nc" id="L526">        requestTransactionId = transaction.getTransactionID() + 1;</span>
+
+<span class="nc" id="L528">        String traceMsg = &quot;&quot;;</span>
+
+        try {
+<span class="nc" id="L531">            StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L532">            sb.append(&quot;REQUEST: &quot;).append(request.getHexMessage()).append('\n');</span>
+<span class="nc" id="L533">            sb.append(&quot;- transaction ID: &quot;).append(requestTransactionId).append('\n');</span>
+<span class="nc" id="L534">            sb.append(&quot;- protocol ID   : &quot;).append(request.getProtocolID()).append('\n');</span>
+<span class="nc" id="L535">            sb.append(&quot;- data length   : &quot;).append(request.getDataLength()).append('\n');</span>
+<span class="nc" id="L536">            sb.append(&quot;- unit ID       : &quot;).append(request.getUnitID()).append('\n');</span>
+<span class="nc" id="L537">            sb.append(&quot;- function code : &quot;).append(request.getFunctionCode()).append('\n');</span>
+<span class="nc" id="L538">            sb.append(&quot;- is headless   : &quot;).append(request.isHeadless()).append('\n');</span>
+            // sb.append(&quot;- max retries : &quot;).append(transaction.getRetries());
+
+<span class="nc bnc" id="L541" title="All 2 branches missed.">            if (transaction instanceof ModbusTCPTransaction) {</span>
+<span class="nc" id="L542">                sb.append(&quot;\n   (NOTE: incorrect transaction Id displayed in hex message due to issue with jamod)&quot;);</span>
+            }
+
+<span class="nc" id="L545">            traceMsg = sb.toString();</span>
+<span class="nc" id="L546">        } catch (</span>
+
+        Exception e) {
+<span class="nc" id="L549">            logger.trace(&quot;Unable to create debug message from request&quot;, e);</span>
+<span class="nc" id="L550">        }</span>
+
+<span class="nc" id="L552">        return traceMsg;</span>
+    }
+
+    private void printResponseTraceMsg(ModbusResponse response) {
+<span class="nc bnc" id="L556" title="All 2 branches missed.">        if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L557">            logger.trace(createResponseTraceMsg(response));</span>
+        }
+<span class="nc" id="L559">    }</span>
+
+    private String createResponseTraceMsg(ModbusResponse response) {
+
+<span class="nc" id="L563">        int responseTransactionId = response.getTransactionID();</span>
+
+<span class="nc bnc" id="L565" title="All 2 branches missed.">        if (transaction instanceof ModbusTCPTransaction) {</span>
+<span class="nc bnc" id="L566" title="All 2 branches missed.">            if (responseTransactionId &gt; (requestTransactionId + MAX_RETRIES_FOR_DRIVER)) {</span>
+<span class="nc" id="L567">                logger.warn(&quot;responseTransactionId &gt; (lastRequestTransactionId + MAX_RETRIES)&quot;);</span>
+            }
+        }
+
+<span class="nc" id="L571">        String traceMsg = &quot;&quot;;</span>
+
+        try {
+<span class="nc" id="L574">            StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L575">            sb.append(&quot;RESPONSE: &quot; + response.getHexMessage() + &quot;\n&quot;);</span>
+<span class="nc" id="L576">            sb.append(&quot;- transaction ID: &quot; + responseTransactionId + &quot;\n&quot;);</span>
+<span class="nc" id="L577">            sb.append(&quot;- protocol ID   : &quot; + response.getProtocolID() + &quot;\n&quot;);</span>
+<span class="nc" id="L578">            sb.append(&quot;- unit ID       : &quot; + response.getUnitID() + &quot;\n&quot;);</span>
+<span class="nc" id="L579">            sb.append(&quot;- function code : &quot; + response.getFunctionCode() + &quot;\n&quot;);</span>
+<span class="nc" id="L580">            sb.append(&quot;- length        : &quot; + response.getDataLength() + &quot;\n&quot;);</span>
+<span class="nc" id="L581">            sb.append(&quot;- is headless   : &quot; + response.isHeadless() + &quot;\n&quot;);</span>
+            // sb.append(&quot;- max retries : &quot; + transaction.getRetries());
+
+<span class="nc" id="L584">            traceMsg = sb.toString();</span>
+<span class="nc" id="L585">        } catch (Exception e) {</span>
+<span class="nc" id="L586">            logger.trace(&quot;Unable to create debug message from received response&quot;, e);</span>
+<span class="nc" id="L587">        }</span>
+
+<span class="nc" id="L589">        return traceMsg;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

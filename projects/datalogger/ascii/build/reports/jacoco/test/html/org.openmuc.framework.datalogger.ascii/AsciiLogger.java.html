@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AsciiLogger.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii</a> &gt; <span class="el_source">AsciiLogger.java</span></div><h1>AsciiLogger.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.datalogger.ascii.utils.Const;
+import org.openmuc.framework.datalogger.ascii.utils.LoggerUtils;
+import org.openmuc.framework.datalogger.spi.DataLoggerService;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component
+public class AsciiLogger implements DataLoggerService {
+
+<span class="fc" id="L53">    private static final Logger logger = LoggerFactory.getLogger(AsciiLogger.class);</span>
+<span class="fc" id="L54">    private static final String DIRECTORY = System</span>
+<span class="fc" id="L55">            .getProperty(AsciiLogger.class.getPackage().getName().toLowerCase() + &quot;.directory&quot;);</span>
+<span class="fc" id="L56">    private static HashMap&lt;String, Long&gt; lastLoggedLineList = new HashMap&lt;&gt;();</span>
+    private final String loggerDirectory;
+<span class="nc" id="L58">    private final HashMap&lt;String, LogChannel&gt; logChannelList = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L59">    private boolean isFillUpFiles = true;</span>
+    private static final long MS_PER_DAY = 86400000;
+
+<span class="nc" id="L62">    public AsciiLogger() {</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if (DIRECTORY == null) {</span>
+<span class="nc" id="L65">            loggerDirectory = Const.DEFAULT_DIRECTORY;</span>
+        }
+        else {
+<span class="nc" id="L68">            loggerDirectory = DIRECTORY.trim();</span>
+        }
+<span class="nc" id="L70">        createDirectory(loggerDirectory);</span>
+<span class="nc" id="L71">    }</span>
+
+<span class="nc" id="L73">    public AsciiLogger(String loggerDirectory) {</span>
+
+<span class="nc" id="L75">        this.loggerDirectory = loggerDirectory;</span>
+<span class="nc" id="L76">        createDirectory(loggerDirectory);</span>
+<span class="nc" id="L77">    }</span>
+
+    public static Long getLastLoggedLineTimeStamp(int loggingInterval, int loggingOffset) {
+
+<span class="fc" id="L81">        return lastLoggedLineList.get(loggingInterval + Const.TIME_SEPERATOR_STRING + loggingOffset);</span>
+    }
+
+    public static void setLastLoggedLineTimeStamp(String loggerInterval_loggerTimeOffset, long lastTimestamp) {
+
+<span class="fc" id="L86">        lastLoggedLineList.put(loggerInterval_loggerTimeOffset, lastTimestamp);</span>
+<span class="fc" id="L87">    }</span>
+
+    public static void setLastLoggedLineTimeStamp(int loggingInterval, int loggingOffset, long lastTimestamp) {
+
+<span class="fc" id="L91">        lastLoggedLineList.put(loggingInterval + Const.TIME_SEPERATOR_STRING + loggingOffset, lastTimestamp);</span>
+<span class="fc" id="L92">    }</span>
+
+    public static long fillUpFileWithErrorCode(String directoryPath, String loggerInterval_loggerTimeOffset,
+            Calendar calendar) {
+
+<span class="fc" id="L97">        String filename = LoggerUtils.buildFilename(loggerInterval_loggerTimeOffset, calendar);</span>
+<span class="fc" id="L98">        File file = new File(directoryPath + filename);</span>
+<span class="fc" id="L99">        RandomAccessFile raf = LoggerUtils.getRandomAccessFile(file, &quot;r&quot;);</span>
+<span class="fc" id="L100">        PrintWriter out = null;</span>
+
+<span class="fc" id="L102">        String firstLogLine = &quot;&quot;;</span>
+<span class="fc" id="L103">        String lastLogLine = &quot;&quot;;</span>
+<span class="fc" id="L104">        long loggingInterval = 0;</span>
+
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (loggerInterval_loggerTimeOffset.contains(Const.TIME_SEPERATOR_STRING)) {</span>
+<span class="nc" id="L107">            loggingInterval = Long.parseLong(loggerInterval_loggerTimeOffset.split(Const.TIME_SEPERATOR_STRING)[0]);</span>
+        }
+        else {
+<span class="fc" id="L110">            loggingInterval = Long.parseLong(loggerInterval_loggerTimeOffset);</span>
+        }
+
+<span class="fc" id="L113">        long lastLogLineTimeStamp = 0;</span>
+
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (raf != null) {</span>
+            try {
+<span class="fc" id="L117">                String line = raf.readLine();</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                if (line != null) {</span>
+
+<span class="fc bfc" id="L120" title="All 2 branches covered.">                    while (line.startsWith(Const.COMMENT_SIGN)) {</span>
+                        // do nothing with this data, only for finding the begin of logging
+<span class="fc" id="L122">                        line = raf.readLine();</span>
+                    }
+<span class="fc" id="L124">                    firstLogLine = raf.readLine();</span>
+                }
+
+                // read last line backwards and read last line
+<span class="fc" id="L128">                byte[] readedByte = new byte[1];</span>
+<span class="fc" id="L129">                long filePosition = file.length() - 2;</span>
+                String charString;
+<span class="pc bpc" id="L131" title="1 of 4 branches missed.">                while (lastLogLine.isEmpty() &amp;&amp; filePosition &gt; 0) {</span>
+
+<span class="fc" id="L133">                    raf.seek(filePosition);</span>
+<span class="fc" id="L134">                    int readedBytes = raf.read(readedByte);</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">                    if (readedBytes == 1) {</span>
+<span class="fc" id="L136">                        charString = new String(readedByte, Const.CHAR_SET);</span>
+
+<span class="fc bfc" id="L138" title="All 2 branches covered.">                        if (charString.equals(Const.LINESEPARATOR_STRING)) {</span>
+<span class="fc" id="L139">                            lastLogLine = raf.readLine();</span>
+                        }
+                        else {
+<span class="fc" id="L142">                            filePosition -= 1;</span>
+                        }
+                    }
+                    else {
+<span class="nc" id="L146">                        filePosition = -1; // leave the while loop</span>
+                    }
+<span class="fc" id="L148">                }</span>
+<span class="fc" id="L149">                raf.close();</span>
+
+<span class="fc" id="L151">                int firstLogLineLength = firstLogLine.length();</span>
+
+<span class="fc" id="L153">                int lastLogLineLength = lastLogLine.length();</span>
+
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                if (firstLogLineLength != lastLogLineLength) {</span>
+                    /**
+                     * TODO: different size of logging lines, probably the last one is corrupted we have to fill it up
+                     * restOfLastLine = completeLastLine(firstLogLine, lastLogLine); raf.writeChars(restOfLastLine);
+                     */
+                    // File is corrupted rename to old
+<span class="nc" id="L161">                    LoggerUtils.renameFileToOld(directoryPath, loggerInterval_loggerTimeOffset, calendar);</span>
+<span class="nc" id="L162">                    logger.error(&quot;File is coruppted, could not fill up, renamed it. &quot; + file.getAbsolutePath());</span>
+<span class="nc" id="L163">                    return 0l;</span>
+                }
+                else {
+
+<span class="fc" id="L167">                    String lastLogLineArray[] = lastLogLine.split(Const.SEPARATOR);</span>
+
+<span class="fc" id="L169">                    StringBuilder errorValues = LoggerUtils.getErrorValues(lastLogLineArray);</span>
+<span class="fc" id="L170">                    lastLogLineTimeStamp = (long) (Double.parseDouble(lastLogLineArray[2]) * 1000.);</span>
+
+<span class="fc" id="L172">                    out = LoggerUtils.getPrintWriter(file, true);</span>
+
+<span class="fc" id="L174">                    long numberOfFillUpLines = LoggerUtils.getNumberOfFillUpLines(lastLogLineTimeStamp,</span>
+                            loggingInterval);
+
+<span class="fc bfc" id="L177" title="All 2 branches covered.">                    while (numberOfFillUpLines &gt; 0) {</span>
+
+<span class="fc" id="L179">                        lastLogLineTimeStamp = LoggerUtils.fillUp(out, lastLogLineTimeStamp, loggingInterval,</span>
+                                numberOfFillUpLines, errorValues);
+<span class="fc" id="L181">                        numberOfFillUpLines = LoggerUtils.getNumberOfFillUpLines(lastLogLineTimeStamp, loggingInterval);</span>
+                    }
+<span class="fc" id="L183">                    out.close();</span>
+<span class="fc" id="L184">                    AsciiLogger.setLastLoggedLineTimeStamp(loggerInterval_loggerTimeOffset, lastLogLineTimeStamp);</span>
+                }
+<span class="nc" id="L186">            } catch (IOException e) {</span>
+<span class="nc" id="L187">                logger.error(&quot;Could not read file &quot; + file.getAbsolutePath(), e);</span>
+<span class="nc" id="L188">                LoggerUtils.renameFileToOld(directoryPath, loggerInterval_loggerTimeOffset, calendar);</span>
+            } finally {
+                try {
+<span class="fc" id="L191">                    raf.close();</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">                    if (out != null) {</span>
+<span class="fc" id="L193">                        out.close();</span>
+                    }
+<span class="nc" id="L195">                } catch (IOException e) {</span>
+<span class="nc" id="L196">                    logger.error(&quot;Could not close file &quot; + file.getAbsolutePath());</span>
+<span class="fc" id="L197">                }</span>
+            }
+        }
+<span class="fc" id="L200">        return lastLogLineTimeStamp;</span>
+    }
+
+    @Activate
+    protected void activate(ComponentContext context) {
+
+<span class="nc" id="L206">        logger.info(&quot;Activating Ascii Logger&quot;);</span>
+<span class="nc" id="L207">        setSystemProperties();</span>
+<span class="nc" id="L208">    }</span>
+
+    @Deactivate
+    protected void deactivate(ComponentContext context) {
+
+<span class="nc" id="L213">        logger.info(&quot;Deactivating Ascii Logger&quot;);</span>
+<span class="nc" id="L214">    }</span>
+
+    private void createDirectory(String loggerDirectory) {
+
+<span class="nc" id="L218">        logger.trace(&quot;using directory: {}&quot;, loggerDirectory);</span>
+<span class="nc" id="L219">        File asciidata = new File(loggerDirectory);</span>
+<span class="nc bnc" id="L220" title="All 4 branches missed.">        if (!asciidata.exists() &amp;&amp; !asciidata.mkdirs()) {</span>
+<span class="nc" id="L221">            logger.error(&quot;Could not create logger directory: &quot; + asciidata.getAbsolutePath());</span>
+            // TODO: weitere Behandlung,
+        }
+<span class="nc" id="L224">    }</span>
+
+    @Override
+    public String getId() {
+<span class="nc" id="L228">        return &quot;asciilogger&quot;;</span>
+    }
+
+    /**
+     * Will called if OpenMUC starts the logger
+     */
+    @Override
+    public void setChannelsToLog(List&lt;LogChannel&gt; logChannels) {
+
+<span class="nc" id="L237">        Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+<span class="nc" id="L238">        logChannelList.clear();</span>
+
+<span class="nc" id="L240">        logger.trace(&quot;channels to log:&quot;);</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        for (LogChannel logChannel : logChannels) {</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L244">                logger.trace(&quot;channel.getId() &quot; + logChannel.getId());</span>
+<span class="nc" id="L245">                logger.trace(&quot;channel.getLoggingInterval() &quot; + logChannel.getLoggingInterval());</span>
+            }
+<span class="nc" id="L247">            logChannelList.put(logChannel.getId(), logChannel);</span>
+<span class="nc" id="L248">        }</span>
+
+<span class="nc bnc" id="L250" title="All 2 branches missed.">        if (isFillUpFiles) {</span>
+<span class="nc" id="L251">            Map&lt;String, Boolean&gt; areHeaderIdentical = LoggerUtils.areHeadersIdentical(loggerDirectory, logChannels,</span>
+                    calendar);
+
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            for (Entry&lt;String, Boolean&gt; entry : areHeaderIdentical.entrySet()) {</span>
+<span class="nc" id="L255">                String key = entry.getKey();</span>
+<span class="nc" id="L256">                boolean isHeaderIdentical = entry.getValue();</span>
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                if (isHeaderIdentical) {</span>
+                    // Fill file up with error flag 32 (DATA_LOGGING_NOT_ACTIVE)
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                    if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L261">                        logger.trace(</span>
+<span class="nc" id="L262">                                &quot;Fill file &quot; + LoggerUtils.buildFilename(key, calendar) + &quot; up with error flag 32.&quot;);</span>
+                    }
+<span class="nc" id="L264">                    fillUpFileWithErrorCode(loggerDirectory, key, calendar);</span>
+                }
+                else {
+                    // rename file in old file (if file is existing), because of configuration has
+                    // changed
+<span class="nc" id="L269">                    LoggerUtils.renameFileToOld(loggerDirectory, key, calendar);</span>
+                }
+<span class="nc" id="L271">            }</span>
+<span class="nc" id="L272">        }</span>
+        else {
+<span class="nc" id="L274">            LoggerUtils.renameAllFilesToOld(loggerDirectory, calendar);</span>
+        }
+
+<span class="nc" id="L277">    }</span>
+
+    @Override
+    public synchronized void log(List&lt;LoggingRecord&gt; loggingRecords, long timestamp) {
+<span class="nc" id="L281">        HashMap&lt;List&lt;Integer&gt;, LogIntervalContainerGroup&gt; logIntervalGroups = new HashMap&lt;&gt;();</span>
+
+        // add each container to a group with the same logging interval
+<span class="nc bnc" id="L284" title="All 2 branches missed.">        for (LoggingRecord container : loggingRecords) {</span>
+
+<span class="nc" id="L286">            int logInterval = -1;</span>
+<span class="nc" id="L287">            int logTimeOffset = 0;</span>
+<span class="nc" id="L288">            List&lt;Integer&gt; logTimeArray = Arrays.asList(logInterval, logTimeOffset);</span>
+<span class="nc" id="L289">            String channelId = container.getChannelId();</span>
+
+<span class="nc bnc" id="L291" title="All 2 branches missed.">            if (logChannelList.containsKey(channelId)) {</span>
+<span class="nc" id="L292">                logInterval = logChannelList.get(channelId).getLoggingInterval();</span>
+<span class="nc" id="L293">                logTimeOffset = logChannelList.get(channelId).getLoggingTimeOffset();</span>
+<span class="nc" id="L294">                logTimeArray = Arrays.asList(logInterval, logTimeOffset);</span>
+            }
+            else {
+                // TODO there might be a change in the channel config file
+            }
+
+<span class="nc bnc" id="L300" title="All 2 branches missed.">            if (logIntervalGroups.containsKey(logTimeArray)) {</span>
+                // add the container to an existing group
+<span class="nc" id="L302">                LogIntervalContainerGroup group = logIntervalGroups.get(logTimeArray);</span>
+<span class="nc" id="L303">                group.add(container);</span>
+<span class="nc" id="L304">            }</span>
+            else {
+                // create a new group and add the container
+<span class="nc" id="L307">                LogIntervalContainerGroup group = new LogIntervalContainerGroup();</span>
+<span class="nc" id="L308">                group.add(container);</span>
+<span class="nc" id="L309">                logIntervalGroups.put(logTimeArray, group);</span>
+            }
+
+<span class="nc" id="L312">        }</span>
+
+        // alle gruppen loggen
+<span class="nc" id="L315">        Iterator&lt;Entry&lt;List&lt;Integer&gt;, LogIntervalContainerGroup&gt;&gt; it = logIntervalGroups.entrySet().iterator();</span>
+        List&lt;Integer&gt; logTimeArray;
+
+<span class="nc" id="L318">        Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+
+<span class="nc" id="L322">            logTimeArray = it.next().getKey();</span>
+<span class="nc" id="L323">            LogIntervalContainerGroup group = logIntervalGroups.get(logTimeArray);</span>
+<span class="nc" id="L324">            LogFileWriter fileOutHandler = new LogFileWriter(loggerDirectory, isFillUpFiles);</span>
+
+<span class="nc" id="L326">            calendar.setTimeInMillis(timestamp);</span>
+
+<span class="nc" id="L328">            fileOutHandler.log(group, logTimeArray.get(0), logTimeArray.get(1), calendar, logChannelList);</span>
+<span class="nc" id="L329">            setLastLoggedLineTimeStamp(logTimeArray.get(0), logTimeArray.get(1), calendar.getTimeInMillis());</span>
+<span class="nc" id="L330">        }</span>
+<span class="nc" id="L331">    }</span>
+
+    @Override
+    public List&lt;Record&gt; getRecords(String channelId, long startTime, long endTime) throws IOException {
+
+<span class="nc" id="L336">        LogChannel logChannel = logChannelList.get(channelId);</span>
+<span class="nc" id="L337">        LogFileReader reader = null;</span>
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (logChannel != null) {</span>
+<span class="nc" id="L340">            reader = new LogFileReader(loggerDirectory, logChannel);</span>
+<span class="nc" id="L341">            return reader.getValues(startTime, endTime).get(channelId);</span>
+        } // TODO: hier einfuegen, dass nach Logdateien gesucht werden soll, die vorhanden
+          // sind, aber nicht geloggt
+          // werden,
+          // z.B fuer server only ohne Logging. Das suchen sollte nur beim ersten mal
+          // passieren (start).
+        else {
+<span class="nc" id="L348">            throw new IOException(&quot;ChannelID (&quot; + channelId + &quot;) not available. It's not a logging Channel.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get the latest logged Record for the given value. This is achieved by searching within a few times the
+     * loggingInterval from the current time for any record and then selecting the one with the highest timestamp
+     * 
+     * @param channelId
+     *            to be searched
+     * @return latest Record
+     */
+    @Override
+    public Record getLatestLogRecord(String channelId) throws IOException {
+<span class="nc" id="L362">        LogChannel logChannel = logChannelList.get(channelId);</span>
+<span class="nc" id="L363">        LogFileReader reader = null;</span>
+
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (logChannel == null) {</span>
+<span class="nc" id="L366">            throw new IOException(&quot;ChannelID (&quot; + channelId + &quot;) not available. It's not a logging Channel.&quot;);</span>
+        }
+<span class="nc" id="L368">        reader = new LogFileReader(loggerDirectory, logChannel);</span>
+        // attempt to find a record within the last day
+<span class="nc" id="L370">        long endTime = System.currentTimeMillis();</span>
+<span class="nc" id="L371">        long startTime = endTime - MS_PER_DAY;</span>
+<span class="nc" id="L372">        Map&lt;String, List&lt;Record&gt;&gt; recordsMap = reader.getValues(startTime, endTime);</span>
+<span class="nc" id="L373">        Map&lt;String, Record&gt; latestRecordsMap = LoggerUtils.findLatestValue(recordsMap);</span>
+<span class="nc" id="L374">        Record record = latestRecordsMap.get(channelId);</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">        if (record != null) {</span>
+<span class="nc" id="L376">            return record;</span>
+        }
+
+        // Fallback: read all files and find the latest record within these
+<span class="nc" id="L380">        List&lt;File&gt; files = LoggerUtils.getAllDataFiles(loggerDirectory);</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        if (files == null) {</span>
+<span class="nc" id="L382">            return null;</span>
+        }
+<span class="nc" id="L384">        File file = LoggerUtils.getLatestFile(files);</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">        if (file == null) {</span>
+<span class="nc" id="L386">            return null;</span>
+        }
+<span class="nc" id="L388">        recordsMap = reader.getValues(file.getPath());</span>
+<span class="nc" id="L389">        latestRecordsMap = LoggerUtils.findLatestValue(recordsMap);</span>
+<span class="nc" id="L390">        record = latestRecordsMap.get(channelId);</span>
+<span class="nc" id="L391">        return record;</span>
+    }
+
+    private void setSystemProperties() {
+
+        // FIXME: better to use a constant here instead of dynamic name in case the
+        // package name changes in future then
+        // the system.properties entry will be out dated.
+<span class="nc" id="L399">        String fillUpPropertyStr = AsciiLogger.class.getPackage().getName().toLowerCase() + &quot;.fillUpFiles&quot;;</span>
+<span class="nc" id="L400">        String fillUpProperty = System.getProperty(fillUpPropertyStr);</span>
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (fillUpProperty != null) {</span>
+<span class="nc" id="L403">            isFillUpFiles = Boolean.parseBoolean(fillUpProperty);</span>
+<span class="nc" id="L404">            logger.debug(&quot;Property: {} is set to {}&quot;, fillUpPropertyStr, isFillUpFiles);</span>
+        }
+        else {
+<span class="nc" id="L407">            logger.debug(&quot;Property: {} not found in system.properties. Using default value: true&quot;, fillUpPropertyStr);</span>
+<span class="nc" id="L408">            isFillUpFiles = true;</span>
+        }
+<span class="nc" id="L410">    }</span>
+
+    @Override
+    public void logEvent(List&lt;LoggingRecord&gt; containers, long timestamp) {
+<span class="nc" id="L414">        logger.warn(&quot;Event logging is not implemented, yet.&quot;);</span>
+<span class="nc" id="L415">    }</span>
+
+    @Override
+    public boolean logSettingsRequired() {
+<span class="nc" id="L419">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

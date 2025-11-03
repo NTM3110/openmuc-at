@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WriteTask.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">WriteTask.java</span></div><h1>WriteTask.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.driver.spi.ChannelValueContainer;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class WriteTask extends DeviceTask implements ConnectedTask {
+
+<span class="nc" id="L35">    private static final Logger logger = LoggerFactory.getLogger(WriteTask.class);</span>
+
+    private final CountDownLatch writeTaskFinishedSignal;
+    List&lt;WriteValueContainerImpl&gt; writeValueContainers;
+
+    public WriteTask(DataManager dataManager, Device device, List&lt;WriteValueContainerImpl&gt; writeValueContainers,
+<span class="nc" id="L41">            CountDownLatch writeTaskFinishedSignal) {</span>
+<span class="nc" id="L42">        this.dataManager = dataManager;</span>
+<span class="nc" id="L43">        this.device = device;</span>
+<span class="nc" id="L44">        this.writeTaskFinishedSignal = writeTaskFinishedSignal;</span>
+<span class="nc" id="L45">        this.writeValueContainers = writeValueContainers;</span>
+<span class="nc" id="L46">    }</span>
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public void run() {
+
+        try {
+<span class="nc" id="L53">            device.connection.write((List&lt;ChannelValueContainer&gt;) ((List&lt;?&gt;) writeValueContainers), null);</span>
+<span class="nc" id="L54">        } catch (UnsupportedOperationException e) {</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">            for (WriteValueContainerImpl valueContainer : writeValueContainers) {</span>
+<span class="nc" id="L56">                valueContainer.setFlag(Flag.ACCESS_METHOD_NOT_SUPPORTED);</span>
+<span class="nc" id="L57">            }</span>
+<span class="nc" id="L58">        } catch (ConnectionException e) {</span>
+            // Connection to device lost. Signal to device instance and end task without notifying DataManager
+<span class="nc" id="L60">            logger.warn(&quot;Connection to device {} lost because {}. Trying to reconnect...&quot;, device.deviceConfig.getId(),</span>
+<span class="nc" id="L61">                    e.getMessage());</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">            for (WriteValueContainerImpl valueContainer : writeValueContainers) {</span>
+<span class="nc" id="L63">                valueContainer.setFlag(Flag.CONNECTION_EXCEPTION);</span>
+<span class="nc" id="L64">            }</span>
+<span class="nc" id="L65">            writeTaskFinishedSignal.countDown();</span>
+<span class="nc" id="L66">            synchronized (dataManager.disconnectedDevices) {</span>
+<span class="nc" id="L67">                dataManager.disconnectedDevices.add(device);</span>
+<span class="nc" id="L68">            }</span>
+<span class="nc" id="L69">            dataManager.interrupt();</span>
+<span class="nc" id="L70">            return;</span>
+<span class="nc" id="L71">        } catch (Exception e) {</span>
+<span class="nc" id="L72">            logger.warn(&quot;unexpected exception thrown by write funtion of driver &quot;, e);</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">            for (WriteValueContainerImpl valueContainer : writeValueContainers) {</span>
+<span class="nc" id="L74">                valueContainer.setFlag(Flag.DRIVER_THREW_UNKNOWN_EXCEPTION);</span>
+<span class="nc" id="L75">            }</span>
+<span class="nc" id="L76">        }</span>
+
+<span class="nc" id="L78">        writeTaskFinishedSignal.countDown();</span>
+<span class="nc" id="L79">        synchronized (dataManager.tasksFinished) {</span>
+<span class="nc" id="L80">            dataManager.tasksFinished.add(this);</span>
+<span class="nc" id="L81">        }</span>
+<span class="nc" id="L82">        dataManager.interrupt();</span>
+
+<span class="nc" id="L84">    }</span>
+
+    @Override
+    public DeviceTaskType getType() {
+<span class="nc" id="L88">        return DeviceTaskType.WRITE;</span>
+    }
+
+    /**
+     * Writes entries, that the device is not connected.
+     */
+    @Override
+    public void deviceNotConnected() {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (WriteValueContainerImpl valueContainer : writeValueContainers) {</span>
+<span class="nc" id="L97">            valueContainer.setFlag(Flag.COMM_DEVICE_NOT_CONNECTED);</span>
+<span class="nc" id="L98">        }</span>
+<span class="nc" id="L99">        writeTaskFinishedSignal.countDown();</span>
+<span class="nc" id="L100">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

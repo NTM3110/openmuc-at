@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:26" hostname="shou-Dell-G15-5511" time="0.095">
+  <properties/>
+  <testcase name="[1] 99w" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.022"/>
+  <testcase name="[2] 1y" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[3] a77" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[1] 99ms, 99" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.013"/>
+  <testcase name="[2] 5ms, 5" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[3] 100ms, 100" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[4] 1s, 1000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[5] 59s, 59000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[6] 59001ms, 59001" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[7] 1m, 60000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[8] 0, 0" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[9] 5h, 18000000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[10] 24h, 86400000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[1] 99ms, 99" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[2] 100, 100" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[3] 1s, 1000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[4] 1m, 60000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.0"/>
+  <testcase name="[5] 0h, 0" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[6] 5h, 18000000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="[7] 24h, 86400000" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <testcase name="testEmptyTimeStringToMillis()" classname="org.openmuc.framework.core.datamanager.ChannelConfigImplTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

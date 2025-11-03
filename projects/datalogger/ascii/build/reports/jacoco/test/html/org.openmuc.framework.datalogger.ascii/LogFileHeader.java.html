@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogFileHeader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii</a> &gt; <span class="el_source">LogFileHeader.java</span></div><h1>LogFileHeader.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.datalogger.ascii.utils.Const;
+import org.openmuc.framework.datalogger.ascii.utils.LoggerUtils;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+
+public class LogFileHeader {
+
+    private static final String OTHER_STRING = &quot;other&quot;;
+    private static final String TRUE_STRING = &quot;TRUE&quot;;
+    private static final String FALSE_STRING = &quot;FALSE&quot;;
+
+    private LogFileHeader() {
+    }
+
+    /**
+     * Generate the standard IES Data Format Header.
+     *
+     * @param group
+     *            a group of the LogIntervallContainer
+     * @param filename
+     *            the name of the file to add the header
+     * @param loggingInterval
+     *            logging interval in ms
+     * @param logChannelList
+     *            a list of all channels for this file
+     * @return the header as a string
+     */
+    public static String getIESDataFormatHeaderString(LogIntervalContainerGroup group, String filename,
+            int loggingInterval, Map&lt;String, LogChannel&gt; logChannelList) {
+
+<span class="fc" id="L61">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L62">        setHeaderTop(sb, loggingInterval, filename);</span>
+
+        // write channel specific header informations
+<span class="fc" id="L65">        int colNumber = 4;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (LoggingRecord loggingRecord : group.getList()) {</span>
+<span class="fc" id="L67">            String channelId = loggingRecord.getChannelId();</span>
+<span class="fc" id="L68">            LogChannel logChannel = logChannelList.get(channelId);</span>
+<span class="fc" id="L69">            appendChannelSpecificComment(sb, logChannel, colNumber);</span>
+<span class="fc" id="L70">            ++colNumber;</span>
+<span class="fc" id="L71">        }</span>
+<span class="fc" id="L72">        List&lt;LoggingRecord&gt; containers = group.getList();</span>
+<span class="fc" id="L73">        appendColumnHeaderTimestamp(sb);</span>
+
+<span class="fc" id="L75">        Iterator&lt;LoggingRecord&gt; iterator = containers.iterator();</span>
+
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        while (iterator.hasNext()) {</span>
+<span class="fc" id="L78">            sb.append(iterator.next().getChannelId());</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">            if (iterator.hasNext()) {</span>
+<span class="fc" id="L80">                sb.append(Const.SEPARATOR);</span>
+            }
+        }
+
+<span class="fc" id="L84">        sb.append(Const.LINESEPARATOR);</span>
+
+<span class="fc" id="L86">        return sb.toString();</span>
+    }
+
+    /**
+     * Generate the standard IES Data Format Header
+     *
+     * @param filename
+     *            the name of the file to add the header
+     * @param logChannelList
+     *            a list of all channels for this file
+     * @return the header as a string
+     */
+    public static String getIESDataFormatHeaderString(String filename, List&lt;LogChannel&gt; logChannelList) {
+
+<span class="nc" id="L100">        StringBuilder sb0 = new StringBuilder();</span>
+<span class="nc" id="L101">        StringBuilder sb1 = new StringBuilder();</span>
+<span class="nc" id="L102">        setHeaderTop(sb0, logChannelList.get(0).getLoggingInterval(), filename);</span>
+
+        // write channel specific header informations
+<span class="nc" id="L105">        int colNumber = 4;</span>
+<span class="nc" id="L106">        Iterator&lt;LogChannel&gt; iterator = logChannelList.listIterator();</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        while (iterator.hasNext()) {</span>
+
+<span class="nc" id="L109">            LogChannel logChannel = iterator.next();</span>
+<span class="nc" id="L110">            appendChannelSpecificComment(sb0, logChannel, colNumber);</span>
+
+<span class="nc" id="L112">            sb1.append(logChannel.getId());</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">            if (iterator.hasNext()) {</span>
+<span class="nc" id="L114">                sb1.append(Const.SEPARATOR);</span>
+            }
+<span class="nc" id="L116">            ++colNumber;</span>
+<span class="nc" id="L117">        }</span>
+<span class="nc" id="L118">        appendColumnHeaderTimestamp(sb0);</span>
+<span class="nc" id="L119">        sb0.append(sb1);</span>
+<span class="nc" id="L120">        sb0.append(Const.LINESEPARATOR);</span>
+<span class="nc" id="L121">        return sb0.toString();</span>
+    }
+
+    /**
+     * Appends channel specific comments to a StringBuilder
+     *
+     * @param sb
+     * @param logChannel
+     * @param colNumber
+     */
+    private static void appendChannelSpecificComment(StringBuilder sb, LogChannel logChannel, int colNumber) {
+
+<span class="fc" id="L133">        String unit = logChannel.getUnit();</span>
+<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (unit.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L135">            unit = &quot;0&quot;;</span>
+        }
+<span class="fc" id="L137">        ValueType vType = logChannel.getValueType();</span>
+<span class="fc" id="L138">        String valueType = vType.toString();</span>
+<span class="fc" id="L139">        int valueTypeLength = 0;</span>
+<span class="fc bfc" id="L140" title="All 4 branches covered.">        if (vType.equals(ValueType.BYTE_ARRAY) || vType.equals(ValueType.STRING)) {</span>
+<span class="fc" id="L141">            valueTypeLength = logChannel.getValueTypeLength();</span>
+        }
+        else {
+<span class="fc" id="L144">            valueTypeLength = LoggerUtils.getLengthOfValueType(vType);</span>
+        }
+
+<span class="fc" id="L147">        String description = logChannel.getDescription();</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        if (description.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L149">            description = &quot;-&quot;;</span>
+        }
+
+<span class="fc" id="L152">        createRow(sb, String.format(&quot;%03d&quot;, colNumber), logChannel.getId(), FALSE_STRING, TRUE_STRING, unit,</span>
+                OTHER_STRING, valueType, valueTypeLength, description);
+<span class="fc" id="L154">    }</span>
+
+    /**
+     * Append column headers, the timestamps, in a StringBuilder
+     *
+     * @param sb
+     */
+    private static void appendColumnHeaderTimestamp(StringBuilder sb) {
+
+        // write column headers
+<span class="fc" id="L164">        sb.append(&quot;YYYYMMDD&quot;);</span>
+<span class="fc" id="L165">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L166">        sb.append(&quot;hhmmss&quot;);</span>
+<span class="fc" id="L167">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L168">        sb.append(&quot;unixtimestamp&quot;);</span>
+<span class="fc" id="L169">        sb.append(Const.SEPARATOR);</span>
+<span class="fc" id="L170">    }</span>
+
+    /**
+     * Sets the top of the header.
+     *
+     * @param sb
+     * @param loggingInterval
+     * @param filename
+     */
+    private static void setHeaderTop(StringBuilder sb, int loggingInterval, String filename) {
+
+<span class="fc" id="L181">        String timestepSeconds = String.valueOf(loggingInterval / (double) 1000);</span>
+<span class="fc" id="L182">        String seperator = Const.SEPARATOR;</span>
+
+        // write general header informations
+<span class="fc" id="L185">        appendStrings(sb, &quot;#ies_format_version: &quot;, String.valueOf(Const.ISEFORMATVERSION), Const.LINESEPARATOR_STRING);</span>
+<span class="fc" id="L186">        appendStrings(sb, &quot;#file: &quot;, filename, Const.LINESEPARATOR_STRING);</span>
+<span class="fc" id="L187">        appendStrings(sb, &quot;#file_info: &quot;, Const.FILEINFO, Const.LINESEPARATOR_STRING);</span>
+<span class="fc" id="L188">        appendStrings(sb, &quot;#timezone: &quot;, getDiffLocalUTC(), Const.LINESEPARATOR_STRING);</span>
+<span class="fc" id="L189">        appendStrings(sb, &quot;#timestep_sec: &quot;, timestepSeconds, Const.LINESEPARATOR_STRING);</span>
+<span class="fc" id="L190">        appendStrings(sb, &quot;#&quot;, &quot;col_no&quot;, seperator, &quot;col_name&quot;, seperator, &quot;confidential&quot;, seperator, &quot;measured&quot;,</span>
+                seperator, &quot;unit&quot;, seperator, &quot;category&quot;, seperator, Const.COMMENT_NAME, Const.LINESEPARATOR_STRING);
+<span class="fc" id="L192">        createRow(sb, &quot;001&quot;, &quot;YYYYMMDD&quot;, FALSE_STRING, FALSE_STRING, &quot;0&quot;, &quot;time&quot;, &quot;INTEGER&quot;, 8,</span>
+                &quot;Date [human readable]&quot;);
+<span class="fc" id="L194">        createRow(sb, &quot;002&quot;, &quot;hhmmss&quot;, FALSE_STRING, FALSE_STRING, &quot;0&quot;, &quot;time&quot;, &quot;SHORT&quot;, 6, &quot;Time [human readable]&quot;);</span>
+<span class="fc" id="L195">        createRow(sb, &quot;003&quot;, &quot;unixtimestamp&quot;, FALSE_STRING, FALSE_STRING, &quot;s&quot;, &quot;time&quot;, &quot;DOUBLE&quot;, 14,</span>
+                &quot;lapsed seconds from 01-01-1970&quot;);
+<span class="fc" id="L197">    }</span>
+
+    /**
+     * Construct a header row with predefined separators and comment signs.
+     *
+     * @param colNumber
+     *            column number example: #001
+     * @param colName
+     *            column name example: YYYYMMDD
+     * @param confidential
+     *            false or true
+     * @param measured
+     *            false or true
+     * @param unit
+     *            example: kWh
+     * @param category
+     *            example: time
+     * @param valueType
+     *            example: DOUBLE
+     * @param valueTypeLength
+     *            example: 8
+     * @param comment
+     *            a comment
+     */
+    private static void createRow(StringBuilder sb, String colNumber, String colName, String confidential,
+            String measured, String unit, String category, String valueType, int valueTypeLength, String comment) {
+
+<span class="fc" id="L224">        String seperator = Const.SEPARATOR;</span>
+<span class="fc" id="L225">        String commentSign = Const.COMMENT_SIGN;</span>
+<span class="fc" id="L226">        String vtEndSign = Const.VALUETYPE_ENDSIGN;</span>
+<span class="fc" id="L227">        String vtSizeSep = Const.VALUETYPE_SIZE_SEPARATOR;</span>
+<span class="fc" id="L228">        String valueTypeLengthString = &quot;&quot;;</span>
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (valueTypeLength != 0) {</span>
+<span class="fc" id="L230">            valueTypeLengthString += valueTypeLength;</span>
+        }
+<span class="fc" id="L232">        appendStrings(sb, commentSign, colNumber, seperator, colName, seperator, confidential, seperator, measured,</span>
+                seperator, unit, seperator, category, seperator, valueType, vtSizeSep, valueTypeLengthString, vtEndSign,
+                comment, Const.LINESEPARATOR_STRING);
+<span class="fc" id="L235">    }</span>
+
+    /**
+     * appendStrings appends a any String to a StringBuilder
+     *
+     * @param sb
+     *            StringBuilder to append a String
+     * @param s
+     *            the String to append
+     */
+    private static void appendStrings(StringBuilder sb, String... s) {
+
+<span class="fc bfc" id="L247" title="All 2 branches covered.">        for (String element : s) {</span>
+<span class="fc" id="L248">            sb.append(element);</span>
+        }
+<span class="fc" id="L250">    }</span>
+
+    /**
+     * Calculates the difference between the configured local time and the Coordinated Universal Time (UTC) without
+     * daylight saving time and returns it as a string.
+     *
+     * @return the difference between local time and UTC as string.
+     */
+    private static String getDiffLocalUTC() {
+
+        String ret;
+<span class="fc" id="L261">        long time = 0;</span>
+
+<span class="fc" id="L263">        Calendar calendar = new GregorianCalendar(Locale.getDefault());</span>
+
+<span class="fc" id="L265">        time = calendar.getTimeZone().getRawOffset();</span>
+<span class="fc" id="L266">        time /= 1000 * 60 * 60;</span>
+
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if (time &gt;= 0) {</span>
+<span class="fc" id="L269">            ret = (&quot;+ &quot; + time);</span>
+        }
+        else {
+<span class="nc" id="L272">            ret = (&quot;- &quot; + time);</span>
+        }
+
+<span class="fc" id="L275">        return ret;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

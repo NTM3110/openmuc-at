@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ByteArrayValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-api</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.data</a> &gt; <span class="el_source">ByteArrayValue.java</span></div><h1>ByteArrayValue.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.data;
+
+import java.util.Arrays;
+import java.util.Objects;
+
+/**
+ * ByteArrayValue is not immutable.
+ */
+public class ByteArrayValue implements Value {
+
+    private final byte[] value;
+
+    /**
+     * Create a new ByteArrayValue whose internal byte array will be a reference to the &lt;code&gt;value&lt;/code&gt; passed to
+     * this constructor. That means the passed byte array is not copied. Therefore you should not change the contents of
+     * value after calling this constructor. If you want ByteArrayValue to internally store a copy of the passed value
+     * then you should use the other constructor of this class instead.
+     *
+     * @param value
+     *            the byte array value.
+     */
+<span class="fc" id="L43">    public ByteArrayValue(byte[] value) {</span>
+<span class="fc" id="L44">        this.value = value;</span>
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Creates a new ByteArrayValue copying the byte array passed if &lt;code&gt;copy&lt;/code&gt; is true.
+     *
+     * @param value
+     *            the byte array value.
+     * @param copy
+     *            if true it will internally store a copy of value, else it will store a reference to value.
+     */
+<span class="nc" id="L55">    public ByteArrayValue(byte[] value, boolean copy) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (copy) {</span>
+<span class="nc" id="L57">            this.value = value.clone();</span>
+        }
+        else {
+<span class="nc" id="L60">            this.value = value;</span>
+        }
+<span class="nc" id="L62">    }</span>
+
+    /**
+     * Creates a new ByteArrayValue from a String in type [012345] or 0x012345.
+     *
+     * @param hexStringValue
+     *            the byte array value as string.
+     */
+<span class="nc" id="L70">    public ByteArrayValue(String hexStringValue) {</span>
+<span class="nc" id="L71">        this.value = fromHexString(hexStringValue);</span>
+<span class="nc" id="L72">    }</span>
+
+    private static byte[] fromHexString(String hexString) throws NumberFormatException {
+<span class="nc" id="L75">        validate(hexString);</span>
+
+<span class="nc" id="L77">        hexString = hexString.replaceAll(&quot;[^0-9a-fA-F]&quot;, &quot;&quot;);</span>
+<span class="nc" id="L78">        int length = hexString.length();</span>
+<span class="nc" id="L79">        byte[] data = new byte[length / 2];</span>
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i += 2) {</span>
+<span class="nc" id="L82">            data[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) &lt;&lt; 4)</span>
+<span class="nc" id="L83">                    + Character.digit(hexString.charAt(i + 1), 16));</span>
+        }
+<span class="nc" id="L85">        return data;</span>
+    }
+
+    private static void validate(String s) {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (s == null) {</span>
+<span class="nc" id="L90">            throw new IllegalArgumentException(&quot;String may not be null&quot;);</span>
+        }
+
+<span class="nc bnc" id="L93" title="All 4 branches missed.">        if (s.isEmpty() || ((s.length() % 2) != 0)) {</span>
+<span class="nc" id="L94">            throw new NumberFormatException(&quot;String \&quot;&quot; + s + &quot;\&quot; is not a legal hex string.&quot;);</span>
+        }
+<span class="nc" id="L96">    }</span>
+
+    @Override
+    public boolean equals(Object o) {
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if (this == o) {</span>
+<span class="nc" id="L101">            return true;</span>
+        }
+<span class="pc bpc" id="L103" title="2 of 4 branches missed.">        if (o == null || getClass() != o.getClass()) {</span>
+<span class="nc" id="L104">            return false;</span>
+        }
+<span class="fc" id="L106">        ByteArrayValue that = (ByteArrayValue) o;</span>
+<span class="fc" id="L107">        return Objects.deepEquals(value, that.value);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L112">        return Arrays.hashCode(value);</span>
+    }
+
+    @Override
+    public double asDouble() {
+<span class="nc" id="L117">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public float asFloat() {
+<span class="nc" id="L122">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public long asLong() {
+<span class="nc" id="L127">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public int asInt() {
+<span class="nc" id="L132">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public short asShort() {
+<span class="nc" id="L137">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public byte asByte() {
+<span class="nc" id="L142">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public boolean asBoolean() {
+<span class="nc" id="L147">        throw new TypeConversionException();</span>
+    }
+
+    @Override
+    public byte[] asByteArray() {
+<span class="nc" id="L152">        return value;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L157">        return Arrays.toString(this.value);</span>
+    }
+
+    @Override
+    public String asString() {
+<span class="nc" id="L162">        return toString();</span>
+    }
+
+    @Override
+    public ValueType getValueType() {
+<span class="nc" id="L167">        return ValueType.BYTE_ARRAY;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

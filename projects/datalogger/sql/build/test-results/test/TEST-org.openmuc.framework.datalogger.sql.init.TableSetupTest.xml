@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.datalogger.sql.init.TableSetupTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:30" hostname="shou-Dell-G15-5511" time="0.167">
+  <properties/>
+  <testcase name="createOpenmucTables()" classname="org.openmuc.framework.datalogger.sql.init.TableSetupTest" time="0.153"/>
+  <testcase name="initNewMetaTable()" classname="org.openmuc.framework.datalogger.sql.init.TableSetupTest" time="0.013"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

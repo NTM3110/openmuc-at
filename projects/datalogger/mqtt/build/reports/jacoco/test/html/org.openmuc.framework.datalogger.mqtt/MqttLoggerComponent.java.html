@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MqttLoggerComponent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-mqtt</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.mqtt</a> &gt; <span class="el_source">MqttLoggerComponent.java</span></div><h1>MqttLoggerComponent.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.mqtt;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.openmuc.framework.datalogger.spi.DataLoggerService;
+import org.openmuc.framework.lib.osgi.deployment.RegistrationHandler;
+import org.openmuc.framework.parser.spi.ParserService;
+import org.openmuc.framework.security.SslManagerInterface;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component
+<span class="nc" id="L42">public class MqttLoggerComponent {</span>
+
+<span class="nc" id="L44">    private static final Logger logger = LoggerFactory.getLogger(MqttLoggerComponent.class);</span>
+    private RegistrationHandler registrationHandler;
+    private MqttLogger mqttLogger;
+
+    @Activate
+    protected void activate(BundleContext context) {
+<span class="nc" id="L50">        logger.info(&quot;Activating MQTT Logger&quot;);</span>
+<span class="nc" id="L51">        mqttLogger = new MqttLogger();</span>
+<span class="nc" id="L52">        registrationHandler = new RegistrationHandler(context);</span>
+
+        // subscribe for ParserService
+<span class="nc" id="L55">        String serviceName = ParserService.class.getName();</span>
+<span class="nc" id="L56">        registrationHandler.subscribeForServiceServiceEvent(serviceName, (event) -&gt; {</span>
+<span class="nc" id="L57">            handleServiceRegistrationEvent(event, context);</span>
+<span class="nc" id="L58">        });</span>
+
+        // subscribe for SSLManager
+<span class="nc" id="L61">        serviceName = SslManagerInterface.class.getName();</span>
+<span class="nc" id="L62">        registrationHandler.subscribeForService(serviceName, instance -&gt; {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">            if (instance != null) {</span>
+<span class="nc" id="L64">                mqttLogger.setSslManager((SslManagerInterface) instance);</span>
+            }
+<span class="nc" id="L66">        });</span>
+
+        // provide ManagedService
+<span class="nc" id="L69">        String pid = MqttLogger.class.getName();</span>
+<span class="nc" id="L70">        registrationHandler.provideInFrameworkAsManagedService(mqttLogger, pid);</span>
+
+<span class="nc" id="L72">        registerDataLoggerService();</span>
+<span class="nc" id="L73">    }</span>
+
+    private void registerDataLoggerService() {
+<span class="nc" id="L76">        registrationHandler.provideInFrameworkWithoutConfiguration(DataLoggerService.class.getName(), mqttLogger);</span>
+<span class="nc" id="L77">    }</span>
+
+    private void handleServiceRegistrationEvent(Object event, BundleContext context) {
+<span class="nc" id="L80">        ServiceReference&lt;?&gt; serviceReference = ((ServiceEvent) event).getServiceReference();</span>
+
+<span class="nc" id="L82">        String parserId = (String) serviceReference.getProperty(&quot;parserID&quot;);</span>
+<span class="nc" id="L83">        ParserService parserService = (ParserService) context.getService(serviceReference);</span>
+<span class="nc" id="L84">        String parserServiceName = parserService.getClass().getName();</span>
+
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        if (((ServiceEvent) event).getType() == ServiceEvent.UNREGISTERING) {</span>
+<span class="nc" id="L87">            logger.info(&quot;{} unregistering, removing Parser&quot;, parserServiceName);</span>
+<span class="nc" id="L88">            mqttLogger.removeParser(parserId);</span>
+        }
+        else {
+<span class="nc" id="L91">            logger.info(&quot;{} changed, updating Parser&quot;, parserServiceName);</span>
+<span class="nc" id="L92">            mqttLogger.addParser(parserId, parserService);</span>
+        }
+<span class="nc" id="L94">    }</span>
+
+    @Deactivate
+    protected void deactivate(ComponentContext context) throws IOException, TimeoutException {
+<span class="nc" id="L98">        logger.info(&quot;Deactivating MQTT logger&quot;);</span>
+<span class="nc" id="L99">        mqttLogger.shutdown();</span>
+<span class="nc" id="L100">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

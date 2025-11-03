@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusDriverUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">ModbusDriverUtil.java</span></div><h1>ModbusDriverUtil.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus;
+
+import org.openmuc.framework.data.BooleanValue;
+import org.openmuc.framework.data.ByteArrayValue;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.FloatValue;
+import org.openmuc.framework.data.IntValue;
+import org.openmuc.framework.data.LongValue;
+import org.openmuc.framework.data.ShortValue;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.modbus.util.DatatypeConversion;
+import org.openmuc.framework.driver.modbus.util.DatatypeConversion.EndianInput;
+
+import com.ghgande.j2mod.modbus.procimg.InputRegister;
+import com.ghgande.j2mod.modbus.procimg.Register;
+import com.ghgande.j2mod.modbus.procimg.SimpleRegister;
+import com.ghgande.j2mod.modbus.util.BitVector;
+import com.ghgande.j2mod.modbus.util.ModbusUtil;
+
+public class ModbusDriverUtil {
+
+    private ModbusDriverUtil() {
+    }
+
+    public static Value getBitVectorsValue(BitVector bitVector) {
+
+        Value readValue;
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (bitVector.size() == 1) {</span>
+
+<span class="nc" id="L50">            readValue = new BooleanValue(bitVector.getBit(0)); // read single bit</span>
+        }
+        else {
+<span class="nc" id="L53">            readValue = new ByteArrayValue(bitVector.getBytes()); // read multiple bits</span>
+        }
+<span class="nc" id="L55">        return readValue;</span>
+    }
+
+    public static BitVector getBitVectorFromByteArray(Value value) {
+<span class="nc" id="L59">        BitVector bv = new BitVector(value.asByteArray().length * 8);</span>
+<span class="nc" id="L60">        bv.setBytes(value.asByteArray());</span>
+<span class="nc" id="L61">        return bv;</span>
+    }
+
+    /**
+     * Converts the registers into the datatyp of the channel
+     * 
+     * @param registers
+     *            input register array
+     * @param datatype
+     *            Edatatype
+     * @return the corresponding Value Object
+     */
+
+    public static Value getRegistersValue(InputRegister[] registers, EDatatype datatype) {
+<span class="nc" id="L75">        byte[] registerAsByteArray = inputRegisterToByteArray(registers);</span>
+<span class="nc" id="L76">        return getValueFromByteArray(registerAsByteArray, datatype);</span>
+    }
+
+    public static Value getValueFromByteArray(byte[] registerAsByteArray, EDatatype datatype) {
+
+<span class="nc" id="L81">        Value registerValue = null;</span>
+
+<span class="nc bnc" id="L83" title="All 10 branches missed.">        switch (datatype) {</span>
+        // case INT8:
+        // int int8 = DatatypeConversion.bytes_To_SignedInt8(registerAsByteArray);
+        // registerValue = new IntValue(int8);
+        // break;
+        case SHORT:
+        case INT16:
+<span class="nc" id="L90">            registerValue = new ShortValue(ModbusUtil.registerToShort(registerAsByteArray));</span>
+<span class="nc" id="L91">            break;</span>
+        case INT32:
+<span class="nc" id="L93">            registerValue = new IntValue(ModbusUtil.registersToInt(registerAsByteArray));</span>
+
+<span class="nc" id="L95">            break;</span>
+        // case INT64:
+        // registerValue = new LongValue(ModbusUtil.registersToLong(registerAsByteArray));
+        // break;
+
+        // case UINT8:
+        // // TODO might need both: big/little endian support in settings
+        // int uint8 = DatatypeConversion.bytes_To_UnsignedInt8(registerAsByteArray, 0);
+        // registerValue = new IntValue(uint8);
+        // break;
+        case UINT16:
+            // TODO might need both: big/little endian support in settings
+            // int uint16 = DatatypeConversion.bytes_To_UnsignedInt16(registerAsByteArray,
+            // EndianInput.BYTES_ARE_BIG_ENDIAN);
+            // registerValue = new IntValue(uint16);
+<span class="nc" id="L110">            registerValue = new IntValue(ModbusUtil.registerToUnsignedShort(registerAsByteArray));</span>
+<span class="nc" id="L111">            break;</span>
+        case UINT32:
+            // TODO might need both: big/little endian support in settings
+<span class="nc" id="L114">            long uint32 = DatatypeConversion.bytes_To_UnsignedInt32(registerAsByteArray,</span>
+                    EndianInput.BYTES_ARE_BIG_ENDIAN);
+<span class="nc" id="L116">            registerValue = new LongValue(uint32);</span>
+<span class="nc" id="L117">            break;</span>
+        case FLOAT:
+<span class="nc" id="L119">            registerValue = new FloatValue(ModbusUtil.registersToFloat(registerAsByteArray));</span>
+<span class="nc" id="L120">            break;</span>
+        case DOUBLE:
+<span class="nc" id="L122">            registerValue = new DoubleValue(ModbusUtil.registersToDouble(registerAsByteArray));</span>
+<span class="nc" id="L123">            break;</span>
+        case LONG:
+<span class="nc" id="L125">            registerValue = new LongValue(ModbusUtil.registersToLong(registerAsByteArray));</span>
+<span class="nc" id="L126">            break;</span>
+        case BYTEARRAY:
+<span class="nc" id="L128">            registerValue = new ByteArrayValue(registerAsByteArray);</span>
+<span class="nc" id="L129">            break;</span>
+        case BYTEARRAYLONG:
+<span class="nc" id="L131">            registerValue = new LongValue(</span>
+<span class="nc" id="L132">                    DatatypeConversion.bytes_To_SignedInt64(registerAsByteArray, EndianInput.BYTES_ARE_LITTLE_ENDIAN));</span>
+<span class="nc" id="L133">            break;</span>
+        // case BYTE_HIGH:
+        // registerValue = new IntValue(registerAsByteArray[1] &amp; 0xFF);
+        // break;
+        // case BYTE_LOW:
+        // registerValue = new IntValue(registerAsByteArray[0] &amp; 0xFF);
+        // break;
+        default:
+<span class="nc" id="L141">            throw new RuntimeException(&quot;Datatype &quot; + datatype.toString() + &quot; not supported yet&quot;);</span>
+        }
+
+<span class="nc" id="L144">        return registerValue;</span>
+    }
+
+    public static Register[] valueToRegisters(Value value, EDatatype datatype) {
+
+        Register[] registers;
+
+<span class="nc bnc" id="L151" title="All 9 branches missed.">        switch (datatype) {</span>
+
+        case SHORT:
+        case INT16:
+<span class="nc" id="L155">            registers = byteArrayToRegister(ModbusUtil.shortToRegister(value.asShort()));</span>
+<span class="nc" id="L156">            break;</span>
+        case INT32:
+<span class="nc" id="L158">            registers = byteArrayToRegister(ModbusUtil.intToRegisters(value.asInt()));</span>
+<span class="nc" id="L159">            break;</span>
+        case UINT16:
+<span class="nc" id="L161">            byte[] registerBytesUint16 = DatatypeConversion.unsingedInt16_To_Bytes(value.asInt(),</span>
+                    DatatypeConversion.EndianOutput.BYTES_AS_BIG_ENDIAN);
+<span class="nc" id="L163">            registers = byteArrayToRegister(registerBytesUint16);</span>
+<span class="nc" id="L164">            break;</span>
+        case UINT32:
+<span class="nc" id="L166">            byte[] registerBytesUint32 = DatatypeConversion.unsingedInt32_To_Bytes(value.asLong(),</span>
+                    DatatypeConversion.EndianOutput.BYTES_AS_BIG_ENDIAN);
+<span class="nc" id="L168">            registers = byteArrayToRegister(registerBytesUint32);</span>
+<span class="nc" id="L169">            break;</span>
+        case DOUBLE:
+<span class="nc" id="L171">            registers = byteArrayToRegister(ModbusUtil.doubleToRegisters(value.asDouble()));</span>
+<span class="nc" id="L172">            break;</span>
+        case FLOAT:
+<span class="nc" id="L174">            registers = byteArrayToRegister(ModbusUtil.floatToRegisters(value.asFloat()));</span>
+<span class="nc" id="L175">            break;</span>
+        case LONG:
+<span class="nc" id="L177">            registers = byteArrayToRegister(ModbusUtil.longToRegisters(value.asLong()));</span>
+<span class="nc" id="L178">            break;</span>
+        case BYTEARRAY:
+<span class="nc" id="L180">            registers = byteArrayToRegister(value.asByteArray());</span>
+<span class="nc" id="L181">            break;</span>
+        // case BYTE_HIGH:
+        // case BYTE_LOW:
+        default:
+<span class="nc" id="L185">            throw new RuntimeException(&quot;Datatype &quot; + datatype.toString() + &quot; not supported yet&quot;);</span>
+        }
+
+<span class="nc" id="L188">        return registers;</span>
+    }
+
+    /**
+     * Converts an array of input registers into a byte array
+     * 
+     * @param inputRegister
+     *            inputRegister array
+     * @return the InputRegister[] as byte[]
+     */
+    private static byte[] inputRegisterToByteArray(InputRegister[] inputRegister) {
+<span class="nc" id="L199">        byte[] registerAsBytes = new byte[inputRegister.length * 2]; // one register = 2 bytes</span>
+<span class="nc" id="L200">        byte inputRegisterByteLength = 2;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        for (int i = 0; i &lt; inputRegister.length; i++) {</span>
+<span class="nc" id="L202">            System.arraycopy(inputRegister[i].toBytes(), 0, registerAsBytes, i * inputRegisterByteLength,</span>
+                    inputRegisterByteLength);
+        }
+<span class="nc" id="L205">        return registerAsBytes;</span>
+    }
+
+    // TODO check byte order e.g. is an Integer!
+    // TODO only works for even byteArray.length!
+    private static Register[] byteArrayToRegister(byte[] byteArray) throws RuntimeException {
+
+        // TODO byteArray might has a odd number of bytes...
+        SimpleRegister[] register;
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        if (byteArray.length % 2 == 0) {</span>
+<span class="nc" id="L216">            register = new SimpleRegister[byteArray.length / 2];</span>
+<span class="nc" id="L217">            int j = 0;</span>
+            // for (int i = 0; i &lt; byteArray.length; i++) {
+<span class="nc bnc" id="L219" title="All 2 branches missed.">            for (int i = 0; i &lt; byteArray.length / 2; i++) {</span>
+<span class="nc" id="L220">                register[i] = new SimpleRegister(byteArray[j], byteArray[j + 1]);</span>
+<span class="nc" id="L221">                j = j + 2;</span>
+            }
+<span class="nc" id="L223">        }</span>
+        else {
+<span class="nc" id="L225">            throw new RuntimeException(&quot;conversion from byteArray to Register is not working for odd number of bytes&quot;);</span>
+        }
+<span class="nc" id="L227">        return register;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

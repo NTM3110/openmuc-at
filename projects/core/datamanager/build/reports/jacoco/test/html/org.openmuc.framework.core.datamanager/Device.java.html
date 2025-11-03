@@ -1,0 +1,683 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Device.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">Device.java</span></div><h1>Device.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.dataaccess.ChannelState;
+import org.openmuc.framework.dataaccess.DeviceState;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.driver.spi.Connection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class Device {
+
+<span class="nc" id="L40">    private static final Logger logger = LoggerFactory.getLogger(Device.class);</span>
+    private final LinkedList&lt;DeviceEvent&gt; eventList;
+    private final LinkedList&lt;DeviceTask&gt; taskList;
+    DeviceConfigImpl deviceConfig;
+    DataManager dataManager;
+    Connection connection;
+<span class="nc" id="L46">    private DeviceState state = null;</span>
+
+    public Device(DataManager dataManager, DeviceConfigImpl deviceConfig, long currentTime,
+<span class="nc" id="L49">            List&lt;LogChannel&gt; logChannels) {</span>
+<span class="nc" id="L50">        this.eventList = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L51">        this.taskList = new LinkedList&lt;&gt;();</span>
+
+<span class="nc" id="L53">        this.dataManager = dataManager;</span>
+<span class="nc" id="L54">        this.deviceConfig = deviceConfig;</span>
+
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        if (deviceConfig.isDisabled()) {</span>
+<span class="nc" id="L57">            state = DeviceState.DISABLED;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">            for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L59">                channelConfig.channel = new ChannelImpl(dataManager, channelConfig, ChannelState.DISABLED,</span>
+                        Flag.DISABLED, currentTime, logChannels);
+<span class="nc" id="L61">            }</span>
+        }
+<span class="nc bnc" id="L63" title="All 2 branches missed.">        else if (deviceConfig.driverParent.activeDriver == null) {</span>
+<span class="nc" id="L64">            state = DeviceState.DRIVER_UNAVAILABLE;</span>
+<span class="nc" id="L65">            logger.warn(&quot;No driver bundle available for configured driver: '{}'.&quot;, deviceConfig.getDriver().getId());</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L67">                channelConfig.channel = new ChannelImpl(dataManager, channelConfig, ChannelState.DRIVER_UNAVAILABLE,</span>
+                        Flag.DRIVER_UNAVAILABLE, currentTime, logChannels);
+<span class="nc" id="L69">            }</span>
+
+        }
+        else {
+<span class="nc" id="L73">            state = DeviceState.CONNECTING;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L75">                channelConfig.channel = new ChannelImpl(dataManager, channelConfig, ChannelState.CONNECTING,</span>
+                        Flag.CONNECTING, currentTime, logChannels);
+<span class="nc" id="L77">            }</span>
+        }
+<span class="nc" id="L79">    }</span>
+
+    DeviceState getState() {
+<span class="nc" id="L82">        return state;</span>
+    }
+
+    public void configChangedSignal(DeviceConfigImpl newDeviceConfig, long currentTime, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L86">        DeviceConfigImpl oldDeviceConfig = deviceConfig;</span>
+<span class="nc" id="L87">        deviceConfig = newDeviceConfig;</span>
+<span class="nc" id="L88">        newDeviceConfig.device = this;</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if (state == DeviceState.DISABLED) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L92">                setStatesForNewDevice(oldDeviceConfig, DeviceState.DISABLED, ChannelState.DISABLED, Flag.DISABLED,</span>
+                        currentTime, logChannels);
+            }
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            else if (deviceConfig.driverParent.activeDriver == null) {</span>
+<span class="nc" id="L96">                setStatesForNewDevice(oldDeviceConfig, DeviceState.DRIVER_UNAVAILABLE, ChannelState.DRIVER_UNAVAILABLE,</span>
+                        Flag.DRIVER_UNAVAILABLE, currentTime, logChannels);
+            }
+            else {
+<span class="nc" id="L100">                setStatesForNewDevice(oldDeviceConfig, DeviceState.CONNECTING, ChannelState.CONNECTING, Flag.CONNECTING,</span>
+                        currentTime, logChannels);
+<span class="nc" id="L102">                connect();</span>
+            }
+        }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        else if (state == DeviceState.DRIVER_UNAVAILABLE) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L107">                setStatesForNewDevice(oldDeviceConfig, DeviceState.DISABLED, ChannelState.DISABLED, Flag.DISABLED,</span>
+                        currentTime, logChannels);
+            }
+            else {
+<span class="nc" id="L111">                setStatesForNewDevice(oldDeviceConfig, DeviceState.DRIVER_UNAVAILABLE, ChannelState.DRIVER_UNAVAILABLE,</span>
+                        Flag.DRIVER_UNAVAILABLE, currentTime, logChannels);
+            }
+        }
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        else if (state == DeviceState.CONNECTING) {</span>
+<span class="nc" id="L116">            setStatesForNewDevice(oldDeviceConfig, DeviceState.CONNECTING, ChannelState.CONNECTING, Flag.CONNECTING,</span>
+                    currentTime, logChannels);
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L119">                addEvent(DeviceEvent.DISABLED);</span>
+            }
+<span class="nc bnc" id="L121" title="All 2 branches missed.">            else if (oldDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L122">                eventList.remove(DeviceEvent.DISABLED);</span>
+            }
+        }
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        else if (state == DeviceState.DISCONNECTING) {</span>
+<span class="nc" id="L126">            setStatesForNewDevice(oldDeviceConfig, DeviceState.DISCONNECTING, ChannelState.DISCONNECTING,</span>
+                    Flag.DISCONNECTING, currentTime, logChannels);
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L129">                addEvent(DeviceEvent.DISABLED);</span>
+            }
+<span class="nc bnc" id="L131" title="All 2 branches missed.">            else if (oldDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L132">                eventList.remove(DeviceEvent.DISABLED);</span>
+            }
+        }
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        else if (state == DeviceState.WAITING_FOR_CONNECTION_RETRY) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc" id="L137">                setStatesForNewDevice(oldDeviceConfig, DeviceState.DISABLED, ChannelState.DISABLED, Flag.DISABLED,</span>
+                        currentTime, logChannels);
+            }
+            else {
+<span class="nc" id="L141">                setStatesForNewDevice(oldDeviceConfig, DeviceState.WAITING_FOR_CONNECTION_RETRY,</span>
+                        ChannelState.WAITING_FOR_CONNECTION_RETRY, Flag.WAITING_FOR_CONNECTION_RETRY, currentTime,
+                        logChannels);
+            }
+        }
+        else {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            if (newDeviceConfig.isDisabled()) {</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                if (state == DeviceState.CONNECTED) {</span>
+<span class="nc" id="L149">                    eventList.add(DeviceEvent.DISABLED);</span>
+                    // TODO disable all readworkers
+<span class="nc" id="L151">                    setStatesForNewConnectedDevice(oldDeviceConfig, DeviceState.DISCONNECTING,</span>
+                            ChannelState.DISCONNECTING, Flag.DISCONNECTING, currentTime, logChannels);
+<span class="nc" id="L153">                    disconnect();</span>
+                }
+                else {
+                    // Adding the disabled event will automatically disconnect the device as soon as the active task is
+                    // finished
+<span class="nc" id="L158">                    eventList.add(DeviceEvent.DISABLED);</span>
+                    // Update channels anyway to update the log channels
+<span class="nc" id="L160">                    updateChannels(oldDeviceConfig, ChannelState.DISCONNECTING, Flag.DISCONNECTING, currentTime,</span>
+                            logChannels);
+                }
+            }
+            else {
+<span class="nc" id="L165">                updateChannels(oldDeviceConfig, ChannelState.CONNECTED, Flag.NO_VALUE_RECEIVED_YET, currentTime,</span>
+                        logChannels);
+            }
+        }
+
+<span class="nc" id="L170">    }</span>
+
+    private void updateChannels(DeviceConfigImpl oldDeviceConfig, ChannelState channelState, Flag flag,
+            long currentTime, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L174">        List&lt;ChannelRecordContainerImpl&gt; listeningChannels = null;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        for (Entry&lt;String, ChannelConfigImpl&gt; newChannelConfigEntry : deviceConfig.channelConfigsById.entrySet()) {</span>
+<span class="nc" id="L176">            ChannelConfigImpl oldChannelConfig = oldDeviceConfig.channelConfigsById.get(newChannelConfigEntry.getKey());</span>
+<span class="nc" id="L177">            ChannelConfigImpl newChannelConfig = newChannelConfigEntry.getValue();</span>
+
+<span class="nc bnc" id="L179" title="All 2 branches missed.">            if (oldChannelConfig == null) {</span>
+<span class="nc" id="L180">                listeningChannels = initalizeListenChannels(channelState, flag, currentTime, logChannels,</span>
+                        listeningChannels, newChannelConfig);
+            }
+            else {
+<span class="nc" id="L184">                updateConfig(currentTime, logChannels, oldChannelConfig, newChannelConfig);</span>
+            }
+<span class="nc" id="L186">        }</span>
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if (listeningChannels != null) {</span>
+<span class="nc" id="L189">            addStartListeningTask(new StartListeningTask(dataManager, this, listeningChannels));</span>
+        }
+<span class="nc" id="L191">    }</span>
+
+    private void updateConfig(long currentTime, List&lt;LogChannel&gt; logChannels, ChannelConfigImpl oldChannelConfig,
+            ChannelConfigImpl newChannelConfig) {
+<span class="nc" id="L195">        newChannelConfig.channel = oldChannelConfig.channel;</span>
+<span class="nc" id="L196">        newChannelConfig.channel.config = newChannelConfig;</span>
+<span class="nc" id="L197">        newChannelConfig.channel.setNewDeviceState(oldChannelConfig.state,</span>
+<span class="nc" id="L198">                newChannelConfig.channel.getLatestRecord().getFlag());</span>
+<span class="nc bnc" id="L199" title="All 4 branches missed.">        if (!newChannelConfig.isDisabled() &amp;&amp; (newChannelConfig.getLoggingInterval() &gt; 0)) {</span>
+<span class="nc" id="L200">            dataManager.addToLoggingCollections(newChannelConfig.channel, currentTime);</span>
+<span class="nc" id="L201">            logChannels.add(newChannelConfig);</span>
+        }
+<span class="nc bnc" id="L203" title="All 4 branches missed.">        else if (!oldChannelConfig.isDisabled() &amp;&amp; oldChannelConfig.getLoggingInterval() &gt; 0) {</span>
+<span class="nc" id="L204">            dataManager.removeFromLoggingCollections(newChannelConfig.channel);</span>
+        }
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        else if (!oldChannelConfig.isDisabled()</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                &amp;&amp; oldChannelConfig.getLoggingInterval() == ChannelConfig.LOGGING_INTERVAL_DEFAULT</span>
+<span class="nc bnc" id="L208" title="All 4 branches missed.">                &amp;&amp; oldChannelConfig.isLoggingEvent() &amp;&amp; oldChannelConfig.isListening()) {</span>
+<span class="nc" id="L209">            logChannels.add(newChannelConfig);</span>
+        }
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        if (newChannelConfig.isSampling()) {</span>
+<span class="nc" id="L212">            dataManager.addToSamplingCollections(newChannelConfig.channel, currentTime);</span>
+        }
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        else if (oldChannelConfig.isSampling()) {</span>
+<span class="nc" id="L215">            dataManager.removeFromSamplingCollections(newChannelConfig.channel);</span>
+        }
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        if (!newChannelConfig.getChannelAddress().equals(oldChannelConfig.getChannelAddress())) {</span>
+<span class="nc" id="L218">            newChannelConfig.channel.handle = null;</span>
+        }
+<span class="nc" id="L220">    }</span>
+
+    private List&lt;ChannelRecordContainerImpl&gt; initalizeListenChannels(ChannelState channelState, Flag flag,
+            long currentTime, List&lt;LogChannel&gt; logChannels, List&lt;ChannelRecordContainerImpl&gt; listeningChannels,
+            ChannelConfigImpl newChannelConfig) {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">        if (newChannelConfig.state != ChannelState.DISABLED) {</span>
+
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            if (newChannelConfig.isListening()) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                if (listeningChannels == null) {</span>
+<span class="nc" id="L229">                    listeningChannels = new LinkedList&lt;&gt;();</span>
+                }
+<span class="nc" id="L231">                newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, ChannelState.LISTENING,</span>
+                        Flag.NO_VALUE_RECEIVED_YET, currentTime, logChannels);
+<span class="nc" id="L233">                listeningChannels.add(newChannelConfig.channel.createChannelRecordContainer());</span>
+            }
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            else if (newChannelConfig.getSamplingInterval() != ChannelConfig.SAMPLING_INTERVAL_DEFAULT) {</span>
+<span class="nc" id="L236">                newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, ChannelState.SAMPLING,</span>
+                        Flag.NO_VALUE_RECEIVED_YET, currentTime, logChannels);
+<span class="nc" id="L238">                dataManager.addToSamplingCollections(newChannelConfig.channel, currentTime);</span>
+            }
+            else {
+<span class="nc" id="L241">                newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, channelState, flag,</span>
+                        currentTime, logChannels);
+            }
+        }
+        else {
+<span class="nc" id="L246">            newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, channelState, flag, currentTime,</span>
+                    logChannels);
+        }
+<span class="nc" id="L249">        return listeningChannels;</span>
+    }
+
+    private void addEvent(DeviceEvent event) {
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        for (DeviceEvent element : eventList) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (element == event) {</span>
+<span class="nc" id="L255">                return;</span>
+            }
+<span class="nc" id="L257">        }</span>
+<span class="nc" id="L258">        eventList.add(event);</span>
+<span class="nc" id="L259">    }</span>
+
+    private void setStatesForNewDevice(DeviceConfigImpl oldDeviceConfig, DeviceState deviceState,
+            ChannelState channelState, Flag flag, long currentTime, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L263">        state = deviceState;</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        for (Entry&lt;String, ChannelConfigImpl&gt; newChannelConfigEntry : deviceConfig.channelConfigsById.entrySet()) {</span>
+<span class="nc" id="L265">            ChannelConfigImpl oldChannelConfig = oldDeviceConfig.channelConfigsById.get(newChannelConfigEntry.getKey());</span>
+<span class="nc" id="L266">            ChannelConfigImpl channelConfigImpl = newChannelConfigEntry.getValue();</span>
+
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (oldChannelConfig == null) {</span>
+<span class="nc" id="L269">                channelConfigImpl.channel = new ChannelImpl(dataManager, channelConfigImpl, channelState, flag,</span>
+                        currentTime, logChannels);
+            }
+            else {
+<span class="nc" id="L273">                channelConfigImpl.channel = oldChannelConfig.channel;</span>
+<span class="nc" id="L274">                channelConfigImpl.channel.config = channelConfigImpl;</span>
+<span class="nc" id="L275">                channelConfigImpl.channel.setNewDeviceState(channelState, flag);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                if (!channelConfigImpl.isDisabled()) {</span>
+<span class="nc bnc" id="L277" title="All 4 branches missed.">                    if (channelConfigImpl.getLoggingInterval() &gt; 0 &amp;&amp; !channelConfigImpl.isLoggingEvent()) {</span>
+<span class="nc" id="L278">                        dataManager.addToLoggingCollections(channelConfigImpl.channel, currentTime);</span>
+<span class="nc" id="L279">                        logChannels.add(channelConfigImpl);</span>
+                    }
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                    else if (channelConfigImpl.getLoggingInterval() == ChannelConfig.LOGGING_INTERVAL_DEFAULT</span>
+<span class="nc bnc" id="L282" title="All 4 branches missed.">                            &amp;&amp; channelConfigImpl.isLoggingEvent() &amp;&amp; channelConfigImpl.isListening()) {</span>
+<span class="nc" id="L283">                        logChannels.add(channelConfigImpl);</span>
+                    }
+                }
+            }
+<span class="nc" id="L287">        }</span>
+<span class="nc" id="L288">    }</span>
+
+    private void setStatesForNewConnectedDevice(DeviceConfigImpl oldDeviceConfig, DeviceState DeviceState,
+            ChannelState channelState, Flag flag, long currentTime, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L292">        state = DeviceState;</span>
+<span class="nc" id="L293">        List&lt;ChannelRecordContainerImpl&gt; listeningChannels = null;</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        for (Entry&lt;String, ChannelConfigImpl&gt; newChannelConfigEntry : deviceConfig.channelConfigsById.entrySet()) {</span>
+<span class="nc" id="L295">            ChannelConfigImpl oldChannelConfig = oldDeviceConfig.channelConfigsById.get(newChannelConfigEntry.getKey());</span>
+<span class="nc" id="L296">            ChannelConfigImpl newChannelConfig = newChannelConfigEntry.getValue();</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">            if (oldChannelConfig == null) {</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                if (newChannelConfig.state != ChannelState.DISABLED) {</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">                    if (newChannelConfig.isListening()) {</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                        if (listeningChannels == null) {</span>
+<span class="nc" id="L301">                            listeningChannels = new LinkedList&lt;&gt;();</span>
+                        }
+<span class="nc" id="L303">                        listeningChannels.add(newChannelConfig.channel.createChannelRecordContainer());</span>
+<span class="nc" id="L304">                        newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig,</span>
+                                ChannelState.LISTENING, Flag.NO_VALUE_RECEIVED_YET, currentTime, logChannels);
+                    }
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                    else if (newChannelConfig.getSamplingInterval() != ChannelConfig.SAMPLING_INTERVAL_DEFAULT) {</span>
+<span class="nc" id="L308">                        newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, ChannelState.SAMPLING,</span>
+                                Flag.NO_VALUE_RECEIVED_YET, currentTime, logChannels);
+<span class="nc" id="L310">                        dataManager.addToSamplingCollections(newChannelConfig.channel, currentTime);</span>
+                    }
+                    else {
+<span class="nc" id="L313">                        newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, channelState, flag,</span>
+                                currentTime, logChannels);
+                    }
+                }
+                else {
+<span class="nc" id="L318">                    newChannelConfig.channel = new ChannelImpl(dataManager, newChannelConfig, channelState, flag,</span>
+                            currentTime, logChannels);
+                }
+            }
+            else {
+<span class="nc" id="L323">                newChannelConfig.channel = oldChannelConfig.channel;</span>
+<span class="nc" id="L324">                newChannelConfig.channel.config = newChannelConfig;</span>
+<span class="nc" id="L325">                newChannelConfig.channel.setNewDeviceState(channelState, flag);</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">                if (!newChannelConfigEntry.getValue().isDisabled()) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                    if ((newChannelConfigEntry.getValue().getLoggingInterval() &gt; 0</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                            &amp;&amp; !newChannelConfigEntry.getValue().isLoggingEvent())) {</span>
+<span class="nc" id="L329">                        dataManager.addToLoggingCollections(newChannelConfig.channel, currentTime);</span>
+<span class="nc" id="L330">                        logChannels.add(newChannelConfigEntry.getValue());</span>
+                    }
+<span class="nc bnc" id="L332" title="All 2 branches missed.">                    else if (newChannelConfigEntry.getValue()</span>
+<span class="nc" id="L333">                            .getLoggingInterval() == ChannelConfig.LOGGING_INTERVAL_DEFAULT</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                            &amp;&amp; newChannelConfigEntry.getValue().isLoggingEvent()</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">                            &amp;&amp; newChannelConfigEntry.getValue().isListening()) {</span>
+<span class="nc" id="L336">                        logChannels.add(newChannelConfigEntry.getValue());</span>
+                    }
+                }
+            }
+<span class="nc" id="L340">        }</span>
+
+<span class="nc" id="L342">    }</span>
+
+    private void setStates(DeviceState DeviceState, ChannelState channelState, Flag flag) {
+<span class="nc" id="L345">        state = DeviceState;</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">            if (channelConfig.state != ChannelState.DISABLED) {</span>
+<span class="nc" id="L348">                channelConfig.state = channelState;</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">                if (channelConfig.channel.getLatestRecord().getFlag() != Flag.SAMPLING_AND_LISTENING_DISABLED) {</span>
+<span class="nc" id="L350">                    channelConfig.channel.setFlag(flag);</span>
+                }
+            }
+<span class="nc" id="L353">        }</span>
+<span class="nc" id="L354">    }</span>
+
+    void driverRegisteredSignal() {
+
+<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (state == DeviceState.DRIVER_UNAVAILABLE) {</span>
+<span class="nc" id="L359">            setStates(DeviceState.CONNECTING, ChannelState.CONNECTING, Flag.CONNECTING);</span>
+<span class="nc" id="L360">            connect();</span>
+        }
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        else if (state == DeviceState.DISCONNECTING) {</span>
+<span class="nc" id="L363">            eventList.add(DeviceEvent.DRIVER_REGISTERED);</span>
+        }
+<span class="nc" id="L365">    }</span>
+
+    void driverDeregisteredSignal() {
+
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        if (state == DeviceState.DISABLED) {</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">            if (dataManager.activeDeviceCountDown-- == 0) {</span>
+<span class="nc" id="L371">                dataManager.driverRemovedSignal.countDown();</span>
+            }
+        }
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        else if (state == DeviceState.CONNECTED) {</span>
+
+<span class="nc" id="L376">            eventList.addFirst(DeviceEvent.DRIVER_DEREGISTERED);</span>
+
+<span class="nc" id="L378">            disableSampling();</span>
+<span class="nc" id="L379">            removeAllTasksOfThisDevice();</span>
+<span class="nc" id="L380">            setStates(DeviceState.DISCONNECTING, ChannelState.DISCONNECTING, Flag.DISCONNECTING);</span>
+<span class="nc" id="L381">            disconnect();</span>
+        }
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        else if (state == DeviceState.WAITING_FOR_CONNECTION_RETRY) {</span>
+<span class="nc" id="L384">            disableConnectionRetry();</span>
+<span class="nc" id="L385">            setStates(DeviceState.DRIVER_UNAVAILABLE, ChannelState.DRIVER_UNAVAILABLE, Flag.DRIVER_UNAVAILABLE);</span>
+<span class="nc" id="L386">            dataManager.activeDeviceCountDown--;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">            if (dataManager.activeDeviceCountDown == 0) {</span>
+<span class="nc" id="L388">                dataManager.driverRemovedSignal.countDown();</span>
+            }
+        }
+        else {
+            // add driver deregistered event always to the front of the queue
+<span class="nc" id="L393">            eventList.addFirst(DeviceEvent.DRIVER_DEREGISTERED);</span>
+        }
+<span class="nc" id="L395">    }</span>
+
+    public void deleteSignal() {
+<span class="nc bnc" id="L398" title="All 4 branches missed.">        if (state == DeviceState.DRIVER_UNAVAILABLE || state == DeviceState.DISABLED) {</span>
+<span class="nc" id="L399">            setDeleted();</span>
+        }
+<span class="nc bnc" id="L401" title="All 2 branches missed.">        else if (state == DeviceState.WAITING_FOR_CONNECTION_RETRY) {</span>
+<span class="nc" id="L402">            disableConnectionRetry();</span>
+<span class="nc" id="L403">            setDeleted();</span>
+        }
+<span class="nc bnc" id="L405" title="All 2 branches missed.">        else if (state == DeviceState.CONNECTED) {</span>
+<span class="nc" id="L406">            eventList.add(DeviceEvent.DELETED);</span>
+<span class="nc" id="L407">            setStates(DeviceState.DISCONNECTING, ChannelState.DISCONNECTING, Flag.DISCONNECTING);</span>
+<span class="nc" id="L408">            disconnect();</span>
+        }
+        else {
+<span class="nc" id="L411">            eventList.add(DeviceEvent.DELETED);</span>
+        }
+<span class="nc" id="L413">    }</span>
+
+    void connectedSignal(long currentTime) {
+
+<span class="nc" id="L417">        taskList.removeFirst();</span>
+
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        if (eventList.isEmpty()) {</span>
+<span class="nc" id="L420">            setConnected(currentTime);</span>
+<span class="nc" id="L421">            executeNextTask();</span>
+        }
+        else {
+<span class="nc" id="L424">            handleEventQueueWhenConnected();</span>
+        }
+<span class="nc" id="L426">    }</span>
+
+    void connectFailureSignal(long currentTime) {
+<span class="nc" id="L429">        taskList.removeFirst();</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">        if (eventList.isEmpty()) {</span>
+<span class="nc" id="L431">            setStates(DeviceState.WAITING_FOR_CONNECTION_RETRY, ChannelState.WAITING_FOR_CONNECTION_RETRY,</span>
+                    Flag.WAITING_FOR_CONNECTION_RETRY);
+<span class="nc" id="L433">            dataManager.addReconnectDeviceToActions(this, currentTime + deviceConfig.getConnectRetryInterval());</span>
+<span class="nc" id="L434">            removeAllTasksOfThisDevice();</span>
+        }
+        else {
+<span class="nc" id="L437">            handleEventQueueWhenDisconnected();</span>
+        }
+<span class="nc" id="L439">    }</span>
+
+    // TODO is this function thread save?
+    public synchronized void disconnectedSignal() {
+        // TODO in rare cases where the RecordsReceivedListener causes the disconnectSignal while a SamplingTask is
+        // still sampling this could cause problems
+<span class="nc" id="L445">        removeAllTasksOfThisDevice();</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">        if (eventList.isEmpty()) {</span>
+<span class="nc" id="L447">            setStates(DeviceState.CONNECTING, ChannelState.CONNECTING, Flag.CONNECTING);</span>
+<span class="nc" id="L448">            connect();</span>
+        }
+        else {
+<span class="nc" id="L451">            handleEventQueueWhenDisconnected();</span>
+        }
+<span class="nc" id="L453">    }</span>
+
+    public void connectRetrySignal() {
+<span class="nc" id="L456">        setStates(DeviceState.CONNECTING, ChannelState.CONNECTING, Flag.CONNECTING);</span>
+<span class="nc" id="L457">        connect();</span>
+<span class="nc" id="L458">    }</span>
+
+    private void disableConnectionRetry() {
+<span class="nc" id="L461">        dataManager.removeFromConnectionRetry(this);</span>
+<span class="nc" id="L462">    }</span>
+
+    private void setDeleted() {
+<span class="nc bnc" id="L465" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L466">            channelConfig.state = ChannelState.DELETED;</span>
+<span class="nc" id="L467">            channelConfig.channel.setFlag(Flag.CHANNEL_DELETED);</span>
+<span class="nc" id="L468">            channelConfig.channel.handle = null;</span>
+<span class="nc" id="L469">        }</span>
+<span class="nc" id="L470">        state = DeviceState.DELETED;</span>
+<span class="nc" id="L471">    }</span>
+
+    private void disableSampling() {
+<span class="nc bnc" id="L474" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">            if (channelConfig.state != ChannelState.DISABLED) {</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">                if (channelConfig.state == ChannelState.SAMPLING) {</span>
+<span class="nc" id="L477">                    dataManager.removeFromSamplingCollections(channelConfig.channel);</span>
+                }
+            }
+<span class="nc" id="L480">        }</span>
+<span class="nc" id="L481">    }</span>
+
+    private void handleEventQueueWhenConnected() {
+
+<span class="nc" id="L485">        removeAllTasksOfThisDevice();</span>
+<span class="nc" id="L486">        setStates(DeviceState.DISCONNECTING, ChannelState.DISCONNECTING, Flag.DISCONNECTING);</span>
+<span class="nc" id="L487">        disconnect();</span>
+
+<span class="nc" id="L489">    }</span>
+
+    private void removeAllTasksOfThisDevice() {
+<span class="nc" id="L492">        Iterator&lt;DeviceTask&gt; devTaskIter = taskList.iterator();</span>
+
+<span class="nc bnc" id="L494" title="All 2 branches missed.">        while (devTaskIter.hasNext()) {</span>
+<span class="nc" id="L495">            DeviceTask deviceTask = devTaskIter.next();</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">            if (deviceTask.device == this) {</span>
+<span class="nc" id="L497">                devTaskIter.remove();</span>
+            }
+<span class="nc" id="L499">        }</span>
+
+<span class="nc bnc" id="L501" title="All 2 branches missed.">        if (!taskList.isEmpty()) {</span>
+<span class="nc" id="L502">            DeviceTask firstDevice = taskList.getFirst();</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">            if (!firstDevice.isAlive()) {</span>
+<span class="nc" id="L504">                firstDevice.device.executeNextTask();</span>
+            }
+        }
+<span class="nc" id="L507">    }</span>
+
+    private void handleEventQueueWhenDisconnected() {
+
+        // DeviceEvent.DRIVER_DEREGISTERED will always be put at position 0
+<span class="nc bnc" id="L512" title="All 2 branches missed.">        if (eventList.get(0) == DeviceEvent.DRIVER_DEREGISTERED) {</span>
+
+<span class="nc" id="L514">            synchronized (dataManager.driverRemovedSignal) {</span>
+<span class="nc" id="L515">                dataManager.activeDeviceCountDown--;</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">                if (dataManager.activeDeviceCountDown == 0) {</span>
+<span class="nc" id="L517">                    dataManager.driverRemovedSignal.countDown();</span>
+                }
+<span class="nc" id="L519">            }</span>
+        }
+
+<span class="nc" id="L522">        DeviceEvent lastEvent = eventList.get(eventList.size() - 1);</span>
+
+<span class="nc bnc" id="L524" title="All 2 branches missed.">        if (lastEvent == DeviceEvent.DRIVER_DEREGISTERED) {</span>
+<span class="nc" id="L525">            setStates(DeviceState.DRIVER_UNAVAILABLE, ChannelState.DRIVER_UNAVAILABLE, Flag.DRIVER_UNAVAILABLE);</span>
+        }
+<span class="nc bnc" id="L527" title="All 2 branches missed.">        else if (lastEvent == DeviceEvent.DISABLED) {</span>
+<span class="nc" id="L528">            setStates(DeviceState.DISABLED, ChannelState.DISABLED, Flag.DISABLED);</span>
+        }
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        else if (lastEvent == DeviceEvent.DELETED) {</span>
+<span class="nc" id="L531">            setDeleted();</span>
+        }
+        // TODO handle DeviceEvent.DRIVER_REGISTERED?
+
+<span class="nc" id="L535">        eventList.clear();</span>
+
+<span class="nc" id="L537">    }</span>
+
+    private void connect() {
+
+<span class="nc" id="L541">        ConnectTask connectTask = new ConnectTask(deviceConfig.driverParent.activeDriver, deviceConfig.device,</span>
+                dataManager);
+<span class="nc" id="L543">        taskList.add(connectTask);</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">        if (containsOneTask()) {</span>
+<span class="nc" id="L545">            dataManager.executor.execute(connectTask);</span>
+        }
+<span class="nc" id="L547">    }</span>
+
+    private boolean containsOneTask() {
+<span class="nc bnc" id="L550" title="All 2 branches missed.">        return taskList.size() == 1;</span>
+    }
+
+    private void disconnect() {
+<span class="nc" id="L554">        DisconnectTask disconnectTask = new DisconnectTask(deviceConfig.driverParent.activeDriver, deviceConfig.device,</span>
+                dataManager);
+<span class="nc" id="L556">        taskList.add(disconnectTask);</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">        if (containsOneTask()) {</span>
+<span class="nc" id="L558">            dataManager.executor.execute(disconnectTask);</span>
+        }
+<span class="nc" id="L560">    }</span>
+
+    // only called by main thread
+    public boolean addSamplingTask(SamplingTask samplingTask, int samplingInterval) {
+<span class="nc bnc" id="L564" title="All 2 branches missed.">        if (isConnected()) {</span>
+
+            // new
+            // if (deviceConfig.readTimeout == 0 || deviceConfig.readTimeout &gt; samplingInterval) {
+            // if (taskList.size() &gt; 0) {
+            // if (taskList.get(0).getType() == DeviceTaskType.READ) {
+            // ((GenReadTask) taskList.get(0)).startedLate = true;
+            // }
+            // }
+            // }
+            // new
+
+<span class="nc" id="L576">            taskList.add(samplingTask);</span>
+<span class="nc bnc" id="L577" title="All 2 branches missed.">            if (containsOneTask()) {</span>
+<span class="nc" id="L578">                samplingTask.running = true;</span>
+<span class="nc" id="L579">                state = DeviceState.READING;</span>
+<span class="nc" id="L580">                dataManager.executor.execute(samplingTask);</span>
+            }
+<span class="nc" id="L582">            return true;</span>
+        }
+        else {
+<span class="nc" id="L585">            samplingTask.deviceNotConnected();</span>
+            // TODO in the future change this to true
+<span class="nc" id="L587">            return true;</span>
+        }
+    }
+
+    public &lt;T extends DeviceTask &amp; ConnectedTask&gt; void addTask(T deviceTask) {
+<span class="nc bnc" id="L592" title="All 2 branches missed.">        if (isConnected()) {</span>
+<span class="nc" id="L593">            taskList.add(deviceTask);</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">            if (containsOneTask()) {</span>
+<span class="nc" id="L595">                state = deviceTask.getType().getResultingState();</span>
+<span class="nc" id="L596">                dataManager.executor.execute(deviceTask);</span>
+            }
+        }
+        else {
+<span class="nc" id="L600">            deviceTask.deviceNotConnected();</span>
+        }
+<span class="nc" id="L602">    }</span>
+
+    public void taskFinished() {
+<span class="nc" id="L605">        taskList.removeFirst();</span>
+<span class="nc bnc" id="L606" title="All 2 branches missed.">        if (eventList.isEmpty()) {</span>
+<span class="nc" id="L607">            executeNextTask();</span>
+        }
+        else {
+<span class="nc" id="L610">            handleEventQueueWhenConnected();</span>
+        }
+
+<span class="nc" id="L613">    }</span>
+
+    private void executeNextTask() {
+<span class="nc bnc" id="L616" title="All 2 branches missed.">        if (!taskList.isEmpty()) {</span>
+<span class="nc" id="L617">            DeviceTask firstTask = taskList.getFirst();</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">            if (firstTask.getType() == DeviceTaskType.SAMPLE) {</span>
+<span class="nc" id="L619">                ((SamplingTask) firstTask).startedLate = true;</span>
+            }
+<span class="nc" id="L621">            state = firstTask.getType().getResultingState();</span>
+<span class="nc" id="L622">            dataManager.executor.execute(firstTask);</span>
+<span class="nc" id="L623">        }</span>
+        else {
+<span class="nc" id="L625">            state = DeviceState.CONNECTED;</span>
+        }
+<span class="nc" id="L627">    }</span>
+
+    public void removeTask(SamplingTask samplingTask) {
+<span class="nc" id="L630">        taskList.remove(samplingTask);</span>
+<span class="nc" id="L631">    }</span>
+
+    public void addStartListeningTask(StartListeningTask startListenTask) {
+<span class="nc bnc" id="L634" title="All 2 branches missed.">        if (isConnected()) {</span>
+<span class="nc" id="L635">            taskList.add(startListenTask);</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">            if (containsOneTask()) {</span>
+<span class="nc" id="L637">                state = DeviceState.STARTING_TO_LISTEN;</span>
+<span class="nc" id="L638">                dataManager.executor.execute(startListenTask);</span>
+            }
+        }
+<span class="nc" id="L641">    }</span>
+
+    public boolean isConnected() {
+<span class="nc bnc" id="L644" title="All 10 branches missed.">        return state == DeviceState.CONNECTED || state == DeviceState.READING</span>
+                || state == DeviceState.SCANNING_FOR_CHANNELS || state == DeviceState.STARTING_TO_LISTEN
+                || state == DeviceState.WRITING;
+    }
+
+    private void setConnected(long currentTime) {
+
+<span class="nc" id="L651">        List&lt;ChannelRecordContainerImpl&gt; listeningChannels = null;</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : deviceConfig.channelConfigsById.values()) {</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">            if (channelConfig.state != ChannelState.DISABLED) {</span>
+<span class="nc bnc" id="L654" title="All 2 branches missed.">                if (channelConfig.isListening()) {</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">                    if (listeningChannels == null) {</span>
+<span class="nc" id="L656">                        listeningChannels = new LinkedList&lt;&gt;();</span>
+                    }
+<span class="nc" id="L658">                    listeningChannels.add(channelConfig.channel.createChannelRecordContainer());</span>
+<span class="nc" id="L659">                    channelConfig.state = ChannelState.LISTENING;</span>
+<span class="nc" id="L660">                    channelConfig.channel.setFlag(Flag.NO_VALUE_RECEIVED_YET);</span>
+                }
+<span class="nc bnc" id="L662" title="All 2 branches missed.">                else if (channelConfig.getSamplingInterval() != ChannelConfig.SAMPLING_INTERVAL_DEFAULT) {</span>
+<span class="nc" id="L663">                    dataManager.addToSamplingCollections(channelConfig.channel, currentTime);</span>
+<span class="nc" id="L664">                    channelConfig.state = ChannelState.SAMPLING;</span>
+<span class="nc" id="L665">                    channelConfig.channel.setFlag(Flag.NO_VALUE_RECEIVED_YET);</span>
+                }
+                else {
+<span class="nc" id="L668">                    channelConfig.state = ChannelState.CONNECTED;</span>
+                }
+            }
+<span class="nc" id="L671">        }</span>
+
+<span class="nc bnc" id="L673" title="All 2 branches missed.">        if (listeningChannels != null) {</span>
+<span class="nc" id="L674">            taskList.add(new StartListeningTask(dataManager, this, listeningChannels));</span>
+<span class="nc" id="L675">            state = DeviceState.STARTING_TO_LISTEN;</span>
+        }
+        else {
+<span class="nc" id="L678">            state = DeviceState.CONNECTED;</span>
+        }
+
+<span class="nc" id="L681">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

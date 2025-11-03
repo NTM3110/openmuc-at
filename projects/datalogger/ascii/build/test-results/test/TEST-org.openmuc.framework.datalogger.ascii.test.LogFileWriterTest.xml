@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.datalogger.ascii.test.LogFileWriterTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:27" hostname="shou-Dell-G15-5511" time="0.005">
+  <properties/>
+  <testcase name="tc301_check_file_fill_up_at_logging()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileWriterTest" time="0.004"/>
+  <testcase name="tc300_check_if_new_file_is_created_on_day_change()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileWriterTest" time="0.001"/>
+  <system-out><![CDATA[### Setup() LogFileWriterTest
+08:39:27.389 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.390 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.391 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.391 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.392 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.392 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.393 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.393 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.394 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.394 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.394 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.395 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.395 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.396 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.396 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.397 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.397 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.398 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.398 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.399 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.399 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.399 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.400 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.400 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.400 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.401 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.401 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.402 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.402 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+08:39:27.402 [Test worker] ERROR org.openmuc.framework.datalogger.ascii.LogFileWriter - Wrong character: String contains separator character: ;	
+### Begin test tc301_check_file_fill_up_at_logging
+tc301_check_file_fill_up_at_logging
+ records = 5 (5 expected)
+ records with error flag 32 = 4 (4 expected)
+### Begin test tc300_check_if_new_file_is_created_on_day_change
+tc300_check_if_new_file_is_created_on_day_change
+ /home/shou/Downloads/openmuc-0.20.0/openmuc/projects/datalogger/ascii/test/20880808_10000.dat
+ /home/shou/Downloads/openmuc-0.20.0/openmuc/projects/datalogger/ascii/test/20880809_10000.dat
+ Two files created = true
+tearing down
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

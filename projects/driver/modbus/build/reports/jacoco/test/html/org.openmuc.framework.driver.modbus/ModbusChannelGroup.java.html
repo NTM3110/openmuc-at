@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusChannelGroup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">ModbusChannelGroup.java</span></div><h1>ModbusChannelGroup.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.driver.modbus;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.openmuc.framework.data.BooleanValue;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.ghgande.j2mod.modbus.procimg.InputRegister;
+import com.ghgande.j2mod.modbus.util.BitVector;
+
+/**
+ * Represents a group of channels which is used for a multiple read request
+ */
+public class ModbusChannelGroup {
+
+<span class="nc" id="L42">    private static final Logger logger = LoggerFactory.getLogger(ModbusChannelGroup.class);</span>
+
+    private static final int INVALID = -1;
+
+    private EPrimaryTable primaryTable;
+    private final ArrayList&lt;ModbusChannel&gt; channels;
+
+    /** Start address to read from */
+    private int startAddress;
+
+    /** Number of Registers/Coils to be read from startAddress */
+    private int count;
+
+    private int unitId;
+    private EFunctionCode functionCode;
+    private final String samplingGroup;
+
+<span class="nc" id="L59">    public ModbusChannelGroup(String samplingGroup, ArrayList&lt;ModbusChannel&gt; channels) {</span>
+<span class="nc" id="L60">        this.samplingGroup = samplingGroup;</span>
+<span class="nc" id="L61">        this.channels = channels;</span>
+<span class="nc" id="L62">        setPrimaryTable();</span>
+<span class="nc" id="L63">        setUnitId();</span>
+<span class="nc" id="L64">        setStartAddress();</span>
+<span class="nc" id="L65">        setCount();</span>
+<span class="nc" id="L66">        setFunctionCode();</span>
+<span class="nc" id="L67">    }</span>
+
+    public String getInfo() {
+<span class="nc" id="L70">        String info = &quot;SamplingGroup: '&quot; + samplingGroup + &quot;' Channels: &quot;;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc" id="L72">            info += channel.getStartAddress() + &quot;:&quot; + channel.getDatatype() + &quot;, &quot;;</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        return info;</span>
+    }
+
+    private void setFunctionCode() {
+
+<span class="nc" id="L79">        boolean init = false;</span>
+<span class="nc" id="L80">        EFunctionCode tempFunctionCode = null;</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            if (!init) {</span>
+<span class="nc" id="L84">                tempFunctionCode = channel.getFunctionCode();</span>
+<span class="nc" id="L85">                init = true;</span>
+            }
+            else {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                if (!tempFunctionCode.equals(channel.getFunctionCode())) {</span>
+<span class="nc" id="L89">                    throw new RuntimeException(&quot;FunctionCodes of all channels within the samplingGroup '&quot;</span>
+                            + samplingGroup + &quot;' are not equal! Change your openmuc config.&quot;);
+                }
+            }
+<span class="nc" id="L93">        }</span>
+
+<span class="nc" id="L95">        functionCode = tempFunctionCode;</span>
+<span class="nc" id="L96">    }</span>
+
+    /**
+     * Checks if the primary table of all channels of the sampling group is equal and sets the value for the channel
+     * group.
+     */
+    private void setPrimaryTable() {
+
+<span class="nc" id="L104">        boolean init = false;</span>
+<span class="nc" id="L105">        EPrimaryTable tempPrimaryTable = null;</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">            if (!init) {</span>
+<span class="nc" id="L109">                tempPrimaryTable = channel.getPrimaryTable();</span>
+<span class="nc" id="L110">                init = true;</span>
+            }
+            else {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                if (!tempPrimaryTable.equals(channel.getPrimaryTable())) {</span>
+<span class="nc" id="L114">                    throw new RuntimeException(&quot;Primary tables of all channels within the samplingGroup '&quot;</span>
+                            + samplingGroup + &quot;' are not equal! Change your openmuc config.&quot;);
+                }
+            }
+<span class="nc" id="L118">        }</span>
+
+<span class="nc" id="L120">        primaryTable = tempPrimaryTable;</span>
+<span class="nc" id="L121">    }</span>
+
+    private void setUnitId() {
+<span class="nc" id="L124">        int idOfFirstChannel = INVALID;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">            if (idOfFirstChannel == INVALID) {</span>
+<span class="nc" id="L127">                idOfFirstChannel = channel.getUnitId();</span>
+            }
+            else {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">                if (channel.getUnitId() != idOfFirstChannel) {</span>
+
+                    // TODO ???
+                    // channel 1 device 1 = unitId 1
+                    // channel 1 device 2 = unitId 2
+                    // Does openmuc calls the read method for channels of different devices?
+                    // If so, then the check for UnitID has to be modified. Only channels of the same device
+                    // need to have the same unitId...
+<span class="nc" id="L138">                    throw new RuntimeException(&quot;UnitIds of all channels within the samplingGroup '&quot; + samplingGroup</span>
+                            + &quot;' are not equal! Change your openmuc config.&quot;);
+                }
+            }
+<span class="nc" id="L142">        }</span>
+<span class="nc" id="L143">        unitId = idOfFirstChannel;</span>
+<span class="nc" id="L144">    }</span>
+
+    /**
+     * StartAddress is the smallest channel address of the group
+     */
+    private void setStartAddress() {
+
+<span class="nc" id="L151">        startAddress = INVALID;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (startAddress == INVALID) {</span>
+<span class="nc" id="L154">                startAddress = channel.getStartAddress();</span>
+            }
+            else {
+<span class="nc" id="L157">                startAddress = Math.min(startAddress, channel.getStartAddress());</span>
+            }
+<span class="nc" id="L159">        }</span>
+<span class="nc" id="L160">    }</span>
+
+    /**
+     *
+     */
+    private void setCount() {
+
+<span class="nc" id="L167">        int maximumAddress = startAddress;</span>
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+<span class="nc" id="L170">            maximumAddress = Math.max(maximumAddress, channel.getStartAddress() + channel.getCount());</span>
+<span class="nc" id="L171">        }</span>
+
+<span class="nc" id="L173">        count = maximumAddress - startAddress;</span>
+<span class="nc" id="L174">    }</span>
+
+    public void setChannelValues(InputRegister[] inputRegisters, List&lt;ChannelRecordContainer&gt; containers) {
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+            // determine start index of the registers which contain the values of the channel
+<span class="nc" id="L180">            int registerIndex = channel.getStartAddress() - getStartAddress();</span>
+            // create a temporary register array
+<span class="nc" id="L182">            InputRegister[] registers = new InputRegister[channel.getCount()];</span>
+            // copy relevant registers for the channel
+<span class="nc" id="L184">            System.arraycopy(inputRegisters, registerIndex, registers, 0, channel.getCount());</span>
+
+            // now we have a register array which contains the value of the channel
+<span class="nc" id="L187">            ChannelRecordContainer container = searchContainer(channel.getChannelAddress(), containers);</span>
+
+<span class="nc" id="L189">            long receiveTime = System.currentTimeMillis();</span>
+
+<span class="nc" id="L191">            Value value = ModbusDriverUtil.getRegistersValue(registers, channel.getDatatype());</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">            if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L194">                logger.trace(&quot;response value channel &quot; + channel.getChannelAddress() + &quot;: &quot; + value.toString());</span>
+            }
+
+<span class="nc" id="L197">            container.setRecord(new Record(value, receiveTime));</span>
+<span class="nc" id="L198">        }</span>
+<span class="nc" id="L199">    }</span>
+
+    public void setChannelValues(BitVector bitVector, List&lt;ChannelRecordContainer&gt; containers) {
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        for (ModbusChannel channel : channels) {</span>
+
+<span class="nc" id="L205">            long receiveTime = System.currentTimeMillis();</span>
+
+            // determine start index of the registers which contain the values of the channel
+<span class="nc" id="L208">            int index = channel.getStartAddress() - getStartAddress();</span>
+
+<span class="nc" id="L210">            BooleanValue value = new BooleanValue(bitVector.getBit(index));</span>
+<span class="nc" id="L211">            ChannelRecordContainer container = searchContainer(channel.getChannelAddress(), containers);</span>
+<span class="nc" id="L212">            container.setRecord(new Record(value, receiveTime));</span>
+<span class="nc" id="L213">        }</span>
+<span class="nc" id="L214">    }</span>
+
+    private ChannelRecordContainer searchContainer(String channelAddress, List&lt;ChannelRecordContainer&gt; containers) {
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        for (ChannelRecordContainer container : containers) {</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">            if (container.getChannelAddress().equalsIgnoreCase(channelAddress)) {</span>
+<span class="nc" id="L219">                return container;</span>
+            }
+<span class="nc" id="L221">        }</span>
+<span class="nc" id="L222">        throw new RuntimeException(&quot;No ChannelRecordContainer found for channelAddress &quot; + channelAddress);</span>
+    }
+
+    public boolean isEmpty() {
+<span class="nc" id="L226">        boolean result = true;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        if (channels.size() != 0) {</span>
+<span class="nc" id="L228">            result = false;</span>
+        }
+<span class="nc" id="L230">        return result;</span>
+    }
+
+    public EPrimaryTable getPrimaryTable() {
+<span class="nc" id="L234">        return primaryTable;</span>
+    }
+
+    public int getStartAddress() {
+<span class="nc" id="L238">        return startAddress;</span>
+    }
+
+    public int getCount() {
+<span class="nc" id="L242">        return count;</span>
+    }
+
+    public int getUnitId() {
+<span class="nc" id="L246">        return unitId;</span>
+    }
+
+    public String getSamplingGroup() {
+<span class="nc" id="L250">        return samplingGroup;</span>
+    }
+
+    public EFunctionCode getFunctionCode() {
+<span class="nc" id="L254">        return functionCode;</span>
+    }
+
+    public ArrayList&lt;ModbusChannel&gt; getChannels() {
+<span class="nc" id="L258">        return channels;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

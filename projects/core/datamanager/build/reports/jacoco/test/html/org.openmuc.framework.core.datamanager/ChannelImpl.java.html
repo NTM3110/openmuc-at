@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChannelImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">ChannelImpl.java</span></div><h1>ChannelImpl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.data.BooleanValue;
+import org.openmuc.framework.data.ByteArrayValue;
+import org.openmuc.framework.data.ByteValue;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.FloatValue;
+import org.openmuc.framework.data.FutureValue;
+import org.openmuc.framework.data.IntValue;
+import org.openmuc.framework.data.LongValue;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.ShortValue;
+import org.openmuc.framework.data.StringValue;
+import org.openmuc.framework.data.TypeConversionException;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.dataaccess.Channel;
+import org.openmuc.framework.dataaccess.ChannelState;
+import org.openmuc.framework.dataaccess.DataLoggerNotAvailableException;
+import org.openmuc.framework.dataaccess.DeviceState;
+import org.openmuc.framework.dataaccess.ReadRecordContainer;
+import org.openmuc.framework.dataaccess.RecordListener;
+import org.openmuc.framework.dataaccess.WriteValueContainer;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+
+public final class ChannelImpl implements Channel {
+
+<span class="nc" id="L68">    private static final Logger logger = LoggerFactory.getLogger(ChannelImpl.class);</span>
+<span class="nc" id="L69">    private final Set&lt;RecordListener&gt; listeners = new LinkedHashSet&lt;&gt;();</span>
+    private final DataManager dataManager;
+    volatile ChannelConfigImpl config;
+    ChannelCollection samplingCollection;
+    ChannelCollection loggingCollection;
+    volatile Object handle;
+    private volatile Record latestRecord;
+<span class="nc" id="L76">    private Timer timer = null;</span>
+    private List&lt;FutureValue&gt; futureValues;
+
+    public ChannelImpl(DataManager dataManager, ChannelConfigImpl config, ChannelState initState, Flag initFlag,
+<span class="nc" id="L80">            long currentTime, List&lt;LogChannel&gt; logChannels) {</span>
+<span class="nc" id="L81">        this.dataManager = dataManager;</span>
+<span class="nc" id="L82">        this.config = config;</span>
+<span class="nc" id="L83">        this.futureValues = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if (config.isDisabled()) {</span>
+<span class="nc" id="L86">            config.state = ChannelState.DISABLED;</span>
+<span class="nc" id="L87">            latestRecord = new Record(Flag.DISABLED);</span>
+        }
+<span class="nc bnc" id="L89" title="All 4 branches missed.">        else if (!config.isListening() &amp;&amp; config.getSamplingInterval() &lt; 0) {</span>
+<span class="nc" id="L90">            config.state = initState;</span>
+<span class="nc" id="L91">            latestRecord = new Record(Flag.SAMPLING_AND_LISTENING_DISABLED);</span>
+        }
+        else {
+<span class="nc" id="L94">            config.state = initState;</span>
+<span class="nc" id="L95">            latestRecord = new Record(null, null, initFlag);</span>
+        }
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if (config.getLoggingInterval() != ChannelConfig.LOGGING_INTERVAL_DEFAULT) {</span>
+<span class="nc" id="L99">            dataManager.addToLoggingCollections(this, currentTime);</span>
+<span class="nc" id="L100">            logChannels.add(config);</span>
+        }
+<span class="nc bnc" id="L102" title="All 4 branches missed.">        else if (config.getLoggingInterval() == ChannelConfig.LOGGING_INTERVAL_DEFAULT &amp;&amp; config.isLoggingEvent()</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">                &amp;&amp; config.isListening()) {</span>
+<span class="nc" id="L104">            logChannels.add(config);</span>
+        }
+<span class="nc" id="L106">    }</span>
+
+    @Override
+    public String getId() {
+<span class="nc" id="L110">        return config.getId();</span>
+    }
+
+    @Override
+    public String getChannelAddress() {
+<span class="nc" id="L115">        return config.getChannelAddress();</span>
+    }
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L120">        return config.getDescription();</span>
+    }
+
+    @Override
+    public String getSettings() {
+<span class="nc" id="L125">        return config.getSettings();</span>
+    }
+
+    @Override
+    public String getLoggingSettings() {
+<span class="nc" id="L130">        return config.getLoggingSettings();</span>
+    }
+
+    @Override
+    public String getUnit() {
+<span class="nc" id="L135">        return config.getUnit();</span>
+    }
+
+    @Override
+    public ValueType getValueType() {
+<span class="nc" id="L140">        return config.getValueType();</span>
+    }
+
+    @Override
+    public double getScalingFactor() {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (config.getScalingFactor() == null) {</span>
+<span class="nc" id="L146">            return 1d;</span>
+        }
+<span class="nc" id="L148">        return config.getScalingFactor();</span>
+    }
+
+    @Override
+    public int getSamplingInterval() {
+<span class="nc" id="L153">        return config.getSamplingInterval();</span>
+    }
+
+    @Override
+    public int getSamplingTimeOffset() {
+<span class="nc" id="L158">        return config.getSamplingTimeOffset();</span>
+    }
+
+    @Override
+    public int getSamplingTimeout() {
+<span class="nc" id="L163">        return config.deviceParent.getSamplingTimeout();</span>
+    }
+
+    @Override
+    public int getLoggingInterval() {
+<span class="nc" id="L168">        return config.getLoggingInterval();</span>
+    }
+
+    @Override
+    public int getLoggingTimeOffset() {
+<span class="nc" id="L173">        return config.getLoggingTimeOffset();</span>
+    }
+
+    @Override
+    public String getDriverName() {
+<span class="nc" id="L178">        return config.deviceParent.driverParent.id;</span>
+    }
+
+    @Override
+    public String getDeviceAddress() {
+<span class="nc" id="L183">        return config.deviceParent.getDeviceAddress();</span>
+    }
+
+    @Override
+    public String getDeviceName() {
+<span class="nc" id="L188">        return config.deviceParent.getId();</span>
+    }
+
+    @Override
+    public String getDeviceDescription() {
+<span class="nc" id="L193">        return config.deviceParent.getDescription();</span>
+    }
+
+    @Override
+    public ChannelState getChannelState() {
+<span class="nc" id="L198">        return config.state;</span>
+    }
+
+    @Override
+    public DeviceState getDeviceState() {
+<span class="nc" id="L203">        return config.deviceParent.device.getState();</span>
+    }
+
+    @Override
+    public void addListener(RecordListener listener) {
+<span class="nc" id="L208">        synchronized (listeners) {</span>
+<span class="nc" id="L209">            listeners.add(listener);</span>
+<span class="nc" id="L210">        }</span>
+<span class="nc" id="L211">    }</span>
+
+    @Override
+    public void removeListener(RecordListener listener) {
+<span class="nc" id="L215">        synchronized (listeners) {</span>
+<span class="nc" id="L216">            listeners.remove(listener);</span>
+<span class="nc" id="L217">        }</span>
+<span class="nc" id="L218">    }</span>
+
+    @Override
+    public Record getLatestRecord() {
+<span class="nc" id="L222">        return latestRecord;</span>
+    }
+
+    @Override
+    public void setLatestRecord(Record record) {
+<span class="nc" id="L227">        setNewRecord(record);</span>
+<span class="nc" id="L228">    }</span>
+
+    @Override
+    public Record getLoggedRecord(long timestamp) throws DataLoggerNotAvailableException, IOException {
+<span class="nc" id="L232">        String reader = getValidReaderIdFromConfig();</span>
+<span class="nc" id="L233">        List&lt;Record&gt; records = dataManager.getDataLogger(reader).getRecords(config.getId(), timestamp, timestamp);</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">        if (!records.isEmpty()) {</span>
+<span class="nc" id="L235">            return records.get(0);</span>
+        }
+        else {
+<span class="nc" id="L238">            return null;</span>
+        }
+    }
+
+    @Override
+    public List&lt;Record&gt; getLoggedRecords(long startTime) throws DataLoggerNotAvailableException, IOException {
+<span class="nc" id="L244">        String reader = getValidReaderIdFromConfig();</span>
+<span class="nc" id="L245">        return dataManager.getDataLogger(reader).getRecords(config.getId(), startTime, System.currentTimeMillis());</span>
+    }
+
+    @Override
+    public List&lt;Record&gt; getLoggedRecords(long startTime, long endTime)
+            throws DataLoggerNotAvailableException, IOException {
+<span class="nc" id="L251">        String reader = getValidReaderIdFromConfig();</span>
+<span class="nc" id="L252">        List&lt;Record&gt; toReturn = dataManager.getDataLogger(reader).getRecords(config.getId(), startTime, endTime);</span>
+
+        // values in the future values list are sorted.
+<span class="nc" id="L255">        Long currentTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        for (FutureValue futureValue : futureValues) {</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            if (futureValue.getWriteTime() &gt;= currentTime) {</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                if (futureValue.getWriteTime() &lt;= endTime) {</span>
+<span class="nc" id="L259">                    Record futureValAsRec = new Record(futureValue.getValue(), futureValue.getWriteTime());</span>
+<span class="nc" id="L260">                    toReturn.add(futureValAsRec);</span>
+                }
+                else {
+                    break;
+                }
+            }
+<span class="nc" id="L266">        }</span>
+<span class="nc" id="L267">        return toReturn;</span>
+    }
+
+    private String getValidReaderIdFromConfig() {
+<span class="nc bnc" id="L271" title="All 4 branches missed.">        if (config.getReader().isEmpty() || config.getReader() == null) {</span>
+<span class="nc" id="L272">            return firstLoggerFromLogSettings();</span>
+        }
+        else {
+<span class="nc" id="L275">            return config.getReader();</span>
+        }
+    }
+
+    private String firstLoggerFromLogSettings() {
+<span class="nc" id="L280">        String[] loggerSegments = config.getLoggingSettings().split(&quot;;&quot;);</span>
+<span class="nc" id="L281">        List&lt;String&gt; definedLogger = Arrays.stream(loggerSegments)</span>
+<span class="nc" id="L282">                .map(seg -&gt; seg.split(&quot;:&quot;)[0])</span>
+<span class="nc" id="L283">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L285">        return definedLogger.get(0);</span>
+    }
+
+    Record setNewRecord(Record record) {
+
+        Record convertedRecord;
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">        if (record.getFlag() == Flag.VALID) {</span>
+<span class="nc" id="L293">            convertedRecord = convertValidRecord(record);</span>
+        }
+        else {
+<span class="nc" id="L296">            convertedRecord = new Record(latestRecord.getValue(), latestRecord.getTimestamp(), record.getFlag());</span>
+        }
+
+<span class="nc" id="L299">        latestRecord = convertedRecord;</span>
+<span class="nc" id="L300">        notifyListeners();</span>
+
+<span class="nc" id="L302">        return convertedRecord;</span>
+    }
+
+    private Record convertValidRecord(Record record) {
+<span class="nc" id="L306">        Double scalingFactor = config.getScalingFactor();</span>
+<span class="nc" id="L307">        Double scalingOffset = config.getValueOffset();</span>
+
+<span class="nc bnc" id="L309" title="All 2 branches missed.">        if (scalingFactor != null) {</span>
+            try {
+<span class="nc" id="L311">                record = new Record(new DoubleValue(record.getValue().asDouble() * scalingFactor),</span>
+<span class="nc" id="L312">                        record.getTimestamp(), record.getFlag());</span>
+<span class="nc" id="L313">            } catch (TypeConversionException e) {</span>
+<span class="nc" id="L314">                String msg = &quot;Unable to apply scaling factor to channel &quot; + config.getId()</span>
+                        + &quot; because a TypeConversionError occurred.&quot;;
+<span class="nc" id="L316">                logger.error(msg, e);</span>
+<span class="nc" id="L317">            }</span>
+        }
+<span class="nc bnc" id="L319" title="All 2 branches missed.">        if (scalingOffset != null) {</span>
+            try {
+<span class="nc" id="L321">                record = new Record(new DoubleValue(record.getValue().asDouble() + scalingOffset),</span>
+<span class="nc" id="L322">                        record.getTimestamp(), record.getFlag());</span>
+<span class="nc" id="L323">            } catch (TypeConversionException e) {</span>
+<span class="nc" id="L324">                String msg = &quot;Unable to apply scaling offset to channel &quot; + config.getId()</span>
+                        + &quot; because a TypeConversionError occurred.&quot;;
+<span class="nc" id="L326">                logger.error(msg, e);</span>
+<span class="nc" id="L327">            }</span>
+        }
+
+        try {
+<span class="nc bnc" id="L331" title="All 9 branches missed.">            switch (config.getValueType()) {</span>
+            case BOOLEAN:
+<span class="nc" id="L333">                return new Record(new BooleanValue(record.getValue().asBoolean()), record.getTimestamp(),</span>
+<span class="nc" id="L334">                        record.getFlag());</span>
+            case BYTE:
+<span class="nc" id="L336">                return new Record(new ByteValue(record.getValue().asByte()), record.getTimestamp(), record.getFlag());</span>
+            case SHORT:
+<span class="nc" id="L338">                return new Record(new ShortValue(record.getValue().asShort()), record.getTimestamp(), record.getFlag());</span>
+            case INTEGER:
+<span class="nc" id="L340">                return new Record(new IntValue(record.getValue().asInt()), record.getTimestamp(), record.getFlag());</span>
+            case LONG:
+<span class="nc" id="L342">                return new Record(new LongValue(record.getValue().asLong()), record.getTimestamp(), record.getFlag());</span>
+            case FLOAT:
+<span class="nc" id="L344">                return new Record(new FloatValue(record.getValue().asFloat()), record.getTimestamp(), record.getFlag());</span>
+            case DOUBLE:
+<span class="nc" id="L346">                return new Record(new DoubleValue(record.getValue().asDouble()), record.getTimestamp(),</span>
+<span class="nc" id="L347">                        record.getFlag());</span>
+            case BYTE_ARRAY:
+<span class="nc" id="L349">                return new Record(new ByteArrayValue(record.getValue().asByteArray()), record.getTimestamp(),</span>
+<span class="nc" id="L350">                        record.getFlag());</span>
+            case STRING:
+            default:
+<span class="nc" id="L353">                return new Record(new StringValue(record.getValue().toString()), record.getTimestamp(),</span>
+<span class="nc" id="L354">                        record.getFlag());</span>
+            }
+<span class="nc" id="L356">        } catch (TypeConversionException e) {</span>
+<span class="nc" id="L357">            logger.error(&quot;Unable to convert value to configured value type because a TypeConversionError occured.&quot;, e);</span>
+<span class="nc" id="L358">            return new Record(Flag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION);</span>
+        }
+    }
+
+    private void notifyListeners() {
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (listeners.isEmpty()) {</span>
+<span class="nc" id="L364">            return;</span>
+        }
+
+<span class="nc" id="L367">        synchronized (listeners) {</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            for (RecordListener listener : listeners) {</span>
+<span class="nc" id="L369">                config.deviceParent.device.dataManager.executor.execute(new ListenerNotifier(listener, latestRecord));</span>
+<span class="nc" id="L370">            }</span>
+<span class="nc" id="L371">        }</span>
+
+<span class="nc" id="L373">    }</span>
+
+    ChannelRecordContainerImpl createChannelRecordContainer() {
+<span class="nc" id="L376">        return new ChannelRecordContainerImpl(this);</span>
+    }
+
+    void setFlag(Flag flag) {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (flag != latestRecord.getFlag()) {</span>
+<span class="nc" id="L381">            latestRecord = new Record(latestRecord.getValue(), latestRecord.getTimestamp(), flag);</span>
+<span class="nc" id="L382">            notifyListeners();</span>
+        }
+<span class="nc" id="L384">    }</span>
+
+    public void setNewDeviceState(ChannelState state, Flag flag) {
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        if (config.isDisabled()) {</span>
+<span class="nc" id="L388">            config.state = ChannelState.DISABLED;</span>
+<span class="nc" id="L389">            setFlag(Flag.DISABLED);</span>
+        }
+<span class="nc bnc" id="L391" title="All 4 branches missed.">        else if (!config.isListening() &amp;&amp; config.getSamplingInterval() &lt; 0) {</span>
+<span class="nc" id="L392">            config.state = state;</span>
+<span class="nc" id="L393">            setFlag(Flag.SAMPLING_AND_LISTENING_DISABLED);</span>
+        }
+        else {
+<span class="nc" id="L396">            config.state = state;</span>
+<span class="nc" id="L397">            setFlag(flag);</span>
+        }
+<span class="nc" id="L399">    }</span>
+
+    @Override
+    public Flag write(Value value) {
+
+<span class="nc bnc" id="L404" title="All 2 branches missed.">        if (config.deviceParent.driverParent.getId().equals(&quot;virtual&quot;)) {</span>
+<span class="nc" id="L405">            Record record = new Record(value, System.currentTimeMillis());</span>
+<span class="nc" id="L406">            setLatestRecord(record);</span>
+<span class="nc" id="L407">            List&lt;ChannelRecordContainer&gt; recordContainers = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L408">            ChannelRecordContainer recordContainer = new ChannelRecordContainerImpl(this);</span>
+<span class="nc" id="L409">            recordContainer.setRecord(record);</span>
+<span class="nc" id="L410">            recordContainers.add(recordContainer);</span>
+<span class="nc" id="L411">            dataManager.newRecords(recordContainers);</span>
+<span class="nc" id="L412">            dataManager.interrupt();</span>
+<span class="nc" id="L413">            return record.getFlag();</span>
+        }
+
+<span class="nc" id="L416">        CountDownLatch writeTaskFinishedSignal = new CountDownLatch(1);</span>
+<span class="nc" id="L417">        WriteValueContainerImpl writeValueContainer = new WriteValueContainerImpl(this);</span>
+
+<span class="nc" id="L419">        Value adjustedValue = value;</span>
+
+<span class="nc" id="L421">        Double valueOffset = config.getValueOffset();</span>
+<span class="nc" id="L422">        Double scalingFactor = config.getScalingFactor();</span>
+
+<span class="nc bnc" id="L424" title="All 2 branches missed.">        if (valueOffset != null) {</span>
+<span class="nc" id="L425">            adjustedValue = new DoubleValue(adjustedValue.asDouble() - valueOffset);</span>
+        }
+<span class="nc bnc" id="L427" title="All 2 branches missed.">        if (scalingFactor != null) {</span>
+<span class="nc" id="L428">            adjustedValue = new DoubleValue(adjustedValue.asDouble() / scalingFactor);</span>
+        }
+<span class="nc" id="L430">        writeValueContainer.setValue(adjustedValue);</span>
+
+<span class="nc" id="L432">        List&lt;WriteValueContainerImpl&gt; writeValueContainerList = Arrays.asList(writeValueContainer);</span>
+<span class="nc" id="L433">        WriteTask writeTask = new WriteTask(dataManager, config.deviceParent.device, writeValueContainerList,</span>
+                writeTaskFinishedSignal);
+
+<span class="nc" id="L436">        synchronized (dataManager.newWriteTasks) {</span>
+<span class="nc" id="L437">            dataManager.newWriteTasks.add(writeTask);</span>
+<span class="nc" id="L438">        }</span>
+
+<span class="nc" id="L440">        dataManager.interrupt();</span>
+        try {
+<span class="nc" id="L442">            writeTaskFinishedSignal.await();</span>
+<span class="nc" id="L443">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L444">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L445">        }</span>
+
+<span class="nc" id="L447">        long timestamp = System.currentTimeMillis();</span>
+<span class="nc" id="L448">        latestRecord = new Record(value, timestamp, writeValueContainer.getFlag());</span>
+<span class="nc" id="L449">        notifyListeners();</span>
+
+<span class="nc" id="L451">        return writeValueContainer.getFlag();</span>
+    }
+
+    @Override
+    public void writeFuture(List&lt;FutureValue&gt; values) {
+<span class="nc bnc" id="L456" title="All 2 branches missed.">        if (values == null) {</span>
+<span class="nc" id="L457">            throw new NullPointerException(&quot;Argument is not allowed to be null.&quot;);</span>
+        }
+
+<span class="nc" id="L460">        this.futureValues = values;</span>
+
+<span class="nc" id="L462">        Collections.sort(values, new Comparator&lt;FutureValue&gt;() {</span>
+            @Override
+            public int compare(FutureValue o1, FutureValue o2) {
+<span class="nc" id="L465">                return o1.getWriteTime().compareTo(o2.getWriteTime());</span>
+            }
+        });
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        if (timer != null) {</span>
+<span class="nc" id="L470">            timer.cancel();</span>
+        }
+
+<span class="nc" id="L473">        timer = new Timer(&quot;Timer ChannelImpl &quot; + config.getId());</span>
+
+<span class="nc" id="L475">        long currentTimestamp = System.currentTimeMillis();</span>
+
+<span class="nc bnc" id="L477" title="All 2 branches missed.">        for (final FutureValue value : futureValues) {</span>
+
+<span class="nc bnc" id="L479" title="All 2 branches missed.">            if ((currentTimestamp - value.getWriteTime()) &gt;= 1000l) {</span>
+<span class="nc" id="L480">                continue;</span>
+            }
+
+<span class="nc" id="L483">            TimerTask timerTask = new TimerTask() {</span>
+                @Override
+                public void run() {
+<span class="nc" id="L486">                    write(value.getValue());</span>
+<span class="nc" id="L487">                }</span>
+            };
+
+<span class="nc" id="L490">            Date scheduleTime = new Date(value.getWriteTime());</span>
+<span class="nc" id="L491">            timer.schedule(timerTask, scheduleTime);</span>
+<span class="nc" id="L492">        }</span>
+
+<span class="nc" id="L494">    }</span>
+
+    @Override
+    public Record read() {
+<span class="nc" id="L498">        CountDownLatch readTaskFinishedSignal = new CountDownLatch(1);</span>
+
+<span class="nc" id="L500">        ChannelRecordContainerImpl readValueContainer = new ChannelRecordContainerImpl(this);</span>
+<span class="nc" id="L501">        List&lt;ChannelRecordContainerImpl&gt; readValueContainerList = Arrays.asList(readValueContainer);</span>
+
+<span class="nc" id="L503">        ReadTask readTask = new ReadTask(dataManager, config.deviceParent.device, readValueContainerList,</span>
+                readTaskFinishedSignal);
+<span class="nc" id="L505">        synchronized (dataManager.newReadTasks) {</span>
+<span class="nc" id="L506">            dataManager.newReadTasks.add(readTask);</span>
+<span class="nc" id="L507">        }</span>
+<span class="nc" id="L508">        dataManager.interrupt();</span>
+
+        try {
+<span class="nc" id="L511">            readTaskFinishedSignal.await();</span>
+<span class="nc" id="L512">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L513">            Thread.currentThread().interrupt();</span>
+<span class="nc" id="L514">        }</span>
+
+<span class="nc" id="L516">        return setNewRecord(readValueContainer.getRecord());</span>
+    }
+
+    @Override
+    public boolean isConnected() {
+<span class="nc bnc" id="L521" title="All 6 branches missed.">        return config.state == ChannelState.CONNECTED || config.state == ChannelState.SAMPLING</span>
+                || config.state == ChannelState.LISTENING;
+    }
+
+    @Override
+    public WriteValueContainer getWriteContainer() {
+<span class="nc" id="L527">        return new WriteValueContainerImpl(this);</span>
+    }
+
+    @Override
+    public ReadRecordContainer getReadContainer() {
+<span class="nc" id="L532">        return new ChannelRecordContainerImpl(this);</span>
+    }
+
+    public boolean isLoggingEvent() {
+<span class="nc bnc" id="L536" title="All 6 branches missed.">        return config.isLoggingEvent() &amp;&amp; config.isListening() &amp;&amp; config.getLoggingInterval() == -1;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L541">        return &quot;Channel with id=&quot; + getId();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

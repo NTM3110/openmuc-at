@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EDatatype.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">EDatatype.java</span></div><h1>EDatatype.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.driver.modbus;
+
+/**
+ * Matching from Java Datatyp to Modbus Register
+ * 
+ * One modbus register has the size of two Bytes
+ */
+
+<span class="fc" id="L30">public enum EDatatype {</span>
+
+    /** 1 Bit */
+<span class="fc" id="L33">    BOOLEAN(1),</span>
+
+    // not implemented yet
+    /// ** RHB register high byte */
+    // INT8_RHB(&quot;int8_rhb&quot;, 1),
+
+    // not implemented yet
+    /// ** RLB register low byte */
+    // INT8_RLB(&quot;int8_rlb&quot;, 1),
+
+    /**
+     * @deprecated Use INT16 instead
+     */
+<span class="fc" id="L46">    @Deprecated</span>
+    SHORT(1),
+
+    /** 1 Register, 2 bytes */
+<span class="fc" id="L50">    INT16(1),</span>
+
+    /** 2 Register, 4 bytes */
+<span class="fc" id="L53">    INT32(2),</span>
+
+    // not implemented yet
+    // /** 4 Register, 8 bytes */
+    // INT64( 4),
+
+    // not implemented yet
+    /// ** to convert register high byte RHB to uint8 */
+    // UINT8_RHB( 1),
+
+    // not implemented yet
+    /// ** to convert register low byte RLB to uint8 */
+    // UINT8_RLB( 1),
+
+    /** 1 Register, 2 bytes */
+<span class="fc" id="L68">    UINT16(1),</span>
+
+    /** 2 Register, 4 bytes */
+<span class="fc" id="L71">    UINT32(2),</span>
+
+    /** 2 Register, 4 bytes */
+<span class="fc" id="L74">    FLOAT(2),</span>
+
+    /** 4 Register, 8 bytes */
+<span class="fc" id="L77">    DOUBLE(4),</span>
+
+    /** 4 Register, 8 bytes */
+<span class="fc" id="L80">    LONG(4),</span>
+
+    /** n Registers, n*2 bytes. Note: 0 will be overwritten */
+<span class="fc" id="L83">    BYTEARRAY(0),</span>
+
+    /** n Registers, n*2 bytes. Note: max. registers 4; 0 will be overwritten */
+<span class="fc" id="L86">    BYTEARRAYLONG(0);</span>
+
+    // not implemented yet
+    /// ** 1 Register, 2 bytes, access high byte of a register */
+    // BYTE_HIGH( 1),
+
+    // not implemented yet
+    /// ** 1 Register, 2 bytes, access low byte of a register */
+    // BYTE_LOW( 1);
+
+    private final int registerSize;
+
+<span class="fc" id="L98">    private EDatatype(int registerSize) {</span>
+<span class="fc" id="L99">        this.registerSize = registerSize;</span>
+<span class="fc" id="L100">    }</span>
+
+    public int getRegisterSize() {
+<span class="fc" id="L103">        return registerSize;</span>
+    }
+
+    public static EDatatype getEnum(String string) {
+<span class="fc" id="L107">        EDatatype returnValue = null;</span>
+
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if (string != null) {</span>
+<span class="fc" id="L110">            string = string.toUpperCase();</span>
+
+<span class="fc bfc" id="L112" title="All 2 branches covered.">            for (EDatatype type : EDatatype.values()) {</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">                if (string.equals(type.toString())) {</span>
+<span class="fc" id="L114">                    returnValue = type;</span>
+<span class="fc" id="L115">                    break;</span>
+                }
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">                else if (string.toUpperCase().matches(EDatatype.BYTEARRAY + &quot;\\[\\d+\\]&quot;)) {</span>
+                    // Special check for BYTEARRAY[n] datatyp
+<span class="nc" id="L119">                    returnValue = EDatatype.BYTEARRAY;</span>
+<span class="nc" id="L120">                    break;</span>
+                }
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">                else if (string.toUpperCase().matches(EDatatype.BYTEARRAYLONG + &quot;\\[\\d+\\]&quot;)) {</span>
+                    // Special check for BYTEARRAYLONG[n] datatyp
+<span class="nc" id="L124">                    returnValue = EDatatype.BYTEARRAYLONG;</span>
+<span class="nc" id="L125">                    break;</span>
+                }
+            }
+        }
+
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (returnValue == null) {</span>
+<span class="fc" id="L131">            throw new RuntimeException(string + &quot; is not supported. Use one of the following supported datatypes: &quot;</span>
+<span class="fc" id="L132">                    + getSupportedDatatypes());</span>
+        }
+
+<span class="fc" id="L135">        return returnValue;</span>
+
+    }
+
+    /**
+     * @return all supported datatypes
+     */
+    public static String getSupportedDatatypes() {
+
+<span class="fc" id="L144">        String supported = &quot;&quot;;</span>
+
+<span class="fc bfc" id="L146" title="All 2 branches covered.">        for (EDatatype type : EDatatype.values()) {</span>
+<span class="fc" id="L147">            supported += type.toString() + &quot;, &quot;;</span>
+        }
+
+<span class="fc" id="L150">        return supported;</span>
+    }
+
+    /**
+     * Checks if the datatype is valid
+     * 
+     * @param string
+     *            Enum as String
+     * @return true if valid, otherwise false
+     */
+    public static boolean isValid(String string) {
+<span class="fc" id="L161">        boolean returnValue = false;</span>
+
+        try {
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">            if (getEnum(string) != null) {</span>
+<span class="fc" id="L165">                returnValue = true;</span>
+            }
+<span class="fc" id="L167">        } catch (RuntimeException e) {</span>
+<span class="fc" id="L168">        }</span>
+
+<span class="fc" id="L170">        return returnValue;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusRTUConnection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus.rtu</a> &gt; <span class="el_source">ModbusRTUConnection.java</span></div><h1>ModbusRTUConnection.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus.rtu;
+
+import java.util.List;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.config.ChannelScanInfo;
+import org.openmuc.framework.config.ScanException;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.modbus.EDatatype;
+import org.openmuc.framework.driver.modbus.ModbusChannel;
+import org.openmuc.framework.driver.modbus.ModbusChannel.EAccess;
+import org.openmuc.framework.driver.modbus.ModbusConnection;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.framework.driver.spi.ChannelValueContainer;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.RecordsReceivedListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fazecast.jSerialComm.SerialPort;
+import com.ghgande.j2mod.modbus.Modbus;
+import com.ghgande.j2mod.modbus.ModbusException;
+import com.ghgande.j2mod.modbus.ModbusIOException;
+import com.ghgande.j2mod.modbus.io.ModbusSerialTransaction;
+import com.ghgande.j2mod.modbus.net.AbstractSerialConnection;
+import com.ghgande.j2mod.modbus.net.SerialConnection;
+import com.ghgande.j2mod.modbus.util.SerialParameters;
+
+/**
+ * 
+ * TODO
+ * 
+ */
+public class ModbusRTUConnection extends ModbusConnection {
+
+<span class="nc" id="L58">    private static final Logger logger = LoggerFactory.getLogger(ModbusRTUConnection.class);</span>
+
+    private static final int ENCODING = 1;
+    private static final int BAUDRATE = 2;
+    private static final int DATABITS = 3;
+    private static final int PARITY = 4;
+    private static final int STOPBITS = 5;
+    private static final int ECHO = 6;
+    private static final int FLOWCONTROL_IN = 7;
+    private static final int FLOWCONTEOL_OUT = 8;
+
+    private static final String SERIAL_ENCODING_RTU = &quot;SERIAL_ENCODING_RTU&quot;;
+
+    private static final String ECHO_TRUE = &quot;ECHO_TRUE&quot;;
+    private static final String ECHO_FALSE = &quot;ECHO_FALSE&quot;;
+
+    private final SerialConnection connection;
+    private ModbusSerialTransaction transaction;
+
+    public ModbusRTUConnection(String deviceAddress, String[] settings, int timoutMs)
+            throws ModbusConfigurationException {
+
+<span class="nc" id="L80">        super();</span>
+
+<span class="nc" id="L82">        SerialParameters params = setParameters(deviceAddress, settings);</span>
+<span class="nc" id="L83">        connection = new SerialConnection(params);</span>
+
+        try {
+<span class="nc" id="L86">            connect();</span>
+            // connection.setReceiveTimeout(timoutMs);
+<span class="nc" id="L88">            transaction = new ModbusSerialTransaction(connection);</span>
+<span class="nc" id="L89">            transaction.setSerialConnection(connection);</span>
+<span class="nc" id="L90">            setTransaction(transaction);</span>
+
+<span class="nc" id="L92">        } catch (Exception e) {</span>
+<span class="nc" id="L93">            logger.error(&quot;Unable to connect to device &quot; + deviceAddress, e);</span>
+<span class="nc" id="L94">            throw new ModbusConfigurationException(&quot;Wrong Modbus RTU configuration. Check configuration file&quot;);</span>
+<span class="nc" id="L95">        }</span>
+<span class="nc" id="L96">        logger.info(&quot;Modbus Device: &quot; + deviceAddress + &quot; connected&quot;);</span>
+<span class="nc" id="L97">    }</span>
+
+    @Override
+    public void connect() throws ConnectionException {
+<span class="nc bnc" id="L101" title="All 2 branches missed.">        if (!connection.isOpen()) {</span>
+            try {
+<span class="nc" id="L103">                connection.open();</span>
+<span class="nc" id="L104">            } catch (Exception e) {</span>
+<span class="nc" id="L105">                throw new ConnectionException(e);</span>
+<span class="nc" id="L106">            }</span>
+        }
+<span class="nc" id="L108">    }</span>
+
+    @Override
+    public void disconnect() {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (connection.isOpen()) {</span>
+<span class="nc" id="L113">            connection.close();</span>
+        }
+<span class="nc" id="L115">    }</span>
+
+    private SerialParameters setParameters(String address, String[] settings) throws ModbusConfigurationException {
+
+<span class="nc" id="L119">        SerialParameters params = new SerialParameters();</span>
+
+<span class="nc" id="L121">        params.setPortName(address);</span>
+
+        try {
+<span class="nc" id="L124">            setEncoding(params, settings[ENCODING]);</span>
+<span class="nc" id="L125">            setBaudrate(params, settings[BAUDRATE]);</span>
+<span class="nc" id="L126">            setDatabits(params, settings[DATABITS]);</span>
+<span class="nc" id="L127">            setParity(params, settings[PARITY]);</span>
+<span class="nc" id="L128">            setStopbits(params, settings[STOPBITS]);</span>
+<span class="nc" id="L129">            setEcho(params, settings[ECHO]);</span>
+<span class="nc" id="L130">            setFlowControlIn(params, settings[FLOWCONTROL_IN]);</span>
+<span class="nc" id="L131">            setFlowControlOut(params, settings[FLOWCONTEOL_OUT]);</span>
+<span class="nc" id="L132">        } catch (Exception e) {</span>
+<span class="nc" id="L133">            logger.error(&quot;Unable to set all parameters for RTU connection&quot;, e);</span>
+<span class="nc" id="L134">            throw new ModbusConfigurationException(&quot;Specify all settings parameter&quot;);</span>
+<span class="nc" id="L135">        }</span>
+
+<span class="nc" id="L137">        return params;</span>
+    }
+
+    private void setFlowControlIn(SerialParameters params, String flowControlIn) throws ModbusConfigurationException {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        if (flowControlIn.equalsIgnoreCase(&quot;FLOWCONTROL_NONE&quot;)) {</span>
+<span class="nc" id="L142">            params.setFlowControlIn(AbstractSerialConnection.FLOW_CONTROL_DISABLED);</span>
+        }
+<span class="nc bnc" id="L144" title="All 2 branches missed.">        else if (flowControlIn.equalsIgnoreCase(&quot;FLOWCONTROL_RTSCTS_IN&quot;)) {</span>
+<span class="nc" id="L145">            params.setFlowControlIn(AbstractSerialConnection.FLOW_CONTROL_RTS_ENABLED);</span>
+        }
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        else if (flowControlIn.equalsIgnoreCase(&quot;FLOWCONTROL_XONXOFF_IN&quot;)) {</span>
+<span class="nc" id="L148">            params.setFlowControlIn(AbstractSerialConnection.FLOW_CONTROL_XONXOFF_IN_ENABLED);</span>
+        }
+        else {
+<span class="nc" id="L151">            throw new ModbusConfigurationException(&quot;Unknown flow control in setting. Check configuration file&quot;);</span>
+        }
+
+<span class="nc" id="L154">    }</span>
+
+    private void setFlowControlOut(SerialParameters params, String flowControlOut) throws ModbusConfigurationException {
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (flowControlOut.equalsIgnoreCase(&quot;FLOWCONTROL_NONE&quot;)) {</span>
+<span class="nc" id="L158">            params.setFlowControlOut(AbstractSerialConnection.FLOW_CONTROL_DISABLED);</span>
+        }
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        else if (flowControlOut.equalsIgnoreCase(&quot;FLOWCONTROL_RTSCTS_OUT&quot;)) {</span>
+<span class="nc" id="L161">            params.setFlowControlOut(AbstractSerialConnection.FLOW_CONTROL_RTS_ENABLED);</span>
+        }
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        else if (flowControlOut.equalsIgnoreCase(&quot;FLOWCONTROL_DSRTSR&quot;)) {</span>
+<span class="nc" id="L164">            params.setFlowControlOut(AbstractSerialConnection.FLOW_CONTROL_DTR_ENABLED);</span>
+        }
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        else if (flowControlOut.equalsIgnoreCase(&quot;FLOWCONTROL_XONXOFF_OUT&quot;)) {</span>
+<span class="nc" id="L167">            params.setFlowControlOut(AbstractSerialConnection.FLOW_CONTROL_XONXOFF_OUT_ENABLED);</span>
+        }
+        else {
+<span class="nc" id="L170">            throw new ModbusConfigurationException(&quot;Unknown flow control out setting. Check configuration file&quot;);</span>
+        }
+
+<span class="nc" id="L173">    }</span>
+
+    private void setEcho(SerialParameters params, String echo) throws ModbusConfigurationException {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (echo.equalsIgnoreCase(ECHO_TRUE)) {</span>
+<span class="nc" id="L177">            params.setEcho(true);</span>
+        }
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        else if (echo.equalsIgnoreCase(ECHO_FALSE)) {</span>
+<span class="nc" id="L180">            params.setEcho(false);</span>
+        }
+        else {
+<span class="nc" id="L183">            throw new ModbusConfigurationException(&quot;Unknown echo setting. Check configuration file&quot;);</span>
+        }
+
+<span class="nc" id="L186">    }</span>
+
+    private void setStopbits(SerialParameters params, String stopbits) throws ModbusConfigurationException {
+<span class="nc bnc" id="L189" title="All 2 branches missed.">        if (stopbits.equalsIgnoreCase(&quot;STOPBITS_1&quot;)) {</span>
+<span class="nc" id="L190">            params.setStopbits(AbstractSerialConnection.ONE_STOP_BIT);</span>
+        }
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        else if (stopbits.equalsIgnoreCase(&quot;STOPBITS_1_5&quot;)) {</span>
+<span class="nc" id="L193">            params.setStopbits(AbstractSerialConnection.ONE_POINT_FIVE_STOP_BITS);</span>
+        }
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        else if (stopbits.equalsIgnoreCase(&quot;STOPBITS_2&quot;)) {</span>
+<span class="nc" id="L196">            params.setStopbits(AbstractSerialConnection.TWO_STOP_BITS);</span>
+        }
+        else {
+<span class="nc" id="L199">            throw new ModbusConfigurationException(&quot;Unknown stobit setting. Check configuration file&quot;);</span>
+        }
+
+<span class="nc" id="L202">    }</span>
+
+    private void setParity(SerialParameters params, String parity) throws ModbusConfigurationException {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (parity.equalsIgnoreCase(&quot;PARITY_EVEN&quot;)) {</span>
+<span class="nc" id="L206">            params.setParity(SerialPort.EVEN_PARITY);</span>
+        }
+<span class="nc bnc" id="L208" title="All 2 branches missed.">        else if (parity.equalsIgnoreCase(&quot;PARITY_MARK&quot;)) {</span>
+<span class="nc" id="L209">            params.setParity(SerialPort.MARK_PARITY);</span>
+        }
+<span class="nc bnc" id="L211" title="All 2 branches missed.">        else if (parity.equalsIgnoreCase(&quot;PARITY_NONE&quot;)) {</span>
+<span class="nc" id="L212">            params.setParity(SerialPort.NO_PARITY);</span>
+        }
+<span class="nc bnc" id="L214" title="All 2 branches missed.">        else if (parity.equalsIgnoreCase(&quot;PARITY_ODD&quot;)) {</span>
+<span class="nc" id="L215">            params.setParity(SerialPort.ODD_PARITY);</span>
+        }
+<span class="nc bnc" id="L217" title="All 2 branches missed.">        else if (parity.equalsIgnoreCase(&quot;PARITY_SPACE&quot;)) {</span>
+<span class="nc" id="L218">            params.setParity(SerialPort.SPACE_PARITY);</span>
+        }
+        else {
+<span class="nc" id="L221">            throw new ModbusConfigurationException(&quot;Unknown parity setting. Check configuration file&quot;);</span>
+        }
+
+<span class="nc" id="L224">    }</span>
+
+    private void setDatabits(SerialParameters params, String databits) throws ModbusConfigurationException {
+<span class="nc bnc" id="L227" title="All 2 branches missed.">        if (databits.equalsIgnoreCase(&quot;DATABITS_5&quot;)) {</span>
+<span class="nc" id="L228">            params.setDatabits(5);</span>
+        }
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        else if (databits.equalsIgnoreCase(&quot;DATABITS_6&quot;)) {</span>
+<span class="nc" id="L231">            params.setDatabits(6);</span>
+        }
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        else if (databits.equalsIgnoreCase(&quot;DATABITS_7&quot;)) {</span>
+<span class="nc" id="L234">            params.setDatabits(7);</span>
+        }
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        else if (databits.equalsIgnoreCase(&quot;DATABITS_8&quot;)) {</span>
+<span class="nc" id="L237">            params.setDatabits(8);</span>
+        }
+        else {
+<span class="nc" id="L240">            throw new ModbusConfigurationException(&quot;Unknown databit setting. Check configuration file&quot;);</span>
+        }
+<span class="nc" id="L242">    }</span>
+
+    private void setBaudrate(SerialParameters params, String baudrate) {
+<span class="nc" id="L245">        params.setBaudRate(baudrate);</span>
+<span class="nc" id="L246">    }</span>
+
+    private void setEncoding(SerialParameters params, String encoding) throws ModbusConfigurationException {
+<span class="nc bnc" id="L249" title="All 2 branches missed.">        if (encoding.equalsIgnoreCase(SERIAL_ENCODING_RTU)) {</span>
+<span class="nc" id="L250">            params.setEncoding(Modbus.SERIAL_ENCODING_RTU);</span>
+        }
+        else {
+<span class="nc" id="L253">            throw new ModbusConfigurationException(&quot;Unknown encoding setting. Check configuration file&quot;);</span>
+        }
+<span class="nc" id="L255">    }</span>
+
+    @Override
+    public Object read(List&lt;ChannelRecordContainer&gt; containers, Object containerListHandle, String samplingGroup)
+            throws UnsupportedOperationException, ConnectionException {
+
+<span class="nc bnc" id="L261" title="All 2 branches missed.">        if (samplingGroup.isEmpty()) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            for (ChannelRecordContainer container : containers) {</span>
+
+<span class="nc" id="L264">                long receiveTime = System.currentTimeMillis();</span>
+<span class="nc" id="L265">                ModbusChannel channel = getModbusChannel(container.getChannelAddress(), EAccess.READ);</span>
+                Value value;
+
+                try {
+<span class="nc" id="L269">                    value = readChannel(channel);</span>
+
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                    if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L272">                        printResponseValue(channel, value);</span>
+                    }
+
+<span class="nc" id="L275">                    container.setRecord(new Record(value, receiveTime));</span>
+
+<span class="nc" id="L277">                } catch (ModbusIOException e) {</span>
+<span class="nc" id="L278">                    logger.error(&quot;ModbusIOException while reading channel:&quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L279">                    disconnect();</span>
+<span class="nc" id="L280">                    throw new ConnectionException(&quot;ModbusIOException&quot;);</span>
+
+<span class="nc" id="L282">                } catch (ModbusException e) {</span>
+<span class="nc" id="L283">                    logger.error(&quot;ModbusException while reading channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L284">                    container.setRecord(new Record(Flag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE));</span>
+
+<span class="nc" id="L286">                } catch (Exception e) {</span>
+                    // catch all possible exceptions and provide info about the channel
+<span class="nc" id="L288">                    logger.error(&quot;Exception while reading channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L289">                    container.setRecord(new Record(Flag.UNKNOWN_ERROR));</span>
+<span class="nc" id="L290">                }</span>
+<span class="nc" id="L291">            }</span>
+        }
+        // reads whole samplingGroup at once
+        else {
+<span class="nc" id="L295">            readChannelGroupHighLevel(containers, containerListHandle, samplingGroup);</span>
+        }
+
+<span class="nc" id="L298">        return null;</span>
+    }
+
+    private void printResponseValue(ModbusChannel channel, Value value) {
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if (channel.getDatatype().equals(EDatatype.BYTEARRAY)) {</span>
+<span class="nc" id="L303">            final StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">            for (byte b : value.asByteArray()) {</span>
+<span class="nc" id="L305">                sb.append(String.format(&quot;%02x &quot;, b));</span>
+            }
+<span class="nc" id="L307">            logger.trace(&quot;Value of response: &quot; + sb.toString());</span>
+<span class="nc" id="L308">        }</span>
+        else {
+<span class="nc" id="L310">            logger.trace(&quot;Value of response: &quot; + value.toString());</span>
+        }
+<span class="nc" id="L312">    }</span>
+
+    @Override
+    public Object write(List&lt;ChannelValueContainer&gt; containers, Object containerListHandle)
+            throws UnsupportedOperationException, ConnectionException {
+
+<span class="nc bnc" id="L318" title="All 2 branches missed.">        for (ChannelValueContainer container : containers) {</span>
+
+<span class="nc" id="L320">            ModbusChannel channel = getModbusChannel(container.getChannelAddress(), EAccess.WRITE);</span>
+
+            try {
+<span class="nc" id="L323">                writeChannel(channel, container.getValue());</span>
+<span class="nc" id="L324">                container.setFlag(Flag.VALID);</span>
+
+<span class="nc" id="L326">            } catch (ModbusIOException e) {</span>
+<span class="nc" id="L327">                logger.error(&quot;ModbusIOException while writing channel:&quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L328">                disconnect();</span>
+<span class="nc" id="L329">                throw new ConnectionException(&quot;Try to solve issue with reconnect.&quot;);</span>
+
+<span class="nc" id="L331">            } catch (ModbusException e) {</span>
+<span class="nc" id="L332">                logger.error(&quot;ModbusException while writing channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L333">                container.setFlag(Flag.DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE);</span>
+
+<span class="nc" id="L335">            } catch (Exception e) {</span>
+<span class="nc" id="L336">                logger.error(&quot;Exception while writing channel: &quot; + channel.getChannelAddress(), e);</span>
+<span class="nc" id="L337">                container.setFlag(Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L338">            }</span>
+
+<span class="nc" id="L340">        }</span>
+
+<span class="nc" id="L342">        return null;</span>
+
+    }
+
+    @Override
+    public void startListening(List&lt;ChannelRecordContainer&gt; containers, RecordsReceivedListener listener)
+            throws UnsupportedOperationException, ConnectionException {
+<span class="nc" id="L349">        throw new UnsupportedOperationException();</span>
+    }
+
+    @Override
+    public List&lt;ChannelScanInfo&gt; scanForChannels(String settings)
+            throws UnsupportedOperationException, ArgumentSyntaxException, ScanException, ConnectionException {
+<span class="nc" id="L355">        throw new UnsupportedOperationException();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

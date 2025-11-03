@@ -1,0 +1,1341 @@
+25.11.03 08:15:57.689 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 08:15:57.739 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 08:15:57.752 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 08:15:57.759 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @1240ms
+25.11.03 08:15:57.801 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@5c596c9a{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:15:57.882 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@350c00e8(openmuc,h=[openmuc],a=[],w=[]) for Server@2250fddf[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 08:15:58.045 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@13630a63{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:15:58.047 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 08:15:58.191 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 08:15:58.229 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:15:58.235 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:15:58.236 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:15:58.237 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:15:58.242 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 08:15:58.243 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Add listener to modbus channel!!!!!!
+25.11.03 08:15:58.243 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 08:15:58.243 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Getting the first cell dimension!!!!!
+25.11.03 08:15:58.259 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 08:15:58.260 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 08:15:58.277 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 08:15:58.291 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 08:15:58.337 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 08:15:58.341 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:58.341 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:58.342 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/5
+25.11.03 08:15:58.342 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/9
+25.11.03 08:15:58.348 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 08:15:58.378 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/5
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:58.378 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/9
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:58.380 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:58.380 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:58.381 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str1_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:58.381 [OpenMUC Data Manager Pool - thread-2] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str2_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:58.492 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 3753b55d-bea1-4a28-a235-020a612fd2c6
+25.11.03 08:15:58.493 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 8f3409d4-c9a4-4ad9-830a-73e31f628038
+25.11.03 08:15:58.493 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for 8f3409d4-c9a4-4ad9-830a-73e31f628038
+25.11.03 08:15:58.494 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 08:15:58.499 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 08:15:58.503 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 08:15:58.605 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 08:15:58.622 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 08:15:58.622 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 08:15:58.622 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 08:15:58.622 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 08:15:58.623 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 08:15:58.623 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 08:15:58.623 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 08:15:58.623 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 08:15:58.627 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 08:15:58.628 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 08:15:58.629 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 08:15:58.629 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 08:15:58.630 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 08:15:58.630 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 08:15:58.631 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 08:15:58.672 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 08:15:58.883 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:58.883 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:58.883 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/9
+25.11.03 08:15:58.884 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/5
+25.11.03 08:15:58.884 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/9
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:58.884 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/5
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:58.885 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:58.885 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str2_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:58.885 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:58.886 [OpenMUC Data Manager Pool - thread-2] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str1_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:59.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:15:59.387 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:59.387 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:59.387 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/9
+25.11.03 08:15:59.387 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/5
+25.11.03 08:15:59.388 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/9
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:59.389 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:59.389 [OpenMUC Data Manager Pool - thread-2] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str2_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:59.389 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/5
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:59.389 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:59.390 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str1_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:59.889 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/9
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/9
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str2_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:15:59.890 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/5
+25.11.03 08:15:59.891 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/5
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:15:59.891 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:15:59.891 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str1_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:16:00.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:16:00.390 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:16:00.391 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/9
+25.11.03 08:16:00.392 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:16:00.392 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/5
+25.11.03 08:16:00.392 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/9
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/9
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:16:00.393 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.d.m.rtu.ModbusRTUConnection - Unable to connect to device /dev/pts/5
+org.openmuc.framework.driver.spi.ConnectionException: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:105)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:86)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.fazecast.jSerialComm.SerialPortInvalidPortException: Unable to create a serial port object from the invalid port descriptor: /dev/5
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:502)
+	at com.ghgande.j2mod.modbus.net.SerialConnection.open(SerialConnection.java:96)
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.connect(ModbusRTUConnection.java:103)
+	... 6 common frames omitted
+Caused by: java.io.IOException: null
+	at com.fazecast.jSerialComm.SerialPort.getCommPort(SerialPort.java:488)
+	... 8 common frames omitted
+25.11.03 08:16:00.393 [OpenMUC Data Manager Pool - thread-1] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:16:00.393 [OpenMUC Data Manager Pool - thread-2] ERROR o.o.f.driver.modbus.ModbusDriver - Unable to create ModbusRTUConnection
+org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException: Wrong Modbus RTU configuration. Check configuration file
+	at org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection.<init>(ModbusRTUConnection.java:94)
+	at org.openmuc.framework.driver.modbus.ModbusDriver.connect(ModbusDriver.java:105)
+	at org.openmuc.framework.core.datamanager.ConnectTask.run(ConnectTask.java:44)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+25.11.03 08:16:00.393 [OpenMUC Data Manager Pool - thread-2] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str1_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:16:00.393 [OpenMUC Data Manager Pool - thread-1] WARN  o.o.f.core.datamanager.ConnectTask - Unable to connect to device str2_modbus because null.
+Will try again in 500 ms.
+25.11.03 08:16:00.613 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 08:16:00.616 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 08:16:00.618 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 08:16:00.618 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 08:16:00.619 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 08:16:00.619 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 08:16:00.620 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 08:16:00.620 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 08:16:00.620 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 08:16:00.626 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 08:16:00.627 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 08:16:00.634 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 8f3409d4-c9a4-4ad9-830a-73e31f628038
+25.11.03 08:16:00.638 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 08:16:00.640 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 08:16:00.641 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 08:16:00.641 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 08:16:00.641 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 08:16:00.642 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 08:16:00.646 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 08:16:00.649 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 08:16:00.664 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 08:16:00.674 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@5c596c9a{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:16:00.677 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@13630a63{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:16:00.684 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 08:16:00.691 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 08:51:18.907 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 08:51:18.960 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 08:51:18.997 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 08:51:19.011 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @1019ms
+25.11.03 08:51:19.035 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:51:19.062 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@1c1232a0(openmuc,h=[openmuc],a=[],w=[]) for Server@3da2ceb9[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 08:51:19.148 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:51:19.149 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 08:51:19.259 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 08:51:19.280 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:51:19.282 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:51:19.282 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:51:19.282 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:51:19.283 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 08:51:19.283 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Add listener to modbus channel!!!!!!
+25.11.03 08:51:19.283 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 08:51:19.283 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Getting the first cell dimension!!!!!
+25.11.03 08:51:19.288 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 08:51:19.288 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 08:51:19.293 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 08:51:19.296 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 08:51:19.336 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 08:51:19.339 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:51:19.339 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:51:19.340 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 08:51:19.340 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 08:51:19.343 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 08:51:19.374 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 08:51:19.374 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 08:51:19.419 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server dd483d63-08fa-4d70-b44e-82e1a1cbd486
+25.11.03 08:51:19.419 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for dd483d63-08fa-4d70-b44e-82e1a1cbd486
+25.11.03 08:51:19.420 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 08:51:19.423 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 08:51:19.426 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 08:51:19.490 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 08:51:19.501 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 08:51:19.502 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 08:51:19.506 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 08:51:19.506 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 08:51:19.507 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 08:51:19.507 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 08:51:19.508 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 08:51:19.509 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 08:51:19.510 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 08:51:19.545 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 08:51:20.002 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:51:21.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:51:22.000 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:51:22.517 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 08:51:22.524 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server dd483d63-08fa-4d70-b44e-82e1a1cbd486
+25.11.03 08:51:22.525 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 08:51:22.526 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 08:51:22.530 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server ddbb7579-0313-4c1c-8de7-e922e4e55141
+25.11.03 08:51:22.534 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 08:51:22.535 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 08:51:23.140 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server 76d80fba-2d42-41b2-a21e-64bedddbb89e got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 08:51:23.141 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 76d80fba-2d42-41b2-a21e-64bedddbb89e
+25.11.03 08:51:23.349 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 08:55:48.646 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 08:55:48.650 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 08:55:48.652 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 08:55:48.653 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 08:55:48.653 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 08:55:48.654 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 08:55:48.654 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 08:55:48.655 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 08:55:48.655 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 08:55:48.663 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 08:55:48.664 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 08:55:48.666 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 08:55:48.678 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 76d80fba-2d42-41b2-a21e-64bedddbb89e
+25.11.03 08:55:48.686 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 08:55:48.686 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 08:55:48.687 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 08:55:48.690 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 08:55:48.691 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 08:55:48.692 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 08:55:48.693 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 08:55:48.713 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 08:55:48.721 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:55:48.725 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:55:48.732 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 08:55:48.739 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 08:57:39.179 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 08:57:39.224 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 08:57:39.239 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 08:57:39.243 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @1032ms
+25.11.03 08:57:39.258 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:57:39.283 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@1c1232a0(openmuc,h=[openmuc],a=[],w=[]) for Server@3da2ceb9[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 08:57:39.386 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:57:39.387 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 08:57:39.451 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 08:57:39.481 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:57:39.488 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 08:57:39.489 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:57:39.489 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 08:57:39.491 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 08:57:39.492 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Add listener to modbus channel!!!!!!
+25.11.03 08:57:39.492 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 08:57:39.492 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Getting the first cell dimension!!!!!
+25.11.03 08:57:39.506 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 08:57:39.508 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 08:57:39.521 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 08:57:39.531 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 08:57:39.572 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 08:57:39.575 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:57:39.575 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 08:57:39.576 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 08:57:39.576 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 08:57:39.578 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 08:57:39.625 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 08:57:39.625 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 08:57:39.686 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e9f81fc6-96bb-44fb-a3cd-76bbadef7ae0
+25.11.03 08:57:39.686 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for e9f81fc6-96bb-44fb-a3cd-76bbadef7ae0
+25.11.03 08:57:39.687 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 08:57:39.692 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 08:57:39.695 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 08:57:39.770 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 08:57:39.775 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 08:57:39.776 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 08:57:39.776 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 08:57:39.778 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 08:57:39.779 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 08:57:39.779 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 08:57:39.780 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 08:57:39.780 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 08:57:39.780 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 08:57:39.781 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 08:57:39.839 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 08:57:40.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:57:41.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:57:42.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:57:42.810 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 08:57:42.816 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e9f81fc6-96bb-44fb-a3cd-76bbadef7ae0
+25.11.03 08:57:42.818 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 08:57:42.819 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 08:57:42.823 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server d48688bd-6e85-4a98-8d72-4caa18a9ad2e
+25.11.03 08:57:42.827 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 08:57:42.828 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 08:57:43.000 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 08:57:43.467 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server f498560c-4bc1-45e9-9e71-5e1898a854ac got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 08:57:43.468 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server f498560c-4bc1-45e9-9e71-5e1898a854ac
+25.11.03 08:57:43.619 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 08:58:24.309 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 08:58:24.312 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 08:58:24.314 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 08:58:24.315 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 08:58:24.315 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 08:58:24.316 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 08:58:24.316 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 08:58:24.316 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 08:58:24.317 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 08:58:24.324 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 08:58:24.325 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 08:58:24.326 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 08:58:24.335 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server f498560c-4bc1-45e9-9e71-5e1898a854ac
+25.11.03 08:58:24.341 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 08:58:24.342 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 08:58:24.342 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 08:58:24.345 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 08:58:24.346 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 08:58:24.347 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 08:58:24.348 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 08:58:24.359 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 08:58:24.366 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 08:58:24.369 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 08:58:24.372 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 08:58:24.377 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 09:08:37.285 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 09:08:37.322 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 09:08:37.334 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 09:08:37.339 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @927ms
+25.11.03 09:08:37.353 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:08:37.386 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@1c1232a0(openmuc,h=[openmuc],a=[],w=[]) for Server@3da2ceb9[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 09:08:37.436 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:08:37.437 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 09:08:37.496 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 09:08:37.507 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:08:37.508 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:08:37.508 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:08:37.508 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:08:37.509 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Add listener to modbus channel!!!!!!
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Getting the first cell dimension!!!!!
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created PowerCellValue null
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiate Channel ATEnergy BMS App
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - DATA OPTION NUMBER 6
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created Channels null
+25.11.03 09:08:37.510 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Current string number is 2
+25.11.03 09:08:37.520 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 09:08:37.521 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 09:08:37.526 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 09:08:37.535 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 09:08:37.565 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 09:08:37.566 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:08:37.566 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:08:37.567 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 09:08:37.567 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 09:08:37.571 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 09:08:37.589 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 09:08:37.589 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 09:08:37.662 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 8ac81ce2-3df5-4234-9213-56d93b8c3cbc
+25.11.03 09:08:37.663 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for 8ac81ce2-3df5-4234-9213-56d93b8c3cbc
+25.11.03 09:08:37.663 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:08:37.673 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 09:08:37.678 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 09:08:37.746 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 09:08:37.763 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 09:08:37.763 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 09:08:37.764 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 09:08:37.764 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 09:08:37.764 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 09:08:37.764 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 09:08:37.764 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 09:08:37.765 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 09:08:37.771 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 09:08:37.772 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 09:08:37.772 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 09:08:37.773 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 09:08:37.773 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 09:08:37.774 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 09:08:37.775 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 09:08:37.812 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 09:08:38.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:08:39.000 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:08:40.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:08:40.978 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 09:08:40.986 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 09:08:40.988 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 09:08:40.989 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 8ac81ce2-3df5-4234-9213-56d93b8c3cbc
+25.11.03 09:08:40.996 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server c98608f5-b313-4147-ba2c-159b70966bd7
+25.11.03 09:08:41.000 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:08:41.001 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 09:08:41.001 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:08:41.545 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server 7cc6b8c8-7bb1-4b91-b594-fa8548b7714b got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 09:08:41.545 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 7cc6b8c8-7bb1-4b91-b594-fa8548b7714b
+25.11.03 09:08:41.739 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 09:17:00.168 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 09:17:00.171 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 09:17:00.173 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 09:17:00.174 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 09:17:00.174 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 09:17:00.175 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 09:17:00.175 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 09:17:00.175 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 09:17:00.176 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 09:17:00.183 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 09:17:00.184 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 09:17:00.186 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 09:17:00.198 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 7cc6b8c8-7bb1-4b91-b594-fa8548b7714b
+25.11.03 09:17:00.208 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 09:17:00.209 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 09:17:00.210 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 09:17:00.215 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 09:17:00.217 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 09:17:00.218 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 09:17:00.220 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 09:17:00.240 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 09:17:00.247 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:17:00.250 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:17:00.257 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 09:17:00.262 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 09:17:02.625 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 09:17:02.684 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 09:17:02.699 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 09:17:02.704 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @992ms
+25.11.03 09:17:02.719 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:17:02.736 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@1c1232a0(openmuc,h=[openmuc],a=[],w=[]) for Server@3da2ceb9[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 09:17:02.800 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:17:02.802 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 09:17:02.968 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 09:17:03.013 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:17:03.017 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:17:03.017 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:17:03.018 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:17:03.023 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 09:17:03.023 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Add listener to modbus channel!!!!!!
+25.11.03 09:17:03.023 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Getting the first cell dimension!!!!!
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created PowerCellValue null
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiate Channel ATEnergy BMS App
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - DATA OPTION NUMBER 6
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created Channels null
+25.11.03 09:17:03.024 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Current string number is 2
+25.11.03 09:17:03.035 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 09:17:03.037 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 09:17:03.049 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 09:17:03.062 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 09:17:03.104 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 09:17:03.107 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:17:03.107 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:17:03.108 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 09:17:03.108 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 09:17:03.114 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 09:17:03.144 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 09:17:03.144 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 09:17:03.237 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server ba513162-ac9c-4c63-84a1-7c80ce92384b
+25.11.03 09:17:03.237 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for ba513162-ac9c-4c63-84a1-7c80ce92384b
+25.11.03 09:17:03.237 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:17:03.242 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 09:17:03.246 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 09:17:03.372 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 09:17:03.379 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 09:17:03.379 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 09:17:03.379 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 09:17:03.380 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 09:17:03.380 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 09:17:03.380 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 09:17:03.380 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 09:17:03.380 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 09:17:03.383 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 09:17:03.384 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 09:17:03.385 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 09:17:03.385 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 09:17:03.385 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 09:17:03.386 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 09:17:03.386 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 09:17:03.419 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 09:17:04.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:17:04.211 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 09:17:04.214 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 09:17:04.216 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 09:17:04.216 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 09:17:04.216 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 09:17:04.217 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 09:17:04.217 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 09:17:04.218 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 09:17:04.219 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 09:17:04.226 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 09:17:04.227 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 09:17:04.228 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 09:17:04.233 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server ba513162-ac9c-4c63-84a1-7c80ce92384b
+25.11.03 09:17:04.239 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 09:17:04.240 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 09:17:04.240 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 09:17:04.243 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 09:17:04.244 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 09:17:04.244 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 09:17:04.245 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 09:17:04.256 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 09:17:04.261 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:17:04.264 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:17:04.270 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 09:17:04.276 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 09:17:50.506 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 09:17:50.553 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 09:17:50.565 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@4499b12c{/,null,AVAILABLE}
+25.11.03 09:17:50.569 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@6f01dddb{STARTING}[11.0.22,sto=0] @922ms
+25.11.03 09:17:50.585 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@3c8a8593{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:17:50.602 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@36010d7d(openmuc,h=[openmuc],a=[],w=[]) for Server@7797baa2[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 09:17:50.689 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@7af3a9e8{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:17:50.690 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 09:17:50.747 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 09:17:50.762 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:17:50.763 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:17:50.764 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:17:50.764 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:17:50.767 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 09:17:50.768 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 09:17:50.768 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created PowerCellValue {}
+25.11.03 09:17:50.768 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiate Channel ATEnergy BMS App
+25.11.03 09:17:50.768 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - DATA OPTION NUMBER 6
+25.11.03 09:17:50.768 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created Channels null
+25.11.03 09:17:50.769 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Current string number is 2 with maxCellNumber = 2
+25.11.03 09:17:50.773 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 09:17:50.774 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 09:17:50.777 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 09:17:50.779 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 09:17:50.798 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 09:17:50.799 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:17:50.799 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:17:50.800 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 09:17:50.800 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 09:17:50.800 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 09:17:50.837 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 09:17:50.837 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 09:17:50.884 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 9e49bd78-05dd-4715-a1e3-9f633ccd2e1f
+25.11.03 09:17:50.886 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server ca28e779-04e4-433b-86d9-c81f961e70ca
+25.11.03 09:17:50.887 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for ca28e779-04e4-433b-86d9-c81f961e70ca
+25.11.03 09:17:50.888 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:17:50.899 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 09:17:50.906 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 09:17:50.974 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 09:17:50.975 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 09:17:50.980 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 09:17:50.980 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 09:17:50.980 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 09:17:50.981 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 09:17:50.981 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 09:17:50.981 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 09:17:50.981 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 09:17:50.990 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 09:17:51.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:17:51.051 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 09:17:52.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:17:53.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:17:54.002 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:17:54.160 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 09:17:54.165 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 09:17:54.165 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 09:17:54.170 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server ca28e779-04e4-433b-86d9-c81f961e70ca
+25.11.03 09:17:54.175 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server dd6e7360-cd3e-4be5-873a-3e5a73626e29
+25.11.03 09:17:54.180 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 09:17:54.181 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:17:55.026 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server e1dd4c7b-9a88-4db9-8fc1-1a18f4798b9c got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 09:17:55.026 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e1dd4c7b-9a88-4db9-8fc1-1a18f4798b9c
+25.11.03 09:17:55.191 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 09:21:20.767 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 09:21:20.771 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 09:21:20.772 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 09:21:20.772 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 09:21:20.773 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 09:21:20.774 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 09:21:20.775 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 09:21:20.775 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 09:21:20.780 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 09:21:20.788 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 09:21:20.789 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 09:21:20.791 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 09:21:20.802 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 09:21:20.809 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 09:21:20.812 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 09:21:20.819 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 09:21:20.819 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 09:21:20.820 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 09:21:20.826 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e1dd4c7b-9a88-4db9-8fc1-1a18f4798b9c
+25.11.03 09:21:20.828 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 09:21:20.847 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@6f01dddb{STOPPING}[11.0.22,sto=0]
+25.11.03 09:21:20.855 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@3c8a8593{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:21:20.858 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@7af3a9e8{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:21:20.864 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@4499b12c{/,null,STOPPED}
+25.11.03 09:21:20.871 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 09:22:00.308 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 09:22:00.342 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 09:22:00.353 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@69952e{/,null,AVAILABLE}
+25.11.03 09:22:00.357 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@66279059{STARTING}[11.0.22,sto=0] @959ms
+25.11.03 09:22:00.375 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1a5337ec{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:22:00.396 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@22b24267(openmuc,h=[openmuc],a=[],w=[]) for Server@63832c75[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 09:22:00.503 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@40ce0770{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:22:00.505 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 09:22:00.651 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 09:22:00.683 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:22:00.685 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:22:00.686 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:22:00.687 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:22:00.688 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 09:22:00.688 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 09:22:00.688 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created PowerCellValue {}
+25.11.03 09:22:00.688 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiate Channel ATEnergy BMS App
+25.11.03 09:22:00.688 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - DATA OPTION NUMBER 6
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created Channels null
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_R
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_V
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_T
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_total_I
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_SOC
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_SOH
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_R
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_V
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_T
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_total_I
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_SOC
+25.11.03 09:22:00.689 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_SOH
+25.11.03 09:22:00.695 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 09:22:00.696 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 09:22:00.701 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 09:22:00.708 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 09:22:00.725 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 09:22:00.726 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:22:00.726 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:22:00.726 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 09:22:00.727 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 09:22:00.727 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 09:22:00.762 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 09:22:00.762 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 09:22:00.798 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 8f459166-1ea1-43d0-89bc-a89e5686f7ac
+25.11.03 09:22:00.800 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e5c67a73-5aeb-4c8a-ab1d-5c27222d60f1
+25.11.03 09:22:00.801 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for e5c67a73-5aeb-4c8a-ab1d-5c27222d60f1
+25.11.03 09:22:00.802 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:22:00.811 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 09:22:00.823 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 09:22:00.877 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 09:22:00.887 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 09:22:00.888 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 09:22:00.889 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 09:22:00.889 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 09:22:00.890 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 09:22:00.890 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 09:22:00.890 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 09:22:00.891 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 09:22:00.896 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 09:22:00.897 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 09:22:00.898 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 09:22:00.899 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 09:22:00.900 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 09:22:00.900 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 09:22:00.901 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 09:22:00.960 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 09:22:01.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:22:01.693 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:22:02.002 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:22:02.689 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:22:03.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:22:03.689 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:22:03.913 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 09:22:03.920 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 09:22:03.920 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 09:22:03.920 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server e5c67a73-5aeb-4c8a-ab1d-5c27222d60f1
+25.11.03 09:22:03.922 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 238ea818-375e-4eac-93cb-e6b42180d635
+25.11.03 09:22:03.924 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 09:22:03.925 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:22:04.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:22:04.426 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server 10e5ad4c-525f-415f-87aa-082e9b5ff3b4 got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 09:22:04.426 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 10e5ad4c-525f-415f-87aa-082e9b5ff3b4
+25.11.03 09:22:04.600 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 09:22:04.772 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:05.731 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:06.714 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:07.714 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:08.711 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:09.709 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:10.714 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:11.713 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:12.714 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:13.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:14.704 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:15.707 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:16.709 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:17.704 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:18.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:19.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:20.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:21.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:22.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:23.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:24.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:25.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:26.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:27.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:28.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:29.704 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:30.700 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:31.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:32.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:33.706 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:34.702 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:35.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:36.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:37.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:38.704 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:39.703 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:40.701 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:41.703 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:42.704 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:43.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:44.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:45.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:46.705 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:47.703 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:48.700 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:22:49.181 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 09:22:49.184 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 09:22:49.186 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 09:22:49.186 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 09:22:49.187 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 09:22:49.187 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 09:22:49.187 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 09:22:49.188 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 09:22:49.188 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 09:22:49.195 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 09:22:49.196 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 09:22:49.198 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 09:22:49.202 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Deactivating ATEnergy BMS App
+25.11.03 09:22:49.209 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 10e5ad4c-525f-415f-87aa-082e9b5ff3b4
+25.11.03 09:22:49.211 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 09:22:49.212 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 09:22:49.212 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 09:22:49.212 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 09:22:49.212 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 09:22:49.213 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 09:22:49.228 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 09:22:49.248 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@66279059{STOPPING}[11.0.22,sto=0]
+25.11.03 09:22:49.258 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1a5337ec{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:22:49.260 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@40ce0770{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:22:49.265 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@69952e{/,null,STOPPED}
+25.11.03 09:22:49.272 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty
+25.11.03 09:24:09.919 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - jetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 17.0.16+8-Ubuntu-0ubuntu124.04.1
+25.11.03 09:24:09.967 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - Session workerName=node0
+25.11.03 09:24:09.986 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Started o.e.j.s.ServletContextHandler@395bef08{/,null,AVAILABLE}
+25.11.03 09:24:09.991 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Started Server@2d534d91{STARTING}[11.0.22,sto=0] @901ms
+25.11.03 09:24:10.019 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:24:10.039 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - x509=X509@1c1232a0(openmuc,h=[openmuc],a=[],w=[]) for Server@3da2ceb9[provider=null,keyStore=file:///home/shou/Documents/ATEnergy/openmuc/framework/conf/https-certificate.jks,trustStore=null]
+25.11.03 09:24:10.122 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Started ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:24:10.122 [FelixStartLevel] INFO  org.apache.felix.http - Started Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+25.11.03 09:24:10.207 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Activating Data Manager with config conf/channels.xml
+25.11.03 09:24:10.234 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:24:10.236 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'virtual'.
+25.11.03 09:24:10.236 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:24:10.236 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - No driver bundle available for configured driver: 'modbus'.
+25.11.03 09:24:10.241 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Activating ATEnergy BMS App
+25.11.03 09:24:10.241 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiating ATEnergy BMS App
+25.11.03 09:24:10.242 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created PowerCellValue {}
+25.11.03 09:24:10.242 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Initiate Channel ATEnergy BMS App
+25.11.03 09:24:10.243 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - DATA OPTION NUMBER 6
+25.11.03 09:24:10.244 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Created Channels null
+25.11.03 09:24:10.245 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_R
+25.11.03 09:24:10.245 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_V
+25.11.03 09:24:10.246 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_T
+25.11.03 09:24:10.246 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_total_I
+25.11.03 09:24:10.246 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_SOC
+25.11.03 09:24:10.246 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell1_SOH
+25.11.03 09:24:10.246 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_R
+25.11.03 09:24:10.247 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_V
+25.11.03 09:24:10.247 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_T
+25.11.03 09:24:10.247 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_total_I
+25.11.03 09:24:10.247 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_SOC
+25.11.03 09:24:10.247 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Get channels ATEnergy BMS App ----> str1_cell2_SOH
+25.11.03 09:24:10.266 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Activating Ascii Logger
+25.11.03 09:24:10.268 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: asciilogger
+25.11.03 09:24:10.282 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Activating SQL Logger
+25.11.03 09:24:10.297 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Data logger registered: sqllogger
+25.11.03 09:24:10.337 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - Driver registered: modbus
+25.11.03 09:24:10.339 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:24:10.339 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - Set sampling timeout to 3000 ms.
+25.11.03 09:24:10.339 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/7
+25.11.03 09:24:10.339 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.driver.modbus.ModbusDriver - New Modbus Connection on device: /dev/pts/3
+25.11.03 09:24:10.343 [FelixStartLevel] INFO  o.o.f.lib.ssl.SslManagerComponent - SSL Component activated
+25.11.03 09:24:10.367 [OpenMUC Data Manager Pool - thread-1] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/3 connected
+25.11.03 09:24:10.367 [OpenMUC Data Manager Pool - thread-2] INFO  o.o.f.d.m.rtu.ModbusRTUConnection - Modbus Device: /dev/pts/7 connected
+25.11.03 09:24:10.473 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 4fafefa5-54da-42da-b324-5d2dd6bd3364
+25.11.03 09:24:10.473 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - updated server mappings for 4fafefa5-54da-42da-b324-5d2dd6bd3364
+25.11.03 09:24:10.474 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:24:10.486 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Activating Modbus Server
+25.11.03 09:24:10.492 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Registered Server: modbus.
+25.11.03 09:24:10.599 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Access Tool.
+25.11.03 09:24:10.599 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Channel Configurator.
+25.11.03 09:24:10.599 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Exporter.
+25.11.03 09:24:10.599 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Data Plotter.
+25.11.03 09:24:10.599 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Media Viewer.
+25.11.03 09:24:10.600 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin Simple Demo Visualisation.
+25.11.03 09:24:10.600 [FelixStartLevel] WARN  o.o.framework.webui.base.WebUiBase - Can't register WebUI plugin User Configurator.
+25.11.03 09:24:10.600 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Activating WebUI Base
+25.11.03 09:24:10.606 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Configurator
+25.11.03 09:24:10.606 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Channel Access Tool
+25.11.03 09:24:10.607 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Plotter
+25.11.03 09:24:10.607 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Media Viewer
+25.11.03 09:24:10.608 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Simple Demo Visualisation
+25.11.03 09:24:10.608 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: User Configurator
+25.11.03 09:24:10.608 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin registered: Data Exporter
+25.11.03 09:24:10.618 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Activating REST Server
+25.11.03 09:24:10.649 [FelixStartLevel] INFO  org.apache.felix.webconsole - Servlet 3 bridge enabled
+25.11.03 09:24:11.003 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:24:11.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:11.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> -50.0
+25.11.03 09:24:11.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:11.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.23
+25.11.03 09:24:11.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Calculate the first SoC: voltage 2.147--------> firstSoc: 0.7424999999999994
+25.11.03 09:24:11.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - First SoC ----> 74.24999999999994
+25.11.03 09:24:11.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:11.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:11.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.149
+25.11.03 09:24:11.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.25
+25.11.03 09:24:11.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Calculate the first SoC: voltage 2.149--------> firstSoc: 0.7474999999999999
+25.11.03 09:24:11.254 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - First SoC ----> 74.75
+25.11.03 09:24:11.257 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:24:12.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:24:12.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:12.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:12.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.146
+25.11.03 09:24:12.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.16
+25.11.03 09:24:12.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.146, current: 50.0, temperature: 29.16
+25.11.03 09:24:12.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7474999999999999, Vp: 0.0
+25.11.03 09:24:12.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.747361111111111
+25.11.03 09:24:12.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7267344633598222, Vp: 0.0037381196658123773, y_pred: 2.1566794444444444, nu: -0.010679444444444464, R0: 1.0E-4
+25.11.03 09:24:12.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.67344633598222
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> 50.0
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.149
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.25
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.149, current: 50.0, temperature: 29.25
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7267344633598222, Vp: 0.0037381196658123773
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7265955744709333
+25.11.03 09:24:12.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7309284640531079, Vp: 0.0051386790683836375, y_pred: 2.1451370161058514, nu: 0.0038629838941486305, R0: 1.0E-4
+25.11.03 09:24:12.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 73.09284640531078
+25.11.03 09:24:12.253 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:24:13.001 [OpenMUC Data Manager] WARN  o.o.f.d.sql.SqlLoggerService - Sql connection not established!
+25.11.03 09:24:13.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:13.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> -50.0
+25.11.03 09:24:13.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.148
+25.11.03 09:24:13.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.13
+25.11.03 09:24:13.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.148, current: -50.0, temperature: 29.13
+25.11.03 09:24:13.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7309284640531079, Vp: 0.0051386790683836375
+25.11.03 09:24:13.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7310673529419968
+25.11.03 09:24:13.254 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7211964389550711, Vp: 0.003214509082587176, y_pred: 2.158825196061834, nu: -0.010825196061833964, R0: 1.0E-4
+25.11.03 09:24:13.254 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.11964389550711
+25.11.03 09:24:13.255 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:13.255 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:13.255 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.152
+25.11.03 09:24:13.255 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.22
+25.11.03 09:24:13.255 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.152, current: -50.0, temperature: 29.22
+25.11.03 09:24:13.256 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7211964389550711, Vp: 0.003214509082587176
+25.11.03 09:24:13.256 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.72133532784396
+25.11.03 09:24:13.256 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.717085750467821, Vp: 0.001185474452337553, y_pred: 2.157075347509126, nu: -0.0050753475091260825, R0: 1.0E-4
+25.11.03 09:24:13.257 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 71.7085750467821
+25.11.03 09:24:13.257 [Modbus Update] WARN  o.o.f.app.simpledemo.SimpleDemoApp - SQL Logger not ready; skipping read this cycle.
+25.11.03 09:24:13.542 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.d.sql.SqlLoggerService - Configuration changed - new configuration 
+url=jdbc:postgresql://127.0.0.1:5432/openmuc
+user=openmuc_user
+password=*****
+ssl=false
+socket_timeout=5
+tcp_keep_alive=true
+psql_pass=postgres
+timezone=Asia/Bangkok
+25.11.03 09:24:13.547 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - sql driver
+25.11.03 09:24:13.548 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - URL is: jdbc:postgresql://127.0.0.1:5432/openmuc
+25.11.03 09:24:13.551 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 4fafefa5-54da-42da-b324-5d2dd6bd3364
+25.11.03 09:24:13.557 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 32698dcf-397f-4d6a-981a-409ff8d12c87
+25.11.03 09:24:13.561 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - No updates in mappings. Leaving server unchanged
+25.11.03 09:24:13.562 [CM Event Dispatcher (Fire ConfigurationEvent: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.core.datamanager.DataManager - Registered Server: iec61850.
+25.11.03 09:24:14.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:14.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:14.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.146
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.3
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.146, current: 50.0, temperature: 29.3
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.717085750467821, Vp: 0.001185474452337553
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7169468615789321
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7186515598288803, Vp: 0.002991220321069437, y_pred: 2.1438775439018523, nu: 0.0021224560981476515, R0: 1.0E-4
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 71.86515598288803
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> 50.0
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.148
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.29
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.148, current: 50.0, temperature: 29.29
+25.11.03 09:24:14.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7186515598288803, Vp: 0.002991220321069437
+25.11.03 09:24:14.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7185126709399914
+25.11.03 09:24:14.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7226068026505166, Vp: 0.004778146181341452, y_pred: 2.142753409070981, nu: 0.005246590929019135, R0: 1.0E-4
+25.11.03 09:24:14.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.26068026505166
+25.11.03 09:24:14.322 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:14.419 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Server 7d1652bb-2853-460c-b41a-78de04c1fcdd got update with {felix.fileinstall.filename=file:/home/shou/Documents/ATEnergy/openmuc/framework/conf/properties/org.openmuc.framework.server.iec61850.server.Iec61850Server.cfg, port=10003, schedulingEnabled=true, sclPath=conf/iec61850-server-example.cid, service.pid=org.openmuc.framework.server.iec61850.server.Iec61850Server}
+25.11.03 09:24:14.419 [CM Configuration Updater (Update: pid=org.openmuc.framework.server.iec61850.server.Iec61850Server)] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 7d1652bb-2853-460c-b41a-78de04c1fcdd
+25.11.03 09:24:14.573 [CM Configuration Updater (Update: pid=org.openmuc.framework.lib.ssl.SslManager)] INFO  o.o.framework.lib.ssl.SslManager - Successfully loaded
+25.11.03 09:24:15.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:15.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> -50.0
+25.11.03 09:24:15.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:15.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.13
+25.11.03 09:24:15.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.147, current: -50.0, temperature: 29.13
+25.11.03 09:24:15.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7226068026505166, Vp: 0.004778146181341452
+25.11.03 09:24:15.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7227456915394055
+25.11.03 09:24:15.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.716036554967431, Vp: 0.002549699296118564, y_pred: 2.1558390377434873, nu: -0.008839037743487488, R0: 1.0E-4
+25.11.03 09:24:15.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 71.6036554967431
+25.11.03 09:24:15.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:15.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> 50.0
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.148
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.25
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.148, current: 50.0, temperature: 29.25
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.716036554967431, Vp: 0.002549699296118564
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7158976660785421
+25.11.03 09:24:15.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7203259597558472, Vp: 0.0043246996990550885, y_pred: 2.1419868521001044, nu: 0.00601314789989571, R0: 1.0E-4
+25.11.03 09:24:15.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.03259597558473
+25.11.03 09:24:15.305 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:16.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:16.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:16.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:16.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.18
+25.11.03 09:24:16.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.147, current: 50.0, temperature: 29.18
+25.11.03 09:24:16.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7203259597558472, Vp: 0.0043246996990550885
+25.11.03 09:24:16.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7201870708669583
+25.11.03 09:24:16.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.72391137987833, Vp: 0.005961569601022345, y_pred: 2.1417713636326807, nu: 0.005228636367319073, R0: 1.0E-4
+25.11.03 09:24:16.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.391137987833
+25.11.03 09:24:16.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:16.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:16.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.149
+25.11.03 09:24:16.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.26
+25.11.03 09:24:16.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.149, current: -50.0, temperature: 29.26
+25.11.03 09:24:16.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.72391137987833, Vp: 0.005961569601022345
+25.11.03 09:24:16.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7240502687672189
+25.11.03 09:24:16.253 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7194519734957135, Vp: 0.0038588348687674866, y_pred: 2.1556916163859166, nu: -0.006691616385916532, R0: 1.0E-4
+25.11.03 09:24:16.254 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 71.94519734957136
+25.11.03 09:24:16.291 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:17.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.16
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.147, current: 50.0, temperature: 29.16
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7194519734957135, Vp: 0.0038588348687674866
+25.11.03 09:24:17.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7193130846068246
+25.11.03 09:24:17.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.722758107178703, Vp: 0.005429513886435233, y_pred: 2.1417943407174005, nu: 0.0052056592825993064, R0: 1.0E-4
+25.11.03 09:24:17.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.2758107178703
+25.11.03 09:24:17.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:17.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:17.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.152
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.23
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.152, current: -50.0, temperature: 29.23
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.722758107178703, Vp: 0.005429513886435233
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.722896996067592
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7205852317700306, Vp: 0.0034075426190043104, y_pred: 2.155630760234923, nu: -0.003630760234922814, R0: 1.0E-4
+25.11.03 09:24:17.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.05852317700307
+25.11.03 09:24:17.282 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:18.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:18.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:18.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:18.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.15
+25.11.03 09:24:18.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.147, current: 50.0, temperature: 29.15
+25.11.03 09:24:18.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7205852317700306, Vp: 0.0034075426190043104
+25.11.03 09:24:18.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7204463428811417
+25.11.03 09:24:18.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7231155277069986, Vp: 0.004935698959312738, y_pred: 2.1426413716644026, nu: 0.004358628335597192, R0: 1.0E-4
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.31155277069986
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> 50.0
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.151
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.29
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.151, current: 50.0, temperature: 29.29
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7231155277069986, Vp: 0.004935698959312738
+25.11.03 09:24:18.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7229766388181097
+25.11.03 09:24:18.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7278708233929149, Vp: 0.006205211971016624, y_pred: 2.142691741515897, nu: 0.008308258484102993, R0: 1.0E-4
+25.11.03 09:24:18.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.78708233929149
+25.11.03 09:24:18.279 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:19.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.146
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.23
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.146, current: 50.0, temperature: 29.23
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7278708233929149, Vp: 0.006205211971016624
+25.11.03 09:24:19.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.727731934504026
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7293318633107447, Vp: 0.007593281907246249, y_pred: 2.1431778224291445, nu: 0.0028221775708554553, R0: 1.0E-4
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.93318633107447
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> 50.0
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.148
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.33
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.148, current: 50.0, temperature: 29.33
+25.11.03 09:24:19.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7293318633107447, Vp: 0.007593281907246249
+25.11.03 09:24:19.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7291929744218558
+25.11.03 09:24:19.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7320355029961931, Vp: 0.008766966041483183, y_pred: 2.142793571956859, nu: 0.005206428043141198, R0: 1.0E-4
+25.11.03 09:24:19.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 73.20355029961931
+25.11.03 09:24:19.274 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:20.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> -50.0
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.147
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.14
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.147, current: -50.0, temperature: 29.14
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7320355029961931, Vp: 0.008766966041483183
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.732174391885082
+25.11.03 09:24:20.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7275139927109493, Vp: 0.007026441259130237, y_pred: 2.155856139014624, nu: -0.00885613901462401, R0: 1.0E-4
+25.11.03 09:24:20.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.75139927109493
+25.11.03 09:24:20.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:20.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:20.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.149
+25.11.03 09:24:20.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.35
+25.11.03 09:24:20.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.149, current: -50.0, temperature: 29.35
+25.11.03 09:24:20.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7275139927109493, Vp: 0.007026441259130237
+25.11.03 09:24:20.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7276528815998382
+25.11.03 09:24:20.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7238777234588913, Vp: 0.005336992226938892, y_pred: 2.156436033443762, nu: -0.007436033443761758, R0: 1.0E-4
+25.11.03 09:24:20.252 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.38777234588913
+25.11.03 09:24:20.277 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:21.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:21.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> 50.0
+25.11.03 09:24:21.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.146
+25.11.03 09:24:21.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.25
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.146, current: 50.0, temperature: 29.25
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7238777234588913, Vp: 0.005336992226938892
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7237388345700024
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7254668160657638, Vp: 0.006643073508954509, y_pred: 2.1424753912124093, nu: 0.003524608787590644, R0: 1.0E-4
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.54668160657639
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:21.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.151
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.2
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.151, current: -50.0, temperature: 29.2
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7254668160657638, Vp: 0.006643073508954509
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7256057049546527
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.723493834568311, Vp: 0.0048298903516715, y_pred: 2.155456362148354, nu: -0.004456362148354209, R0: 1.0E-4
+25.11.03 09:24:21.251 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.34938345683109
+25.11.03 09:24:21.277 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:22.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:22.248 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell1: -----> -50.0
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell1: -----> 2.149
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell1: -----> 29.22
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.149, current: -50.0, temperature: 29.22
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.723493834568311, Vp: 0.0048298903516715
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.7236327234571999
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7202122435052841, Vp: 0.003378890427769304, y_pred: 2.1564596935487916, nu: -0.007459693548791613, R0: 1.0E-4
+25.11.03 09:24:22.249 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 72.02122435052841
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of of str1_total_I: -----> 50.0
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL's Current of string 1_cell2: -----> -50.0
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Voltage of string 1_cell2: -----> 2.153
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Value of POWERCELL'S Temperature of string 1_cell2: -----> 29.36
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - voltage: 2.153, current: -50.0, temperature: 29.36
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7202122435052841, Vp: 0.003378890427769304
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC_pred: 0.720351132394173
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SoC: 0.7185679442818533, Vp: 0.0017363491897532267, y_pred: 2.157015507051288, nu: -0.004015507051287948, R0: 1.0E-4
+25.11.03 09:24:22.250 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - SetLatestSoC ----> currentSoC: 71.85679442818534
+25.11.03 09:24:22.267 [Modbus Update] INFO  o.o.f.app.simpledemo.SimpleDemoApp - --> channel str1_Cnominal: 100.0
+25.11.03 09:24:22.535 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - Deactivating WebUI Base
+25.11.03 09:24:22.538 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Access Tool.
+25.11.03 09:24:22.538 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Channel Configurator.
+25.11.03 09:24:22.539 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Exporter.
+25.11.03 09:24:22.539 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Data Plotter.
+25.11.03 09:24:22.540 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Media Viewer.
+25.11.03 09:24:22.540 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: Simple Demo Visualisation.
+25.11.03 09:24:22.541 [FelixStartLevel] INFO  o.o.framework.webui.base.WebUiBase - WebUI plugin deregistered: User Configurator.
+25.11.03 09:24:22.546 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - Deactivating REST Server
+25.11.03 09:24:22.561 [FelixStartLevel] INFO  o.o.f.s.i.server.Iec61850Server - Deactivating 61850 Server 7d1652bb-2853-460c-b41a-78de04c1fcdd
+25.11.03 09:24:22.563 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - Deactivating ATEnergy BMS App
+25.11.03 09:24:22.565 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering driver: modbus.
+25.11.03 09:24:22.567 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Driver unregistered: modbus
+25.11.03 09:24:22.571 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - Deactivating Modbus Server
+25.11.03 09:24:22.578 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Deactivating Data Manager
+25.11.03 09:24:22.579 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: asciilogger.
+25.11.03 09:24:22.580 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: asciilogger
+25.11.03 09:24:22.580 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Unregistering data logger: sqllogger.
+25.11.03 09:24:22.580 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - Data logger deregistered: sqllogger
+25.11.03 09:24:22.581 [FelixStartLevel] INFO  o.o.f.datalogger.ascii.AsciiLogger - Deactivating Ascii Logger
+25.11.03 09:24:22.585 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - Deactivating SQL Logger
+25.11.03 09:24:22.603 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - Stopped Server@2d534d91{STOPPING}[11.0.22,sto=0]
+25.11.03 09:24:22.610 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@6db5417c{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+25.11.03 09:24:22.612 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - Stopped ServerConnector@1ce83732{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+25.11.03 09:24:22.616 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - Stopped o.e.j.s.ServletContextHandler@395bef08{/,null,STOPPED}
+25.11.03 09:24:22.621 [FelixStartLevel] INFO  org.apache.felix.http - Stopped Jetty

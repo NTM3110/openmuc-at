@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" tests="7" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:27" hostname="shou-Dell-G15-5511" time="0.019">
+  <properties/>
+  <testcase name="tc001_t1_before_available_data_t2_within()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.001"/>
+  <testcase name="tc000_t1_t2_within_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.001"/>
+  <testcase name="tc005_t1_within_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.001"/>
+  <testcase name="tc002_t2_after_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.009"/>
+  <testcase name="tc004_t1_t2_after_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.002"/>
+  <testcase name="tc006_t1_before_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.001"/>
+  <testcase name="tc003_t1_t2_before_available_data()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestSingleFile" time="0.002"/>
+  <system-out><![CDATA[### Setup() LogFileReaderTestSingleFile
+### Begin test tc001_t1_before_available_data_t2_within
+tc001_t1_before_available_data_t2_within records = 0 (0 expected)
+### Begin test tc000_t1_t2_within_available_data
+tc000_t1_t2_within_available_data records = 7 (7 expected)
+### Begin test tc005_t1_within_available_data
+tc005_t1_within_available_data record = truerecord = 
+### Begin test tc002_t2_after_available_data
+tc002_t2_after_available_data records = 361 (361 expected)
+### Begin test tc004_t1_t2_after_available_data
+tc004_t1_t2_after_available_data records = 0 (0 expected)
+### Begin test tc006_t1_before_available_data
+record: null
+tc006_t1_before_available_data no records = true
+### Begin test tc003_t1_t2_before_available_data
+tc003_t1_t2_before_available_data records = 0 (0 expected); wrong = 0, ok(with Flag 7) = 0
+tearing down
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

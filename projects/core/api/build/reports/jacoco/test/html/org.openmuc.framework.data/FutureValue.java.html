@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FutureValue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-api</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.data</a> &gt; <span class="el_source">FutureValue.java</span></div><h1>FutureValue.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.data;
+
+import org.openmuc.framework.dataaccess.Channel;
+
+/**
+ * Class used to write values in the future.
+ * 
+ * {@link Channel#writeFuture(java.util.List)}
+ */
+public class FutureValue {
+
+    private final Value value;
+    private final long writeTime;
+
+    /**
+     * Construct a new future value.
+     * 
+     * @param value
+     *            a value.
+     * @param writeTime
+     *            the write time in the future.
+     */
+<span class="nc" id="L43">    public FutureValue(Value value, long writeTime) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (writeTime &lt;= System.currentTimeMillis()) {</span>
+<span class="nc" id="L45">            throw new IllegalArgumentException(&quot;Write time must be in the future.&quot;);</span>
+        }
+<span class="nc" id="L47">        this.value = value;</span>
+<span class="nc" id="L48">        this.writeTime = writeTime;</span>
+<span class="nc" id="L49">    }</span>
+
+    /**
+     * The future value.
+     * 
+     * @return the value.
+     */
+    public Value getValue() {
+<span class="nc" id="L57">        return value;</span>
+    }
+
+    /**
+     * The write time.
+     * 
+     * @return the write time.
+     */
+    public Long getWriteTime() {
+<span class="nc" id="L66">        return writeTime;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

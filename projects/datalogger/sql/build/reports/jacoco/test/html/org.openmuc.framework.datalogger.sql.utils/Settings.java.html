@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Settings.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-sql</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.sql.utils</a> &gt; <span class="el_source">Settings.java</span></div><h1>Settings.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.sql.utils;
+
+import org.openmuc.framework.lib.osgi.config.GenericSettings;
+import org.openmuc.framework.lib.osgi.config.ServiceProperty;
+
+public class Settings extends GenericSettings {
+
+<span class="fc" id="L29">    public static String URL = &quot;url&quot;;</span>
+<span class="fc" id="L30">    public static String USER = &quot;user&quot;;</span>
+<span class="fc" id="L31">    public static String PASSWORD = &quot;password&quot;;</span>
+<span class="fc" id="L32">    public static String SSL = &quot;ssl&quot;;</span>
+<span class="fc" id="L33">    public static String SOCKET_TIMEOUT = &quot;socket_timeout&quot;;</span>
+<span class="fc" id="L34">    public static String TCP_KEEP_ALIVE = &quot;tcp_keep_alive&quot;;</span>
+<span class="fc" id="L35">    public static String PSQL_PASS = &quot;psql_pass&quot;;</span>
+<span class="fc" id="L36">    public static String TIMEZONE = &quot;timezone&quot;;</span>
+
+    public Settings() {
+<span class="nc" id="L39">        super();</span>
+<span class="nc" id="L40">        String defaultUrl = &quot;jdbc:h2:retry:file:./data/h2/h2;AUTO_SERVER=TRUE;MODE=MYSQL&quot;;</span>
+<span class="nc" id="L41">        properties.put(URL, new ServiceProperty(URL, &quot;URL of the used database&quot;, defaultUrl, true));</span>
+<span class="nc" id="L42">        properties.put(USER, new ServiceProperty(USER, &quot;User of the used database&quot;, &quot;openmuc&quot;, true));</span>
+<span class="nc" id="L43">        properties.put(PASSWORD, new ServiceProperty(PASSWORD, &quot;Password for the database user&quot;, &quot;openmuc&quot;, true));</span>
+<span class="nc" id="L44">        properties.put(SSL, new ServiceProperty(SSL, &quot;SSL needed for the database connection&quot;, &quot;false&quot;, false));</span>
+<span class="nc" id="L45">        properties.put(SOCKET_TIMEOUT,</span>
+                new ServiceProperty(SOCKET_TIMEOUT, &quot;seconds after a timeout is thrown&quot;, &quot;5&quot;, false));
+<span class="nc" id="L47">        properties.put(TCP_KEEP_ALIVE, new ServiceProperty(TCP_KEEP_ALIVE, &quot;keep tcp connection alive&quot;, &quot;true&quot;, false));</span>
+<span class="nc" id="L48">        properties.put(PSQL_PASS, new ServiceProperty(PSQL_PASS, &quot;password for postgresql&quot;, &quot;postgres&quot;, true));</span>
+<span class="nc" id="L49">        properties.put(TIMEZONE, new ServiceProperty(TIMEZONE, &quot;local time zone&quot;, &quot;Europe/Berlin&quot;, false));</span>
+<span class="nc" id="L50">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

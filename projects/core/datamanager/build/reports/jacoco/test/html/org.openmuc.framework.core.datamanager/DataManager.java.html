@@ -1,0 +1,1410 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DataManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">DataManager.java</span></div><h1>DataManager.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Queue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+
+import org.apache.felix.service.command.CommandProcessor;
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.config.ChannelScanInfo;
+import org.openmuc.framework.config.ConfigChangeListener;
+import org.openmuc.framework.config.ConfigService;
+import org.openmuc.framework.config.ConfigWriteException;
+import org.openmuc.framework.config.DeviceConfig;
+import org.openmuc.framework.config.DeviceScanInfo;
+import org.openmuc.framework.config.DeviceScanListener;
+import org.openmuc.framework.config.DriverConfig;
+import org.openmuc.framework.config.DriverInfo;
+import org.openmuc.framework.config.DriverNotAvailableException;
+import org.openmuc.framework.config.ParseException;
+import org.openmuc.framework.config.RootConfig;
+import org.openmuc.framework.config.ScanException;
+import org.openmuc.framework.config.ScanInterruptedException;
+import org.openmuc.framework.config.ServerMapping;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.dataaccess.Channel;
+import org.openmuc.framework.dataaccess.ChannelChangeListener;
+import org.openmuc.framework.dataaccess.ChannelState;
+import org.openmuc.framework.dataaccess.DataAccessService;
+import org.openmuc.framework.dataaccess.DataLoggerNotAvailableException;
+import org.openmuc.framework.dataaccess.DeviceState;
+import org.openmuc.framework.dataaccess.LogicalDevice;
+import org.openmuc.framework.dataaccess.LogicalDeviceChangeListener;
+import org.openmuc.framework.dataaccess.ReadRecordContainer;
+import org.openmuc.framework.dataaccess.WriteValueContainer;
+import org.openmuc.framework.datalogger.spi.DataLoggerService;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.framework.driver.spi.Connection;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.DriverDeviceScanListener;
+import org.openmuc.framework.driver.spi.DriverService;
+import org.openmuc.framework.driver.spi.RecordsReceivedListener;
+import org.openmuc.framework.server.spi.ServerMappingContainer;
+import org.openmuc.framework.server.spi.ServerService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@Component(service = { DataAccessService.class, ConfigService.class }, immediate = true, property = {
+        CommandProcessor.COMMAND_SCOPE + &quot;:String=openmuc&quot;, CommandProcessor.COMMAND_FUNCTION + &quot;:String=reload&quot; })
+<span class="nc" id="L103">public final class DataManager extends Thread implements DataAccessService, ConfigService, RecordsReceivedListener {</span>
+
+    private static final String DEFAULT_CONF_FILE = &quot;conf/channels.xml&quot;;
+
+<span class="nc" id="L107">    private static final Logger logger = LoggerFactory.getLogger(DataManager.class);</span>
+<span class="nc" id="L108">    final LinkedList&lt;Device&gt; connectedDevices = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L109">    final LinkedList&lt;Device&gt; disconnectedDevices = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L110">    final LinkedList&lt;Device&gt; connectionFailures = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L111">    final LinkedList&lt;SamplingTask&gt; samplingTaskFinished = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L112">    final LinkedList&lt;WriteTask&gt; newWriteTasks = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L113">    final LinkedList&lt;ReadTask&gt; newReadTasks = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L114">    final LinkedList&lt;DeviceTask&gt; tasksFinished = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L115">    private final HashMap&lt;String, DriverService&gt; newDrivers = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L116">    final HashMap&lt;String, ServerService&gt; serverServices = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L117">    private final Map&lt;String, DriverService&gt; activeDrivers = new LinkedHashMap&lt;&gt;();</span>
+<span class="nc" id="L118">    private final LinkedList&lt;Action&gt; actions = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L119">    private final List&lt;ConfigChangeListener&gt; configChangeListeners = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L120">    private final List&lt;DataLoggerService&gt; newDataLoggers = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L121">    private final Deque&lt;DataLoggerService&gt; activeDataLoggers = new LinkedBlockingDeque&lt;&gt;();</span>
+<span class="nc" id="L122">    private final LinkedList&lt;List&lt;ChannelRecordContainer&gt;&gt; receivedRecordContainers = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L123">    private final ReentrantLock configLock = new ReentrantLock();</span>
+    CountDownLatch dataLoggerRemovedSignal;
+    volatile int activeDeviceCountDown;
+<span class="nc" id="L126">    ThreadPoolExecutor executor = null;</span>
+    CountDownLatch driverRemovedSignal;
+<span class="nc" id="L128">    private volatile boolean stopFlag = false;</span>
+    // does not need to be a list because RemovedService() for driver services
+    // are never called in parallel:
+<span class="nc" id="L131">    private volatile String driverToBeRemovedId = null;</span>
+<span class="nc" id="L132">    private volatile DataLoggerService dataLoggerToBeRemoved = null;</span>
+<span class="nc" id="L133">    private volatile RootConfigImpl newRootConfigWithoutDefaults = null;</span>
+    private volatile RootConfigImpl rootConfig;
+    private volatile RootConfigImpl rootConfigWithoutDefaults;
+    private File configFile;
+<span class="nc" id="L137">    private volatile Boolean dataManagerActivated = false;</span>
+    private CountDownLatch newConfigSignal;
+
+    @Activate
+    private void activate() throws TransformerFactoryConfigurationError, IOException, ParserConfigurationException,
+            TransformerException, ParseException {
+
+<span class="nc" id="L144">        String configFileName = System.getProperty(&quot;org.openmuc.framework.channelconfig&quot;);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">        if (configFileName == null) {</span>
+<span class="nc" id="L146">            configFileName = DEFAULT_CONF_FILE;</span>
+        }
+<span class="nc" id="L148">        activateWithConfig(new File(configFileName));</span>
+<span class="nc" id="L149">    }</span>
+
+    void activateWithConfig(File configFile) throws TransformerFactoryConfigurationError, IOException,
+            ParserConfigurationException, TransformerException, ParseException {
+
+<span class="nc" id="L154">        logger.info(&quot;Activating Data Manager with config {}&quot;, configFile);</span>
+
+<span class="nc" id="L156">        NamedThreadFactory namedThreadFactory = new NamedThreadFactory(&quot;OpenMUC Data Manager Pool - thread-&quot;);</span>
+<span class="nc" id="L157">        executor = (ThreadPoolExecutor) Executors.newCachedThreadPool(namedThreadFactory);</span>
+
+        try {
+<span class="nc" id="L160">            this.configFile = configFile;</span>
+            try {
+<span class="nc" id="L162">                rootConfigWithoutDefaults = RootConfigImpl.createFromFile(configFile);</span>
+<span class="nc" id="L163">            } catch (FileNotFoundException e) {</span>
+                // create an empty configuration and store it in a file
+<span class="nc" id="L165">                rootConfigWithoutDefaults = new RootConfigImpl();</span>
+<span class="nc" id="L166">                rootConfigWithoutDefaults.writeToFile(configFile);</span>
+<span class="nc" id="L167">                logger.info(&quot;No configuration file found. Created an empty config file at: {}&quot;,</span>
+<span class="nc" id="L168">                        configFile.getAbsolutePath());</span>
+<span class="nc" id="L169">            } catch (ParseException e) {</span>
+<span class="nc" id="L170">                throw new ParseException(&quot;Error parsing OpenMUC config file: &quot; + e.getMessage(), e);</span>
+<span class="nc" id="L171">            }</span>
+
+<span class="nc" id="L173">            rootConfig = new RootConfigImpl();</span>
+
+<span class="nc" id="L175">            applyConfiguration(rootConfigWithoutDefaults, System.currentTimeMillis());</span>
+
+<span class="nc" id="L177">            start();</span>
+
+<span class="nc" id="L179">            dataManagerActivated = true;</span>
+<span class="nc" id="L180">        } catch (ParseException e) {</span>
+<span class="nc" id="L181">            logger.error(e.getMessage());</span>
+<span class="nc" id="L182">            logger.error(&quot;Stopping Framework.&quot;);</span>
+<span class="nc" id="L183">            final BundleContext bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();</span>
+            try {
+<span class="nc" id="L185">                bundleContext.getBundle(0).stop();</span>
+<span class="nc" id="L186">                bundleContext.getBundle().stop();</span>
+<span class="nc" id="L187">            } catch (BundleException ex) {</span>
+<span class="nc" id="L188">                ex.printStackTrace();</span>
+<span class="nc" id="L189">            }</span>
+<span class="nc" id="L190">        }</span>
+<span class="nc" id="L191">    }</span>
+
+    public void reload() {
+<span class="nc" id="L194">        logger.info(&quot;Reload config from file.&quot;);</span>
+        try {
+<span class="nc" id="L196">            reloadConfigFromFile();</span>
+<span class="nc" id="L197">        } catch (FileNotFoundException | ParseException e) {</span>
+<span class="nc" id="L198">            logger.error(e.getMessage());</span>
+<span class="nc" id="L199">        }</span>
+<span class="nc" id="L200">    }</span>
+
+    @Deactivate
+    private void deactivate() {
+<span class="nc" id="L204">        logger.info(&quot;Deactivating Data Manager&quot;);</span>
+
+<span class="nc" id="L206">        stopFlag = true;</span>
+<span class="nc" id="L207">        interrupt();</span>
+        try {
+<span class="nc" id="L209">            this.join();</span>
+<span class="nc" id="L210">            executor.shutdown();</span>
+<span class="nc" id="L211">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L212">        }</span>
+<span class="nc" id="L213">        dataManagerActivated = false;</span>
+<span class="nc" id="L214">    }</span>
+
+    @Override
+    public void run() {
+
+<span class="nc" id="L219">        setName(&quot;OpenMUC Data Manager&quot;);</span>
+<span class="nc" id="L220">        handleInterruptEvent();</span>
+
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        while (!stopFlag) {</span>
+
+<span class="nc bnc" id="L224" title="All 2 branches missed.">            if (interrupted()) {</span>
+<span class="nc" id="L225">                handleInterruptEvent();</span>
+<span class="nc" id="L226">                continue;</span>
+            }
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">            if (actions.isEmpty()) {</span>
+                try {
+                    while (true) {
+<span class="nc" id="L232">                        Thread.sleep(Long.MAX_VALUE);</span>
+                    }
+<span class="nc" id="L234">                } catch (InterruptedException e) {</span>
+<span class="nc" id="L235">                    handleInterruptEvent();</span>
+<span class="nc" id="L236">                    continue;</span>
+                }
+            }
+
+<span class="nc" id="L240">            Action currentAction = actions.getFirst();</span>
+
+<span class="nc" id="L242">            long currentTime = System.currentTimeMillis();</span>
+
+<span class="nc" id="L244">            long elapsedTime = currentTime - currentAction.startTime;</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            if (elapsedTime &gt; 1000L) {</span>
+<span class="nc" id="L247">                elapsedTimeTooBig(currentAction, currentTime);</span>
+<span class="nc" id="L248">                continue;</span>
+            }
+
+<span class="nc" id="L251">            long sleepTime = currentAction.startTime - currentTime;</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">            if (sleepTime &gt; 0) {</span>
+                try {
+<span class="nc" id="L254">                    Thread.sleep(sleepTime);</span>
+<span class="nc" id="L255">                } catch (InterruptedException e) {</span>
+<span class="nc" id="L256">                    handleInterruptEvent();</span>
+<span class="nc" id="L257">                    continue;</span>
+<span class="nc" id="L258">                }</span>
+            }
+<span class="nc" id="L260">            actions.removeFirst();</span>
+
+<span class="nc bnc" id="L262" title="All 2 branches missed.">            if (currentAction.timeouts != null) {</span>
+<span class="nc" id="L263">                triggerTimeouts(currentAction.timeouts);</span>
+            }
+
+<span class="nc" id="L266">            LoggingController loggingController = new LoggingController(activeDataLoggers);</span>
+
+<span class="nc bnc" id="L268" title="All 2 branches missed.">            if (loggingController.channelsHaveToBeLogged(currentAction)) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">                for (Optional&lt;ChannelCollection&gt; collection : loggingController.triggerLogging(currentAction)) {</span>
+<span class="nc" id="L270">                    handleStillFilledChannels(collection, currentAction);</span>
+<span class="nc" id="L271">                }</span>
+            }
+
+<span class="nc bnc" id="L274" title="All 4 branches missed.">            if (currentAction.connectionRetryDevices != null &amp;&amp; !currentAction.connectionRetryDevices.isEmpty()) {</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                for (Device device : currentAction.connectionRetryDevices) {</span>
+<span class="nc" id="L276">                    device.connectRetrySignal();</span>
+<span class="nc" id="L277">                }</span>
+            }
+
+<span class="nc bnc" id="L280" title="All 4 branches missed.">            if (currentAction.samplingCollections != null &amp;&amp; !currentAction.samplingCollections.isEmpty()) {</span>
+
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                for (ChannelCollection samplingCollection : currentAction.samplingCollections) {</span>
+<span class="nc" id="L283">                    List&lt;ChannelRecordContainerImpl&gt; selectedChannels = new ArrayList&lt;&gt;(</span>
+<span class="nc" id="L284">                            samplingCollection.channels.size());</span>
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                    for (ChannelImpl channel : samplingCollection.channels) {</span>
+<span class="nc" id="L286">                        selectedChannels.add(channel.createChannelRecordContainer());</span>
+<span class="nc" id="L287">                    }</span>
+<span class="nc" id="L288">                    SamplingTask samplingTask = new SamplingTask(this, samplingCollection.device, selectedChannels,</span>
+                            samplingCollection.samplingGroup);
+
+<span class="nc" id="L291">                    int timeout = samplingCollection.device.deviceConfig.getSamplingTimeout();</span>
+
+<span class="nc" id="L293">                    boolean taskAddSuccessful = samplingCollection.device.addSamplingTask(samplingTask,</span>
+                            samplingCollection.interval);
+<span class="nc bnc" id="L295" title="All 4 branches missed.">                    if (taskAddSuccessful &amp;&amp; timeout &gt; 0) {</span>
+<span class="nc" id="L296">                        addSamplingWorkerTimeoutToActions(samplingTask, currentAction.startTime + timeout);</span>
+                    }
+
+<span class="nc" id="L299">                    addSamplingCollectionToActions(samplingCollection,</span>
+                            currentAction.startTime + samplingCollection.interval);
+<span class="nc" id="L301">                }</span>
+
+            }
+<span class="nc" id="L304">        }</span>
+<span class="nc" id="L305">    }</span>
+
+    private void handleStillFilledChannels(Optional&lt;ChannelCollection&gt; logCollectionOpt, Action currentAction) {
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        if (!logCollectionOpt.isPresent()) {</span>
+<span class="nc" id="L309">            return;</span>
+        }
+<span class="nc" id="L311">        ChannelCollection loggingCollection = logCollectionOpt.get();</span>
+<span class="nc" id="L312">        long startTimestamp = currentAction.startTime + loggingCollection.interval;</span>
+<span class="nc" id="L313">        addLoggingCollectionToActions(loggingCollection, startTimestamp);</span>
+<span class="nc" id="L314">    }</span>
+
+    private void triggerTimeouts(List&lt;SamplingTask&gt; timeouts) {
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        for (SamplingTask samplingTask : timeouts) {</span>
+<span class="nc" id="L318">            samplingTask.timeout();</span>
+<span class="nc" id="L319">        }</span>
+<span class="nc" id="L320">    }</span>
+
+    private void elapsedTimeTooBig(Action currentAction, long currentTime) {
+<span class="nc" id="L323">        actions.removeFirst();</span>
+<span class="nc" id="L324">        logger.error(</span>
+                &quot;Action was scheduled for UNIX time {}. But current time is already {}. Will calculate new action time because the action has timed out. Has the system clock jumped?&quot;,
+<span class="nc" id="L326">                currentAction.startTime, currentTime);</span>
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if (currentAction.timeouts != null) {</span>
+<span class="nc" id="L329">            triggerTimeouts(currentAction.timeouts);</span>
+        }
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (currentAction.loggingCollections != null) {</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">            for (ChannelCollection loggingCollection : currentAction.loggingCollections) {</span>
+<span class="nc" id="L333">                long startTimestamp = loggingCollection.calculateNextActionTime(currentTime);</span>
+<span class="nc" id="L334">                addLoggingCollectionToActions(loggingCollection, startTimestamp);</span>
+<span class="nc" id="L335">            }</span>
+        }
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        if (currentAction.samplingCollections != null) {</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">            for (ChannelCollection samplingCollection : currentAction.samplingCollections) {</span>
+<span class="nc" id="L339">                long startTimestamp = samplingCollection.calculateNextActionTime(currentTime);</span>
+<span class="nc" id="L340">                addSamplingCollectionToActions(samplingCollection, startTimestamp);</span>
+<span class="nc" id="L341">            }</span>
+        }
+<span class="nc bnc" id="L343" title="All 2 branches missed.">        if (currentAction.connectionRetryDevices != null) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">            for (Device device : currentAction.connectionRetryDevices) {</span>
+<span class="nc" id="L345">                long startTimestamp = currentTime + device.deviceConfig.getConnectRetryInterval();</span>
+<span class="nc" id="L346">                addReconnectDeviceToActions(device, startTimestamp);</span>
+<span class="nc" id="L347">            }</span>
+        }
+<span class="nc" id="L349">    }</span>
+
+    private void addSamplingCollectionToActions(ChannelCollection channelCollection, long startTimestamp) {
+
+<span class="nc" id="L353">        Action fittingAction = null;</span>
+
+<span class="nc" id="L355">        ListIterator&lt;Action&gt; actionIterator = actions.listIterator();</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        while (actionIterator.hasNext()) {</span>
+<span class="nc" id="L357">            Action currentAction = actionIterator.next();</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">            if (currentAction.startTime == startTimestamp) {</span>
+<span class="nc" id="L359">                fittingAction = currentAction;</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">                if (fittingAction.samplingCollections == null) {</span>
+<span class="nc" id="L361">                    fittingAction.samplingCollections = new LinkedList&lt;&gt;();</span>
+                }
+                break;
+            }
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            else if (currentAction.startTime &gt; startTimestamp) {</span>
+<span class="nc" id="L366">                fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L367">                fittingAction.samplingCollections = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L368">                actionIterator.previous();</span>
+<span class="nc" id="L369">                actionIterator.add(fittingAction);</span>
+<span class="nc" id="L370">                break;</span>
+            }
+<span class="nc" id="L372">        }</span>
+
+<span class="nc bnc" id="L374" title="All 2 branches missed.">        if (fittingAction == null) {</span>
+<span class="nc" id="L375">            fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L376">            fittingAction.samplingCollections = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L377">            actions.add(fittingAction);</span>
+        }
+
+<span class="nc" id="L380">        fittingAction.samplingCollections.add(channelCollection);</span>
+<span class="nc" id="L381">        channelCollection.action = fittingAction;</span>
+
+<span class="nc" id="L383">    }</span>
+
+    private void addLoggingCollectionToActions(ChannelCollection channelCollection, long startTimestamp) {
+
+<span class="nc" id="L387">        Action fittingAction = null;</span>
+
+<span class="nc" id="L389">        ListIterator&lt;Action&gt; actionIterator = actions.listIterator();</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        while (actionIterator.hasNext()) {</span>
+<span class="nc" id="L391">            Action currentAction = actionIterator.next();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">            if (currentAction.startTime == startTimestamp) {</span>
+<span class="nc" id="L393">                fittingAction = currentAction;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                if (fittingAction.loggingCollections == null) {</span>
+<span class="nc" id="L395">                    fittingAction.loggingCollections = new LinkedList&lt;&gt;();</span>
+                }
+                break;
+            }
+<span class="nc bnc" id="L399" title="All 2 branches missed.">            else if (currentAction.startTime &gt; startTimestamp) {</span>
+<span class="nc" id="L400">                fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L401">                fittingAction.loggingCollections = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L402">                actionIterator.previous();</span>
+<span class="nc" id="L403">                actionIterator.add(fittingAction);</span>
+<span class="nc" id="L404">                break;</span>
+            }
+<span class="nc" id="L406">        }</span>
+
+<span class="nc bnc" id="L408" title="All 2 branches missed.">        if (fittingAction == null) {</span>
+<span class="nc" id="L409">            fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L410">            fittingAction.loggingCollections = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L411">            actions.add(fittingAction);</span>
+        }
+
+<span class="nc" id="L414">        fittingAction.loggingCollections.add(channelCollection);</span>
+<span class="nc" id="L415">        channelCollection.action = fittingAction;</span>
+<span class="nc" id="L416">    }</span>
+
+    void addReconnectDeviceToActions(Device device, long startTimestamp) {
+<span class="nc" id="L419">        Action fittingAction = null;</span>
+
+<span class="nc" id="L421">        ListIterator&lt;Action&gt; actionIterator = actions.listIterator();</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">        while (actionIterator.hasNext()) {</span>
+<span class="nc" id="L423">            Action currentAction = actionIterator.next();</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">            if (currentAction.startTime == startTimestamp) {</span>
+<span class="nc" id="L425">                fittingAction = currentAction;</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">                if (fittingAction.connectionRetryDevices == null) {</span>
+<span class="nc" id="L427">                    fittingAction.connectionRetryDevices = new LinkedList&lt;&gt;();</span>
+                }
+                break;
+            }
+
+<span class="nc bnc" id="L432" title="All 2 branches missed.">            if (currentAction.startTime &gt; startTimestamp) {</span>
+<span class="nc" id="L433">                fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L434">                fittingAction.connectionRetryDevices = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L435">                actionIterator.previous();</span>
+<span class="nc" id="L436">                actionIterator.add(fittingAction);</span>
+<span class="nc" id="L437">                break;</span>
+            }
+<span class="nc" id="L439">        }</span>
+
+<span class="nc bnc" id="L441" title="All 2 branches missed.">        if (fittingAction == null) {</span>
+<span class="nc" id="L442">            fittingAction = new Action(startTimestamp);</span>
+<span class="nc" id="L443">            fittingAction.connectionRetryDevices = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L444">            actions.add(fittingAction);</span>
+        }
+
+<span class="nc" id="L447">        fittingAction.connectionRetryDevices.add(device);</span>
+<span class="nc" id="L448">    }</span>
+
+    private void addSamplingWorkerTimeoutToActions(SamplingTask readWorker, long timeout) {
+
+<span class="nc" id="L452">        Action fittingAction = null;</span>
+
+<span class="nc" id="L454">        ListIterator&lt;Action&gt; actionIterator = actions.listIterator();</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">        while (actionIterator.hasNext()) {</span>
+<span class="nc" id="L456">            Action currentAction = actionIterator.next();</span>
+<span class="nc bnc" id="L457" title="All 2 branches missed.">            if (currentAction.startTime == timeout) {</span>
+<span class="nc" id="L458">                fittingAction = currentAction;</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">                if (fittingAction.timeouts == null) {</span>
+<span class="nc" id="L460">                    fittingAction.timeouts = new LinkedList&lt;&gt;();</span>
+                }
+                break;
+            }
+<span class="nc bnc" id="L464" title="All 2 branches missed.">            else if (currentAction.startTime &gt; timeout) {</span>
+<span class="nc" id="L465">                fittingAction = new Action(timeout);</span>
+<span class="nc" id="L466">                fittingAction.timeouts = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L467">                actionIterator.previous();</span>
+<span class="nc" id="L468">                actionIterator.add(fittingAction);</span>
+<span class="nc" id="L469">                break;</span>
+            }
+<span class="nc" id="L471">        }</span>
+
+<span class="nc bnc" id="L473" title="All 2 branches missed.">        if (fittingAction == null) {</span>
+<span class="nc" id="L474">            fittingAction = new Action(timeout);</span>
+<span class="nc" id="L475">            fittingAction.timeouts = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L476">            actions.add(fittingAction);</span>
+        }
+
+<span class="nc" id="L479">        fittingAction.timeouts.add(readWorker);</span>
+<span class="nc" id="L480">    }</span>
+
+    private void handleInterruptEvent() {
+
+<span class="nc bnc" id="L484" title="All 2 branches missed.">        if (stopFlag) {</span>
+<span class="nc" id="L485">            prepareStop();</span>
+<span class="nc" id="L486">            return;</span>
+        }
+
+<span class="nc" id="L489">        long currentTime = 0;</span>
+
+<span class="nc bnc" id="L491" title="All 2 branches missed.">        if (newRootConfigWithoutDefaults != null) {</span>
+<span class="nc" id="L492">            currentTime = System.currentTimeMillis();</span>
+<span class="nc" id="L493">            applyConfiguration(newRootConfigWithoutDefaults, currentTime);</span>
+<span class="nc" id="L494">            newRootConfigWithoutDefaults = null;</span>
+<span class="nc" id="L495">            newConfigSignal.countDown();</span>
+        }
+
+<span class="nc" id="L498">        synchronized (receivedRecordContainers) {</span>
+            List&lt;ChannelRecordContainer&gt; recordContainers;
+<span class="nc" id="L500">            LoggingController loggingController = new LoggingController(activeDataLoggers);</span>
+<span class="nc" id="L501">            List&lt;ChannelRecordContainerImpl&gt; channelRecordContainerList = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">            while ((recordContainers = receivedRecordContainers.poll()) != null) {</span>
+<span class="nc" id="L503">                recordContainers.stream()</span>
+<span class="nc" id="L504">                        .map(recContainer -&gt; (ChannelRecordContainerImpl) recContainer)</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">                        .filter(containerImpl -&gt; containerImpl.getChannel().getChannelState() == ChannelState.LISTENING</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">                                || containerImpl.getChannel().getDriverName().equals(&quot;virtual&quot;))</span>
+<span class="nc" id="L507">                        .forEach(containerImpl -&gt; {</span>
+<span class="nc" id="L508">                            containerImpl.getChannel().setNewRecord(containerImpl.getRecord());</span>
+<span class="nc bnc" id="L509" title="All 2 branches missed.">                            if (containerImpl.getChannel().isLoggingEvent()) {</span>
+<span class="nc" id="L510">                                channelRecordContainerList.add(containerImpl);</span>
+                            }
+<span class="nc" id="L512">                        });</span>
+            }
+<span class="nc" id="L514">            loggingController.deliverLogsToEventBasedLogServices(channelRecordContainerList);</span>
+<span class="nc" id="L515">        }</span>
+
+<span class="nc" id="L517">        synchronized (samplingTaskFinished) {</span>
+            SamplingTask samplingTask;
+<span class="nc bnc" id="L519" title="All 2 branches missed.">            while ((samplingTask = samplingTaskFinished.poll()) != null) {</span>
+<span class="nc" id="L520">                samplingTask.storeValues();</span>
+<span class="nc" id="L521">                samplingTask.device.taskFinished();</span>
+            }
+<span class="nc" id="L523">        }</span>
+
+<span class="nc" id="L525">        synchronized (tasksFinished) {</span>
+            DeviceTask deviceTask;
+<span class="nc bnc" id="L527" title="All 2 branches missed.">            while ((deviceTask = tasksFinished.poll()) != null) {</span>
+<span class="nc" id="L528">                deviceTask.device.taskFinished();</span>
+
+            }
+<span class="nc" id="L531">        }</span>
+
+<span class="nc" id="L533">        synchronized (newDrivers) {</span>
+            // needed to synchronize with getRunningDrivers
+<span class="nc" id="L535">            synchronized (activeDrivers) {</span>
+<span class="nc" id="L536">                activeDrivers.putAll(newDrivers);</span>
+<span class="nc" id="L537">            }</span>
+
+<span class="nc bnc" id="L539" title="All 2 branches missed.">            for (Entry&lt;String, DriverService&gt; newDriverEntry : newDrivers.entrySet()) {</span>
+<span class="nc" id="L540">                String driverId = newDriverEntry.getKey();</span>
+<span class="nc" id="L541">                logger.info(&quot;Driver registered: &quot; + driverId);</span>
+
+<span class="nc" id="L543">                DriverConfigImpl driverConfig = rootConfig.driverConfigsById.get(driverId);</span>
+
+<span class="nc bnc" id="L545" title="All 2 branches missed.">                if (driverConfig == null) {</span>
+<span class="nc" id="L546">                    continue;</span>
+                }
+
+<span class="nc" id="L549">                driverConfig.activeDriver = newDriverEntry.getValue();</span>
+<span class="nc bnc" id="L550" title="All 2 branches missed.">                for (DeviceConfigImpl deviceConfig : driverConfig.deviceConfigsById.values()) {</span>
+<span class="nc" id="L551">                    deviceConfig.device.driverRegisteredSignal();</span>
+<span class="nc" id="L552">                }</span>
+<span class="nc" id="L553">            }</span>
+<span class="nc" id="L554">            newDrivers.clear();</span>
+<span class="nc" id="L555">        }</span>
+
+<span class="nc" id="L557">        synchronized (newDataLoggers) {</span>
+<span class="nc bnc" id="L558" title="All 2 branches missed.">            if (!newDataLoggers.isEmpty()) {</span>
+<span class="nc" id="L559">                activeDataLoggers.addAll(newDataLoggers);</span>
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                for (DataLoggerService dataLogger : newDataLoggers) {</span>
+<span class="nc" id="L561">                    logger.info(&quot;Data logger registered: &quot; + dataLogger.getId());</span>
+<span class="nc" id="L562">                    dataLogger.setChannelsToLog(rootConfig.logChannels);</span>
+<span class="nc" id="L563">                }</span>
+<span class="nc" id="L564">                newDataLoggers.clear();</span>
+            }
+<span class="nc" id="L566">        }</span>
+
+<span class="nc bnc" id="L568" title="All 2 branches missed.">        if (driverToBeRemovedId != null) {</span>
+
+            DriverService removedDriverService;
+<span class="nc" id="L571">            synchronized (activeDrivers) {</span>
+<span class="nc" id="L572">                removedDriverService = activeDrivers.remove(driverToBeRemovedId);</span>
+<span class="nc" id="L573">            }</span>
+
+<span class="nc bnc" id="L575" title="All 2 branches missed.">            if (removedDriverService == null) {</span>
+                // drivers was removed before it was added to activeDrivers
+<span class="nc" id="L577">                newDrivers.remove(driverToBeRemovedId);</span>
+<span class="nc" id="L578">                driverRemovedSignal.countDown();</span>
+            }
+            else {
+<span class="nc" id="L581">                DriverConfigImpl driverConfig = rootConfig.driverConfigsById.get(driverToBeRemovedId);</span>
+
+<span class="nc bnc" id="L583" title="All 2 branches missed.">                if (driverConfig != null) {</span>
+<span class="nc" id="L584">                    activeDeviceCountDown = driverConfig.deviceConfigsById.size();</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">                    if (activeDeviceCountDown &gt; 0) {</span>
+
+                        // all devices have to be given a chance to finish their current task and disconnect:
+<span class="nc bnc" id="L588" title="All 2 branches missed.">                        for (DeviceConfigImpl deviceConfig : driverConfig.deviceConfigsById.values()) {</span>
+<span class="nc" id="L589">                            deviceConfig.device.driverDeregisteredSignal();</span>
+<span class="nc" id="L590">                        }</span>
+<span class="nc" id="L591">                        synchronized (driverRemovedSignal) {</span>
+<span class="nc bnc" id="L592" title="All 2 branches missed.">                            if (activeDeviceCountDown == 0) {</span>
+<span class="nc" id="L593">                                driverRemovedSignal.countDown();</span>
+                            }
+<span class="nc" id="L595">                        }</span>
+                    }
+                    else {
+<span class="nc" id="L598">                        driverRemovedSignal.countDown();</span>
+                    }
+                }
+                else {
+<span class="nc" id="L602">                    driverRemovedSignal.countDown();</span>
+                }
+            }
+<span class="nc" id="L605">            driverToBeRemovedId = null;</span>
+        }
+
+<span class="nc bnc" id="L608" title="All 2 branches missed.">        if (dataLoggerToBeRemoved != null) {</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">            if (!activeDataLoggers.remove(dataLoggerToBeRemoved)) {</span>
+<span class="nc" id="L610">                newDataLoggers.remove(dataLoggerToBeRemoved);</span>
+            }
+<span class="nc" id="L612">            dataLoggerToBeRemoved = null;</span>
+<span class="nc" id="L613">            dataLoggerRemovedSignal.countDown();</span>
+        }
+
+<span class="nc" id="L616">        synchronized (connectionFailures) {</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">            if (currentTime == 0) {</span>
+<span class="nc" id="L618">                currentTime = System.currentTimeMillis();</span>
+            }
+            Device connectionFailureDevice;
+<span class="nc bnc" id="L621" title="All 2 branches missed.">            while ((connectionFailureDevice = connectionFailures.poll()) != null) {</span>
+<span class="nc" id="L622">                connectionFailureDevice.connectFailureSignal(currentTime);</span>
+            }
+<span class="nc" id="L624">        }</span>
+
+<span class="nc" id="L626">        synchronized (connectedDevices) {</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">            if (currentTime == 0) {</span>
+<span class="nc" id="L628">                currentTime = System.currentTimeMillis();</span>
+            }
+            Device connectedDevice;
+<span class="nc bnc" id="L631" title="All 2 branches missed.">            while ((connectedDevice = connectedDevices.poll()) != null) {</span>
+<span class="nc" id="L632">                connectedDevice.connectedSignal(currentTime);</span>
+            }
+<span class="nc" id="L634">        }</span>
+
+<span class="nc" id="L636">        synchronized (newWriteTasks) {</span>
+<span class="nc" id="L637">            addTasksAndClear(newWriteTasks);</span>
+<span class="nc" id="L638">        }</span>
+
+<span class="nc" id="L640">        synchronized (newReadTasks) {</span>
+<span class="nc" id="L641">            addTasksAndClear(newReadTasks);</span>
+<span class="nc" id="L642">        }</span>
+
+<span class="nc" id="L644">        synchronized (disconnectedDevices) {</span>
+            Device connectedDevice;
+<span class="nc bnc" id="L646" title="All 2 branches missed.">            while ((connectedDevice = disconnectedDevices.poll()) != null) {</span>
+<span class="nc" id="L647">                connectedDevice.disconnectedSignal();</span>
+            }
+<span class="nc" id="L649">        }</span>
+
+<span class="nc" id="L651">    }</span>
+
+    private &lt;T extends DeviceTask &amp; ConnectedTask&gt; void addTasksAndClear(Queue&lt;T&gt; newTasksList) {
+        T nextTask;
+<span class="nc bnc" id="L655" title="All 2 branches missed.">        while ((nextTask = newTasksList.poll()) != null) {</span>
+<span class="nc" id="L656">            nextTask.device.addTask(nextTask);</span>
+        }
+<span class="nc" id="L658">    }</span>
+
+    private void applyConfiguration(RootConfigImpl configWithoutDefaults, long currentTime) {
+
+<span class="nc" id="L662">        RootConfigImpl newRootConfig = configWithoutDefaults.cloneWithDefaults();</span>
+
+<span class="nc" id="L664">        List&lt;LogChannel&gt; logChannels = new LinkedList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L666" title="All 2 branches missed.">        for (DriverConfigImpl oldDriverConfig : rootConfig.driverConfigsById.values()) {</span>
+<span class="nc" id="L667">            DriverConfigImpl newDriverConfig = newRootConfig.driverConfigsById.get(oldDriverConfig.id);</span>
+<span class="nc bnc" id="L668" title="All 2 branches missed.">            if (newDriverConfig != null) {</span>
+<span class="nc" id="L669">                newDriverConfig.activeDriver = oldDriverConfig.activeDriver;</span>
+            }
+<span class="nc bnc" id="L671" title="All 2 branches missed.">            for (DeviceConfigImpl oldDeviceConfig : oldDriverConfig.deviceConfigsById.values()) {</span>
+<span class="nc" id="L672">                DeviceConfigImpl newDeviceConfig = null;</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">                if (newDriverConfig != null) {</span>
+<span class="nc" id="L674">                    newDeviceConfig = newDriverConfig.deviceConfigsById.get(oldDeviceConfig.getId());</span>
+                }
+<span class="nc bnc" id="L676" title="All 2 branches missed.">                if (newDeviceConfig == null) {</span>
+                    // Device was deleted in new config
+<span class="nc" id="L678">                    oldDeviceConfig.device.deleteSignal();</span>
+                }
+                else {
+                    // Device exists in new and old config
+<span class="nc" id="L682">                    oldDeviceConfig.device.configChangedSignal(newDeviceConfig, currentTime, logChannels);</span>
+                }
+<span class="nc" id="L684">            }</span>
+<span class="nc" id="L685">        }</span>
+
+<span class="nc bnc" id="L687" title="All 2 branches missed.">        for (DriverConfigImpl newDriverConfig : newRootConfig.driverConfigsById.values()) {</span>
+<span class="nc" id="L688">            DriverConfigImpl oldDriverConfig = rootConfig.driverConfigsById.get(newDriverConfig.id);</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">            if (oldDriverConfig == null) {</span>
+<span class="nc" id="L690">                newDriverConfig.activeDriver = activeDrivers.get(newDriverConfig.id);</span>
+            }
+<span class="nc bnc" id="L692" title="All 2 branches missed.">            for (DeviceConfigImpl newDeviceConfig : newDriverConfig.deviceConfigsById.values()) {</span>
+
+<span class="nc" id="L694">                DeviceConfigImpl oldDeviceConfig = null;</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">                if (oldDriverConfig != null) {</span>
+<span class="nc" id="L696">                    oldDeviceConfig = oldDriverConfig.deviceConfigsById.get(newDeviceConfig.getId());</span>
+                }
+
+<span class="nc bnc" id="L699" title="All 2 branches missed.">                if (oldDeviceConfig == null) {</span>
+                    // Device is new
+<span class="nc" id="L701">                    newDeviceConfig.device = new Device(this, newDeviceConfig, currentTime, logChannels);</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">                    if (newDeviceConfig.device.getState() == DeviceState.CONNECTING) {</span>
+<span class="nc" id="L703">                        newDeviceConfig.device.connectRetrySignal();</span>
+                    }
+                }
+<span class="nc" id="L706">            }</span>
+<span class="nc" id="L707">        }</span>
+
+<span class="nc bnc" id="L709" title="All 2 branches missed.">        for (ChannelConfigImpl oldChannelConfig : rootConfig.channelConfigsById.values()) {</span>
+<span class="nc" id="L710">            ChannelConfigImpl newChannelConfig = newRootConfig.channelConfigsById.get(oldChannelConfig.getId());</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">            if (newChannelConfig == null) {</span>
+                // oldChannelConfig does not exist in the new configuration
+<span class="nc bnc" id="L713" title="All 2 branches missed.">                if (oldChannelConfig.state == ChannelState.SAMPLING) {</span>
+<span class="nc" id="L714">                    removeFromSamplingCollections(oldChannelConfig.channel);</span>
+                }
+<span class="nc" id="L716">                oldChannelConfig.state = ChannelState.DELETED;</span>
+<span class="nc" id="L717">                oldChannelConfig.channel.setFlag(Flag.CHANNEL_DELETED);</span>
+                // note: disabling SampleTasks and such has to be done at the
+                // Device level
+            }
+
+<span class="nc" id="L722">        }</span>
+
+<span class="nc" id="L724">        updateLogChannelsInDataLoggers(logChannels);</span>
+
+<span class="nc" id="L726">        newRootConfig.logChannels = logChannels;</span>
+
+<span class="nc" id="L728">        synchronized (configChangeListeners) {</span>
+
+<span class="nc" id="L730">            rootConfig = newRootConfig;</span>
+<span class="nc" id="L731">            rootConfigWithoutDefaults = configWithoutDefaults;</span>
+
+<span class="nc bnc" id="L733" title="All 2 branches missed.">            for (final ConfigChangeListener configChangeListener : configChangeListeners) {</span>
+<span class="nc bnc" id="L734" title="All 2 branches missed.">                if (configChangeListener == null) {</span>
+<span class="nc" id="L735">                    continue;</span>
+                }
+<span class="nc" id="L737">                executor.execute(configChangeListener::configurationChanged);</span>
+<span class="nc" id="L738">            }</span>
+<span class="nc" id="L739">        }</span>
+
+<span class="nc" id="L741">        notifyServers();</span>
+<span class="nc" id="L742">    }</span>
+
+    private void updateLogChannelsInDataLoggers(List&lt;LogChannel&gt; logChannels) {
+<span class="nc bnc" id="L745" title="All 2 branches missed.">        for (DataLoggerService dataLogger : activeDataLoggers) {</span>
+<span class="nc bnc" id="L746" title="All 2 branches missed.">            if (dataLogger.logSettingsRequired()) {</span>
+<span class="nc" id="L747">                setLoggerSpecific(dataLogger, logChannels);</span>
+            }
+            else {
+<span class="nc" id="L750">                setLoggerSpecificAndWithoutSettings(dataLogger, logChannels);</span>
+            }
+<span class="nc" id="L752">        }</span>
+<span class="nc" id="L753">    }</span>
+
+    private void setLoggerSpecific(DataLoggerService dataLogger, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L756">        List&lt;LogChannel&gt; specificLogChannels = filterLogChannelsForSpecificLogger(dataLogger.getId(), logChannels);</span>
+<span class="nc" id="L757">        dataLogger.setChannelsToLog(specificLogChannels);</span>
+<span class="nc" id="L758">    }</span>
+
+    private void setLoggerSpecificAndWithoutSettings(DataLoggerService dataLogger, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L761">        List&lt;LogChannel&gt; specificLogChannels = filterLogChannelsForSpecificLogger(dataLogger.getId(), logChannels);</span>
+<span class="nc" id="L762">        List&lt;LogChannel&gt; logChannelsWithoutLoggingSettings = logChannels.stream()</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">                .filter(logChannel -&gt; logChannel.getLoggingSettings() == null</span>
+<span class="nc bnc" id="L764" title="All 2 branches missed.">                        || logChannel.getLoggingSettings().isEmpty())</span>
+<span class="nc" id="L765">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L767">        specificLogChannels.addAll(logChannelsWithoutLoggingSettings);</span>
+<span class="nc" id="L768">        dataLogger.setChannelsToLog(logChannelsWithoutLoggingSettings);</span>
+<span class="nc" id="L769">    }</span>
+
+    private List&lt;LogChannel&gt; filterLogChannelsForSpecificLogger(String loggerId, List&lt;LogChannel&gt; logChannels) {
+<span class="nc" id="L772">        return logChannels.stream()</span>
+<span class="nc bnc" id="L773" title="All 2 branches missed.">                .filter(logChannel -&gt; logChannel.getLoggingSettings() != null</span>
+<span class="nc bnc" id="L774" title="All 2 branches missed.">                        &amp;&amp; !logChannel.getLoggingSettings().isEmpty())</span>
+<span class="nc" id="L775">                .filter(logChannel -&gt; parseDefinedLogger(logChannel.getLoggingSettings()).contains(loggerId))</span>
+<span class="nc" id="L776">                .collect(Collectors.toList());</span>
+    }
+
+    private List&lt;String&gt; parseDefinedLogger(String logSettings) {
+<span class="nc" id="L780">        String[] loggerSegments = logSettings.split(&quot;;&quot;);</span>
+<span class="nc" id="L781">        List&lt;String&gt; definedLogger = Arrays.stream(loggerSegments)</span>
+<span class="nc" id="L782">                .map(seg -&gt; seg.split(&quot;:&quot;)[0])</span>
+<span class="nc" id="L783">                .collect(Collectors.toList());</span>
+
+<span class="nc" id="L785">        return definedLogger;</span>
+    }
+
+    void addToSamplingCollections(ChannelImpl channel, Long time) {
+
+<span class="nc" id="L790">        ChannelCollection fittingSamplingCollection = null;</span>
+<span class="nc bnc" id="L791" title="All 2 branches missed.">        for (Action action : actions) {</span>
+<span class="nc bnc" id="L792" title="All 2 branches missed.">            if (action.samplingCollections != null) {</span>
+<span class="nc bnc" id="L793" title="All 2 branches missed.">                for (ChannelCollection samplingCollection : action.samplingCollections) {</span>
+<span class="nc bnc" id="L794" title="All 2 branches missed.">                    if (samplingCollection.interval == channel.getSamplingInterval()</span>
+<span class="nc bnc" id="L795" title="All 2 branches missed.">                            &amp;&amp; samplingCollection.timeOffset == channel.getSamplingTimeOffset()</span>
+<span class="nc bnc" id="L796" title="All 4 branches missed.">                            &amp;&amp; samplingCollection.samplingGroup.equals(channel.config.getSamplingGroup())</span>
+                            &amp;&amp; samplingCollection.device == channel.config.deviceParent.device) {
+<span class="nc" id="L798">                        fittingSamplingCollection = samplingCollection;</span>
+<span class="nc" id="L799">                        break;</span>
+                    }
+<span class="nc" id="L801">                }</span>
+            }
+<span class="nc" id="L803">        }</span>
+
+<span class="nc bnc" id="L805" title="All 2 branches missed.">        if (fittingSamplingCollection == null) {</span>
+<span class="nc" id="L806">            fittingSamplingCollection = new ChannelCollection(channel.getSamplingInterval(),</span>
+<span class="nc" id="L807">                    channel.getSamplingTimeOffset(), channel.config.getSamplingGroup(),</span>
+                    channel.config.deviceParent.device);
+<span class="nc" id="L809">            addSamplingCollectionToActions(fittingSamplingCollection,</span>
+<span class="nc" id="L810">                    fittingSamplingCollection.calculateNextActionTime(time));</span>
+        }
+
+<span class="nc bnc" id="L813" title="All 2 branches missed.">        if (channel.samplingCollection != null) {</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">            if (channel.samplingCollection != fittingSamplingCollection) {</span>
+<span class="nc" id="L815">                removeFromSamplingCollections(channel);</span>
+            }
+            else {
+<span class="nc" id="L818">                return;</span>
+            }
+        }
+<span class="nc" id="L821">        fittingSamplingCollection.channels.add(channel);</span>
+<span class="nc" id="L822">        channel.samplingCollection = fittingSamplingCollection;</span>
+<span class="nc" id="L823">    }</span>
+
+    void addToLoggingCollections(ChannelImpl channel, Long time) {
+<span class="nc" id="L826">        ChannelCollection fittingLoggingCollection = null;</span>
+<span class="nc bnc" id="L827" title="All 2 branches missed.">        for (Action action : actions) {</span>
+<span class="nc bnc" id="L828" title="All 2 branches missed.">            if (action.loggingCollections != null) {</span>
+<span class="nc bnc" id="L829" title="All 2 branches missed.">                for (ChannelCollection loggingCollection : action.loggingCollections) {</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">                    if (loggingCollection.interval == channel.getLoggingInterval()</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">                            &amp;&amp; loggingCollection.timeOffset == channel.getLoggingTimeOffset()) {</span>
+<span class="nc" id="L832">                        fittingLoggingCollection = loggingCollection;</span>
+<span class="nc" id="L833">                        break;</span>
+                    }
+<span class="nc" id="L835">                }</span>
+            }
+<span class="nc" id="L837">        }</span>
+<span class="nc bnc" id="L838" title="All 2 branches missed.">        if (fittingLoggingCollection == null) {</span>
+<span class="nc" id="L839">            fittingLoggingCollection = new ChannelCollection(channel.getLoggingInterval(),</span>
+<span class="nc" id="L840">                    channel.getLoggingTimeOffset(), null, null);</span>
+<span class="nc" id="L841">            addLoggingCollectionToActions(fittingLoggingCollection,</span>
+<span class="nc" id="L842">                    fittingLoggingCollection.calculateNextActionTime(time));</span>
+        }
+
+<span class="nc bnc" id="L845" title="All 2 branches missed.">        if (channel.loggingCollection != null) {</span>
+<span class="nc bnc" id="L846" title="All 2 branches missed.">            if (channel.loggingCollection != fittingLoggingCollection) {</span>
+<span class="nc" id="L847">                removeFromLoggingCollections(channel);</span>
+            }
+            else {
+<span class="nc" id="L850">                return;</span>
+            }
+        }
+
+<span class="nc" id="L854">        fittingLoggingCollection.channels.add(channel);</span>
+<span class="nc" id="L855">        channel.loggingCollection = fittingLoggingCollection;</span>
+<span class="nc" id="L856">    }</span>
+
+    void removeFromLoggingCollections(ChannelImpl channel) {
+<span class="nc" id="L859">        channel.loggingCollection.channels.remove(channel);</span>
+<span class="nc bnc" id="L860" title="All 2 branches missed.">        if (channel.loggingCollection.channels.isEmpty()) {</span>
+<span class="nc" id="L861">            channel.loggingCollection.action.loggingCollections.remove(channel.loggingCollection);</span>
+        }
+<span class="nc" id="L863">        channel.loggingCollection = null;</span>
+<span class="nc" id="L864">    }</span>
+
+    void removeFromSamplingCollections(ChannelImpl channel) {
+<span class="nc" id="L867">        channel.samplingCollection.channels.remove(channel);</span>
+<span class="nc bnc" id="L868" title="All 2 branches missed.">        if (channel.samplingCollection.channels.isEmpty()) {</span>
+<span class="nc" id="L869">            channel.samplingCollection.action.samplingCollections.remove(channel.samplingCollection);</span>
+        }
+
+<span class="nc" id="L872">        channel.samplingCollection = null;</span>
+<span class="nc" id="L873">    }</span>
+
+    void removeFromConnectionRetry(Device device) {
+<span class="nc bnc" id="L876" title="All 2 branches missed.">        for (Action action : actions) {</span>
+<span class="nc bnc" id="L877" title="All 4 branches missed.">            if (action.connectionRetryDevices != null &amp;&amp; action.connectionRetryDevices.remove(device)) {</span>
+<span class="nc" id="L878">                break;</span>
+            }
+<span class="nc" id="L880">        }</span>
+<span class="nc" id="L881">    }</span>
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void bindDriverService(DriverService driver) {
+
+<span class="nc" id="L886">        String driverId = driver.getInfo().getId();</span>
+
+<span class="nc" id="L888">        synchronized (newDrivers) {</span>
+<span class="nc bnc" id="L889" title="All 4 branches missed.">            if (activeDrivers.get(driverId) != null || newDrivers.get(driverId) != null) {</span>
+<span class="nc" id="L890">                logger.error(&quot;Unable to register driver: a driver with the ID {}  is already registered.&quot;, driverId);</span>
+<span class="nc" id="L891">                return;</span>
+            }
+<span class="nc" id="L893">            newDrivers.put(driverId, driver);</span>
+<span class="nc" id="L894">            interrupt();</span>
+<span class="nc" id="L895">        }</span>
+<span class="nc" id="L896">    }</span>
+
+    /**
+     * Registers a new ServerService.
+     *
+     * @param serverService
+     *            ServerService object to register
+     */
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void bindServerService(ServerService serverService) {
+<span class="nc" id="L906">        String serverId = serverService.getId();</span>
+<span class="nc" id="L907">        serverServices.put(serverId, serverService);</span>
+
+<span class="nc bnc" id="L909" title="All 2 branches missed.">        if (dataManagerActivated) {</span>
+<span class="nc" id="L910">            notifyServer(serverService);</span>
+        }
+
+<span class="nc" id="L913">        logger.info(&quot;Registered Server: {}.&quot;, serverId);</span>
+<span class="nc" id="L914">    }</span>
+
+    /**
+     * Removes a registered ServerService.
+     *
+     * @param serverService
+     *            ServerService object to unset
+     */
+    @SuppressWarnings(&quot;unused&quot;)
+    private void unbindServerService(ServerService serverService) {
+<span class="nc" id="L924">        serverServices.remove(serverService.getId());</span>
+<span class="nc" id="L925">    }</span>
+
+    /**
+     * Updates all ServerServices with mapped channels.
+     */
+    private void notifyServers() {
+<span class="nc bnc" id="L931" title="All 2 branches missed.">        for (ServerService serverService : serverServices.values()) {</span>
+<span class="nc" id="L932">            notifyServer(serverService);</span>
+<span class="nc" id="L933">        }</span>
+<span class="nc" id="L934">    }</span>
+
+    /**
+     * Updates a specified ServerService with mapped channels.
+     *
+     * @param serverService
+     *            ServerService object to updating
+     */
+    private void notifyServer(ServerService serverService) {
+<span class="nc" id="L943">        List&lt;ServerMappingContainer&gt; relatedServerMappings = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L945" title="All 2 branches missed.">        for (ChannelConfig config : rootConfig.channelConfigsById.values()) {</span>
+<span class="nc bnc" id="L946" title="All 2 branches missed.">            for (ServerMapping serverMapping : config.getServerMappings()) {</span>
+<span class="nc bnc" id="L947" title="All 2 branches missed.">                if (serverMapping.getId().equals(serverService.getId())) {</span>
+<span class="nc" id="L948">                    relatedServerMappings</span>
+<span class="nc" id="L949">                            .add(new ServerMappingContainer(this.getChannel(config.getId()), serverMapping));</span>
+                }
+<span class="nc" id="L951">            }</span>
+<span class="nc" id="L952">        }</span>
+<span class="nc" id="L953">        serverService.serverMappings(relatedServerMappings);</span>
+<span class="nc" id="L954">    }</span>
+
+    @SuppressWarnings(&quot;unused&quot;)
+    private void unbindDriverService(DriverService driver) {
+
+<span class="nc" id="L959">        String driverId = driver.getInfo().getId();</span>
+<span class="nc" id="L960">        logger.info(&quot;Unregistering driver: {}.&quot;, driverId);</span>
+
+        // note: no synchronization needed here because this function and the
+        // deactivate function are always called sequentially:
+<span class="nc bnc" id="L964" title="All 2 branches missed.">        if (dataManagerActivated) {</span>
+<span class="nc" id="L965">            driverToBeRemovedId = driverId;</span>
+<span class="nc" id="L966">            driverRemovedSignal = new CountDownLatch(1);</span>
+<span class="nc" id="L967">            interrupt();</span>
+            try {
+<span class="nc" id="L969">                driverRemovedSignal.await();</span>
+<span class="nc" id="L970">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L971">            }</span>
+        }
+        else {
+<span class="nc bnc" id="L974" title="All 2 branches missed.">            if (activeDrivers.remove(driverId) == null) {</span>
+<span class="nc" id="L975">                newDrivers.remove(driverId);</span>
+            }
+        }
+<span class="nc" id="L978">        logger.info(&quot;Driver unregistered: {}&quot;, driverId);</span>
+<span class="nc" id="L979">    }</span>
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    void bindDataLoggerService(DataLoggerService dataLogger) {
+<span class="nc" id="L983">        synchronized (newDataLoggers) {</span>
+<span class="nc" id="L984">            newDataLoggers.add(dataLogger);</span>
+<span class="nc" id="L985">            interrupt();</span>
+<span class="nc" id="L986">        }</span>
+<span class="nc" id="L987">    }</span>
+
+    @SuppressWarnings(&quot;unused&quot;)
+    private void unbindDataLoggerService(DataLoggerService dataLogger) {
+
+<span class="nc" id="L992">        String dataLoggerId = dataLogger.getId();</span>
+<span class="nc" id="L993">        logger.info(&quot;Unregistering data logger: {}.&quot;, dataLoggerId);</span>
+
+<span class="nc bnc" id="L995" title="All 2 branches missed.">        if (dataManagerActivated) {</span>
+<span class="nc" id="L996">            dataLoggerRemovedSignal = new CountDownLatch(1);</span>
+<span class="nc" id="L997">            dataLoggerToBeRemoved = dataLogger;</span>
+<span class="nc" id="L998">            interrupt();</span>
+            try {
+<span class="nc" id="L1000">                dataLoggerRemovedSignal.await();</span>
+<span class="nc" id="L1001">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L1002">            }</span>
+        }
+        else {
+<span class="nc bnc" id="L1005" title="All 2 branches missed.">            if (!activeDataLoggers.remove(dataLogger)) {</span>
+<span class="nc" id="L1006">                newDataLoggers.remove(dataLogger);</span>
+            }
+        }
+
+<span class="nc" id="L1010">        logger.info(&quot;Data logger deregistered: &quot; + dataLoggerId);</span>
+
+<span class="nc" id="L1012">    }</span>
+
+    private void prepareStop() {
+        // TODO tell all drivers to stop listening
+        // Do I have to wait for all threads (such as SamplingTasks) to finish?
+<span class="nc" id="L1017">        executor.shutdown();</span>
+<span class="nc" id="L1018">    }</span>
+
+    @Override
+    public Channel getChannel(String id) {
+<span class="nc bnc" id="L1022" title="All 2 branches missed.">        if (rootConfig == null) {</span>
+<span class="nc" id="L1023">            return null;</span>
+        }
+<span class="nc" id="L1025">        ChannelConfigImpl channelConfig = rootConfig.channelConfigsById.get(id);</span>
+<span class="nc bnc" id="L1026" title="All 2 branches missed.">        if (channelConfig == null) {</span>
+<span class="nc" id="L1027">            return null;</span>
+        }
+<span class="nc" id="L1029">        return channelConfig.channel;</span>
+    }
+
+    @Override
+    public Channel getChannel(String id, ChannelChangeListener channelChangeListener) {
+        // TODO Auto-generated method stub
+<span class="nc" id="L1035">        return null;</span>
+    }
+
+    @Override
+    public List&lt;LogicalDevice&gt; getLogicalDevices(String type) {
+        // TODO Auto-generated method stub
+<span class="nc" id="L1041">        return null;</span>
+    }
+
+    @Override
+    public List&lt;LogicalDevice&gt; getLogicalDevices(String type, LogicalDeviceChangeListener logicalDeviceChangeListener) {
+        // TODO Auto-generated method stub
+<span class="nc" id="L1047">        return null;</span>
+    }
+
+    @Override
+    public void newRecords(List&lt;ChannelRecordContainer&gt; recordContainers) {
+<span class="nc" id="L1052">        List&lt;ChannelRecordContainer&gt; recordContainersCopy = new ArrayList&lt;&gt;(recordContainers.size());</span>
+<span class="nc bnc" id="L1053" title="All 2 branches missed.">        for (ChannelRecordContainer container : recordContainers) {</span>
+<span class="nc" id="L1054">            recordContainersCopy.add(container.copy());</span>
+<span class="nc" id="L1055">        }</span>
+<span class="nc" id="L1056">        synchronized (receivedRecordContainers) {</span>
+<span class="nc" id="L1057">            receivedRecordContainers.add(recordContainersCopy);</span>
+<span class="nc" id="L1058">        }</span>
+
+<span class="nc" id="L1060">        interrupt();</span>
+
+<span class="nc" id="L1062">    }</span>
+
+    @Override
+    public void connectionInterrupted(String driverId, Connection connection) {
+        // TODO synchronize here
+<span class="nc" id="L1067">        DriverConfig driverConfig = rootConfig.getDriver(driverId);</span>
+<span class="nc bnc" id="L1068" title="All 2 branches missed.">        if (driverConfig == null) {</span>
+<span class="nc" id="L1069">            return;</span>
+        }
+<span class="nc bnc" id="L1071" title="All 2 branches missed.">        for (DeviceConfig deviceConfig : driverConfig.getDevices()) {</span>
+<span class="nc" id="L1072">            DeviceConfigImpl deviceConfigImpl = (DeviceConfigImpl) deviceConfig;</span>
+<span class="nc bnc" id="L1073" title="All 2 branches missed.">            if (deviceConfigImpl.device.connection != connection) {</span>
+<span class="nc" id="L1074">                continue;</span>
+            }
+
+<span class="nc" id="L1077">            Device device = deviceConfigImpl.device;</span>
+<span class="nc" id="L1078">            logger.info(&quot;Connection to device {} was interrupted.&quot;, device.deviceConfig.getId());</span>
+<span class="nc" id="L1079">            device.disconnectedSignal();</span>
+<span class="nc" id="L1080">            return;</span>
+        }
+<span class="nc" id="L1082">    }</span>
+
+    @Override
+    public void lock() {
+<span class="nc" id="L1086">        configLock.lock();</span>
+<span class="nc" id="L1087">    }</span>
+
+    @Override
+    public boolean tryLock() {
+<span class="nc" id="L1091">        return configLock.tryLock();</span>
+    }
+
+    @Override
+    public void unlock() {
+<span class="nc" id="L1096">        configLock.unlock();</span>
+<span class="nc" id="L1097">    }</span>
+
+    @Override
+    public RootConfig getConfig() {
+<span class="nc" id="L1101">        return new RootConfigImpl(this.rootConfigWithoutDefaults);</span>
+    }
+
+    @Override
+    public void setConfig(RootConfig config) {
+<span class="nc" id="L1106">        configLock.lock();</span>
+        try {
+<span class="nc" id="L1108">            RootConfigImpl newConfigCopy = new RootConfigImpl((RootConfigImpl) config);</span>
+<span class="nc" id="L1109">            setNewConfig(newConfigCopy);</span>
+        } finally {
+<span class="nc" id="L1111">            configLock.unlock();</span>
+        }
+
+<span class="nc" id="L1114">    }</span>
+
+    @Override
+    public RootConfig getConfig(ConfigChangeListener listener) {
+<span class="nc" id="L1118">        synchronized (configChangeListeners) {</span>
+<span class="nc bnc" id="L1119" title="All 2 branches missed.">            for (ConfigChangeListener configChangeListener : configChangeListeners) {</span>
+<span class="nc bnc" id="L1120" title="All 2 branches missed.">                if (configChangeListener == listener) {</span>
+<span class="nc" id="L1121">                    configChangeListeners.remove(configChangeListener);</span>
+                }
+<span class="nc" id="L1123">            }</span>
+<span class="nc" id="L1124">            configChangeListeners.add(listener);</span>
+<span class="nc" id="L1125">            return getConfig();</span>
+        }
+    }
+
+    @Override
+    public void stopListeningForConfigChange(ConfigChangeListener listener) {
+<span class="nc" id="L1131">        synchronized (configChangeListeners) {</span>
+<span class="nc" id="L1132">            this.configChangeListeners.remove(listener);</span>
+<span class="nc" id="L1133">        }</span>
+<span class="nc" id="L1134">    }</span>
+
+    @Override
+    public void reloadConfigFromFile() throws FileNotFoundException, ParseException {
+<span class="nc" id="L1138">        configLock.lock();</span>
+        try {
+<span class="nc" id="L1140">            RootConfigImpl newConfigCopy = RootConfigImpl.createFromFile(configFile);</span>
+<span class="nc" id="L1141">            setNewConfig(newConfigCopy);</span>
+        } finally {
+<span class="nc" id="L1143">            configLock.unlock();</span>
+        }
+
+<span class="nc" id="L1146">    }</span>
+
+    private void setNewConfig(RootConfigImpl newConfigCopy) {
+<span class="nc" id="L1149">        synchronized (this) {</span>
+<span class="nc" id="L1150">            newConfigSignal = new CountDownLatch(1);</span>
+<span class="nc" id="L1151">            newRootConfigWithoutDefaults = newConfigCopy;</span>
+<span class="nc" id="L1152">            interrupt();</span>
+<span class="nc" id="L1153">        }</span>
+        while (true) {
+            try {
+<span class="nc" id="L1156">                newConfigSignal.await();</span>
+<span class="nc" id="L1157">                break;</span>
+<span class="nc" id="L1158">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L1159">            }</span>
+        }
+
+<span class="nc" id="L1162">    }</span>
+
+    @Override
+    public RootConfig getEmptyConfig() {
+<span class="nc" id="L1166">        return new RootConfigImpl();</span>
+    }
+
+    @Override
+    public void writeConfigToFile() throws ConfigWriteException {
+        try {
+<span class="nc" id="L1172">            rootConfigWithoutDefaults.writeToFile(configFile);</span>
+<span class="nc" id="L1173">        } catch (Exception e) {</span>
+<span class="nc" id="L1174">            throw new ConfigWriteException(e);</span>
+<span class="nc" id="L1175">        }</span>
+<span class="nc" id="L1176">    }</span>
+
+    @Override
+    public List&lt;DeviceScanInfo&gt; scanForDevices(String driverId, String settings)
+            throws DriverNotAvailableException, ArgumentSyntaxException, ScanException, ScanInterruptedException {
+
+<span class="nc" id="L1182">        DriverService driver = activeDrivers.get(driverId);</span>
+<span class="nc bnc" id="L1183" title="All 2 branches missed.">        if (driver == null) {</span>
+<span class="nc" id="L1184">            throw new DriverNotAvailableException();</span>
+        }
+
+<span class="nc" id="L1187">        BlockingScanListener blockingScanListener = new BlockingScanListener();</span>
+
+        try {
+<span class="nc" id="L1190">            driver.scanForDevices(settings, blockingScanListener);</span>
+<span class="nc" id="L1191">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L1192" title="All 2 branches missed.">            if (e instanceof UnsupportedOperationException) {</span>
+<span class="nc" id="L1193">                throw e;</span>
+            }
+
+<span class="nc" id="L1196">            throw new ScanException(e);</span>
+<span class="nc" id="L1197">        }</span>
+
+<span class="nc" id="L1199">        return blockingScanListener.scanInfos;</span>
+
+    }
+
+    @Override
+    public void scanForDevices(String driverId, String settings, DeviceScanListener scanListener)
+            throws DriverNotAvailableException {
+<span class="nc" id="L1206">        DriverService driver = activeDrivers.get(driverId);</span>
+<span class="nc bnc" id="L1207" title="All 2 branches missed.">        if (driver == null) {</span>
+<span class="nc" id="L1208">            throw new DriverNotAvailableException();</span>
+        }
+<span class="nc" id="L1210">        executor.execute(new ScanForDevicesTask(driver, settings, scanListener));</span>
+<span class="nc" id="L1211">    }</span>
+
+    @Override
+    public void interruptDeviceScan(String driverId) throws DriverNotAvailableException, UnsupportedOperationException {
+<span class="nc" id="L1215">        DriverService driver = activeDrivers.get(driverId);</span>
+<span class="nc bnc" id="L1216" title="All 2 branches missed.">        if (driver == null) {</span>
+<span class="nc" id="L1217">            throw new DriverNotAvailableException();</span>
+        }
+<span class="nc" id="L1219">        driver.interruptDeviceScan();</span>
+<span class="nc" id="L1220">    }</span>
+
+    @Override
+    public List&lt;ChannelScanInfo&gt; scanForChannels(String deviceId, String settings)
+            throws DriverNotAvailableException, UnsupportedOperationException, ArgumentSyntaxException, ScanException {
+        // TODO this function is probably not thread safe
+
+<span class="nc" id="L1227">        DeviceConfigImpl config = (DeviceConfigImpl) this.rootConfig.getDevice(deviceId);</span>
+<span class="nc bnc" id="L1228" title="All 2 branches missed.">        if (config == null) {</span>
+<span class="nc" id="L1229">            throw new ScanException(&quot;No device with ID \&quot;&quot; + deviceId + &quot;\&quot; found.&quot;);</span>
+        }
+<span class="nc" id="L1231">        DriverService activeDriver = activeDrivers.get(config.driverParent.id);</span>
+<span class="nc bnc" id="L1232" title="All 2 branches missed.">        if (activeDriver == null) {</span>
+<span class="nc" id="L1233">            throw new DriverNotAvailableException();</span>
+        }
+
+<span class="nc" id="L1236">        waitTilDeviceIsConnected(config.device);</span>
+
+        try {
+<span class="nc" id="L1239">            return config.device.connection.scanForChannels(settings);</span>
+<span class="nc" id="L1240">        } catch (ConnectionException e) {</span>
+<span class="nc" id="L1241">            config.device.disconnectedSignal();</span>
+<span class="nc" id="L1242">            throw new ScanException(e.getMessage(), e);</span>
+        }
+    }
+
+    private void waitTilDeviceIsConnected(Device device) throws ScanException {
+<span class="nc bnc" id="L1247" title="All 4 branches missed.">        for (int i = 0; i &lt; 10 &amp;&amp; device.getState() == DeviceState.CONNECTING; i++) {</span>
+            try {
+<span class="nc" id="L1249">                Thread.sleep(10L);</span>
+<span class="nc" id="L1250">            } catch (InterruptedException e) {</span>
+                // ignore
+<span class="nc" id="L1252">            }</span>
+        }
+
+<span class="nc bnc" id="L1255" title="All 2 branches missed.">        if (device.connection == null) {</span>
+<span class="nc" id="L1256">            throw new ScanException(&quot;Connection of the device is not yet initialized.&quot;);</span>
+        }
+<span class="nc" id="L1258">    }</span>
+
+    @Override
+    public List&lt;String&gt; getIdsOfRunningDrivers() {
+        List&lt;String&gt; availableDrivers;
+<span class="nc" id="L1263">        synchronized (activeDrivers) {</span>
+<span class="nc" id="L1264">            availableDrivers = new ArrayList&lt;&gt;(activeDrivers.size());</span>
+<span class="nc bnc" id="L1265" title="All 2 branches missed.">            for (String activeDriverName : activeDrivers.keySet()) {</span>
+<span class="nc" id="L1266">                availableDrivers.add(activeDriverName);</span>
+<span class="nc" id="L1267">            }</span>
+<span class="nc" id="L1268">        }</span>
+<span class="nc" id="L1269">        return availableDrivers;</span>
+    }
+
+    @Override
+    public void write(List&lt;WriteValueContainer&gt; values) {
+<span class="nc" id="L1274">        HashMap&lt;Device, List&lt;WriteValueContainerImpl&gt;&gt; containersByDevice = new LinkedHashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L1276" title="All 2 branches missed.">        for (WriteValueContainer value : values) {</span>
+<span class="nc" id="L1277">            WriteValueContainerImpl valueContainerImpl = (WriteValueContainerImpl) value;</span>
+
+<span class="nc bnc" id="L1279" title="All 2 branches missed.">            if (valueContainerImpl.getValue() == null) {</span>
+<span class="nc" id="L1280">                valueContainerImpl.setFlag(Flag.CANNOT_WRITE_NULL_VALUE);</span>
+<span class="nc" id="L1281">                continue;</span>
+            }
+
+<span class="nc" id="L1284">            Device device = valueContainerImpl.getChannel().config.deviceParent.device;</span>
+<span class="nc" id="L1285">            List&lt;WriteValueContainerImpl&gt; writeValueContainers = containersByDevice.get(device);</span>
+
+<span class="nc bnc" id="L1287" title="All 2 branches missed.">            if (writeValueContainers == null) {</span>
+<span class="nc" id="L1288">                writeValueContainers = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L1289">                containersByDevice.put(device, writeValueContainers);</span>
+            }
+
+<span class="nc" id="L1292">            writeValueContainers.add(valueContainerImpl);</span>
+<span class="nc" id="L1293">        }</span>
+<span class="nc" id="L1294">        CountDownLatch writeTasksFinishedSignal = new CountDownLatch(containersByDevice.size());</span>
+
+<span class="nc" id="L1296">        synchronized (newWriteTasks) {</span>
+<span class="nc bnc" id="L1297" title="All 2 branches missed.">            for (Entry&lt;Device, List&lt;WriteValueContainerImpl&gt;&gt; writeValueContainers : containersByDevice.entrySet()) {</span>
+<span class="nc" id="L1298">                WriteTask writeTask = new WriteTask(this, writeValueContainers.getKey(),</span>
+<span class="nc" id="L1299">                        writeValueContainers.getValue(), writeTasksFinishedSignal);</span>
+<span class="nc" id="L1300">                newWriteTasks.add(writeTask);</span>
+<span class="nc" id="L1301">            }</span>
+<span class="nc" id="L1302">        }</span>
+<span class="nc" id="L1303">        interrupt();</span>
+
+        try {
+<span class="nc" id="L1306">            writeTasksFinishedSignal.await();</span>
+<span class="nc" id="L1307">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L1308">        }</span>
+
+<span class="nc" id="L1310">    }</span>
+
+    @Override
+    public void read(List&lt;ReadRecordContainer&gt; readContainers) {
+<span class="nc" id="L1314">        Map&lt;Device, List&lt;ChannelRecordContainerImpl&gt;&gt; containersByDevice = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L1316" title="All 2 branches missed.">        for (ReadRecordContainer container : readContainers) {</span>
+<span class="nc bnc" id="L1317" title="All 2 branches missed.">            if (!(container instanceof ChannelRecordContainerImpl)) {</span>
+<span class="nc" id="L1318">                throw new IllegalArgumentException(</span>
+                        &quot;Only use ReadRecordContainer created by Channel.getReadContainer()&quot;);
+            }
+
+<span class="nc" id="L1322">            ChannelImpl channel = (ChannelImpl) container.getChannel();</span>
+<span class="nc" id="L1323">            List&lt;ChannelRecordContainerImpl&gt; containersOfDevice = containersByDevice</span>
+<span class="nc" id="L1324">                    .get(channel.config.deviceParent.device);</span>
+<span class="nc bnc" id="L1325" title="All 2 branches missed.">            if (containersOfDevice == null) {</span>
+<span class="nc" id="L1326">                containersOfDevice = new LinkedList&lt;&gt;();</span>
+<span class="nc" id="L1327">                containersByDevice.put(channel.config.deviceParent.device, containersOfDevice);</span>
+            }
+<span class="nc" id="L1329">            containersOfDevice.add((ChannelRecordContainerImpl) container);</span>
+<span class="nc" id="L1330">        }</span>
+<span class="nc" id="L1331">        CountDownLatch readTasksFinishedSignal = new CountDownLatch(containersByDevice.size());</span>
+
+<span class="nc" id="L1333">        synchronized (newReadTasks) {</span>
+<span class="nc bnc" id="L1334" title="All 2 branches missed.">            for (Entry&lt;Device, List&lt;ChannelRecordContainerImpl&gt;&gt; channelRecordContainers : containersByDevice</span>
+<span class="nc" id="L1335">                    .entrySet()) {</span>
+<span class="nc" id="L1336">                ReadTask readTask = new ReadTask(this, channelRecordContainers.getKey(),</span>
+<span class="nc" id="L1337">                        channelRecordContainers.getValue(), readTasksFinishedSignal);</span>
+<span class="nc" id="L1338">                newReadTasks.add(readTask);</span>
+<span class="nc" id="L1339">            }</span>
+<span class="nc" id="L1340">        }</span>
+<span class="nc" id="L1341">        interrupt();</span>
+
+        try {
+<span class="nc" id="L1344">            readTasksFinishedSignal.await();</span>
+<span class="nc" id="L1345">        } catch (InterruptedException e) {</span>
+<span class="nc" id="L1346">        }</span>
+<span class="nc" id="L1347">    }</span>
+
+    @Override
+    public List&lt;String&gt; getAllIds() {
+<span class="nc" id="L1351">        return new ArrayList&lt;&gt;(rootConfig.channelConfigsById.keySet());</span>
+    }
+
+    DataLoggerService getDataLogger(String loggerId) throws DataLoggerNotAvailableException {
+        DataLoggerService dataLogger;
+<span class="nc bnc" id="L1356" title="All 4 branches missed.">        if (loggerId == null || loggerId.isEmpty()) {</span>
+<span class="nc" id="L1357">            dataLogger = activeDataLoggers.peekFirst();</span>
+        }
+        else {
+<span class="nc" id="L1360">            dataLogger = activeDataLoggers.stream()</span>
+<span class="nc" id="L1361">                    .filter(activeLogger -&gt; activeLogger.getId().equals(loggerId))</span>
+<span class="nc" id="L1362">                    .findFirst()</span>
+<span class="nc" id="L1363">                    .orElseThrow(() -&gt; {</span>
+<span class="nc" id="L1364">                        logger.warn(&quot;DataLogger with id &quot; + loggerId + &quot; not found for reading logs!&quot;);</span>
+<span class="nc" id="L1365">                        return new DataLoggerNotAvailableException();</span>
+                    });
+        }
+
+<span class="nc" id="L1369">        logger.debug(&quot;Accessing logged values using {}&quot;, dataLogger.getId());</span>
+
+<span class="nc" id="L1371">        return dataLogger;</span>
+    }
+
+    @Override
+    public DriverInfo getDriverInfo(String driverId) throws DriverNotAvailableException {
+<span class="nc" id="L1376">        DriverService driver = activeDrivers.get(driverId);</span>
+<span class="nc bnc" id="L1377" title="All 2 branches missed.">        if (driver == null) {</span>
+<span class="nc" id="L1378">            throw new DriverNotAvailableException();</span>
+        }
+
+<span class="nc" id="L1381">        return driver.getInfo();</span>
+    }
+
+    @Override
+    public DeviceState getDeviceState(String deviceId) {
+<span class="nc" id="L1386">        DeviceConfigImpl deviceConfig = (DeviceConfigImpl) rootConfig.getDevice(deviceId);</span>
+<span class="nc bnc" id="L1387" title="All 2 branches missed.">        if (deviceConfig == null) {</span>
+<span class="nc" id="L1388">            return null;</span>
+        }
+<span class="nc" id="L1390">        return deviceConfig.device.getState();</span>
+    }
+
+<span class="nc" id="L1393">    class BlockingScanListener implements DriverDeviceScanListener {</span>
+<span class="nc" id="L1394">        List&lt;DeviceScanInfo&gt; scanInfos = new ArrayList&lt;&gt;();</span>
+
+        @Override
+        public void scanProgressUpdate(int progress) {
+<span class="nc" id="L1398">        }</span>
+
+        @Override
+        public void deviceFound(DeviceScanInfo scanInfo) {
+<span class="nc bnc" id="L1402" title="All 2 branches missed.">            if (!scanInfos.contains(scanInfo)) {</span>
+<span class="nc" id="L1403">                scanInfos.add(scanInfo);</span>
+            }
+<span class="nc" id="L1405">        }</span>
+
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

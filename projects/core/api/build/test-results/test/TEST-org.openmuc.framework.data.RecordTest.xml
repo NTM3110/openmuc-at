@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.data.RecordTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:25" hostname="shou-Dell-G15-5511" time="0.028">
+  <properties/>
+  <testcase name="equalsWorks_recordsEqual()" classname="org.openmuc.framework.data.RecordTest" time="0.015"/>
+  <testcase name="hashCodeWorks()" classname="org.openmuc.framework.data.RecordTest" time="0.003"/>
+  <testcase name="equalsWorks_recordsNotEqual_differentType()" classname="org.openmuc.framework.data.RecordTest" time="0.005"/>
+  <testcase name="equalsWorks_recordsNotEqual_sameType()" classname="org.openmuc.framework.data.RecordTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

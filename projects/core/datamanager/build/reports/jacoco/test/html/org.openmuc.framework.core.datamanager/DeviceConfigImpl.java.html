@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeviceConfigImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-datamanager</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.core.datamanager</a> &gt; <span class="el_source">DeviceConfigImpl.java</span></div><h1>DeviceConfigImpl.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.core.datamanager;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+import org.openmuc.framework.config.ChannelConfig;
+import org.openmuc.framework.config.DeviceConfig;
+import org.openmuc.framework.config.DriverConfig;
+import org.openmuc.framework.config.IdCollisionException;
+import org.openmuc.framework.config.ParseException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+public final class DeviceConfigImpl implements DeviceConfig {
+
+    private String id;
+    private String description;
+    private String deviceAddress;
+    private String settings;
+
+    private Integer samplingTimeout;
+    private Integer connectRetryInterval;
+    private Boolean disabled;
+
+    Device device;
+
+<span class="nc" id="L52">    final HashMap&lt;String, ChannelConfigImpl&gt; channelConfigsById = new LinkedHashMap&lt;&gt;();</span>
+
+    DriverConfigImpl driverParent;
+
+<span class="nc" id="L56">    public DeviceConfigImpl(String id, DriverConfigImpl driverParent) {</span>
+<span class="nc" id="L57">        this.id = id;</span>
+<span class="nc" id="L58">        this.driverParent = driverParent;</span>
+<span class="nc" id="L59">    }</span>
+
+    DeviceConfigImpl clone(DriverConfigImpl clonedParentConfig) {
+<span class="nc" id="L62">        DeviceConfigImpl configClone = new DeviceConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc" id="L64">        configClone.description = description;</span>
+<span class="nc" id="L65">        configClone.deviceAddress = deviceAddress;</span>
+<span class="nc" id="L66">        configClone.settings = settings;</span>
+<span class="nc" id="L67">        configClone.samplingTimeout = samplingTimeout;</span>
+<span class="nc" id="L68">        configClone.connectRetryInterval = connectRetryInterval;</span>
+<span class="nc" id="L69">        configClone.disabled = disabled;</span>
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : channelConfigsById.values()) {</span>
+<span class="nc" id="L72">            configClone.channelConfigsById.put(channelConfig.getId(), channelConfig.clone(configClone));</span>
+<span class="nc" id="L73">        }</span>
+<span class="nc" id="L74">        return configClone;</span>
+    }
+
+    @Override
+    public String getId() {
+<span class="nc" id="L79">        return id;</span>
+    }
+
+    @Override
+    public void setId(String id) throws IdCollisionException {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L85">            throw new IllegalArgumentException(&quot;The device ID may not be null&quot;);</span>
+        }
+<span class="nc" id="L87">        ChannelConfigImpl.checkIdSyntax(id);</span>
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">        if (driverParent.rootConfigParent.deviceConfigsById.containsKey(id)) {</span>
+<span class="nc" id="L90">            throw new IdCollisionException(&quot;Collision with device ID:&quot; + id);</span>
+        }
+
+<span class="nc" id="L93">        driverParent.deviceConfigsById.put(id, driverParent.deviceConfigsById.remove(this.id));</span>
+<span class="nc" id="L94">        driverParent.rootConfigParent.deviceConfigsById.put(id,</span>
+<span class="nc" id="L95">                driverParent.rootConfigParent.deviceConfigsById.remove(this.id));</span>
+
+<span class="nc" id="L97">        this.id = id;</span>
+<span class="nc" id="L98">    }</span>
+
+    @Override
+    public String getDescription() {
+<span class="nc" id="L102">        return description;</span>
+    }
+
+    @Override
+    public void setDescription(String description) {
+<span class="nc" id="L107">        this.description = description;</span>
+<span class="nc" id="L108">    }</span>
+
+    @Override
+    public String getDeviceAddress() {
+<span class="nc" id="L112">        return deviceAddress;</span>
+    }
+
+    @Override
+    public void setDeviceAddress(String address) {
+<span class="nc" id="L117">        deviceAddress = address;</span>
+<span class="nc" id="L118">    }</span>
+
+    @Override
+    public String getSettings() {
+<span class="nc" id="L122">        return settings;</span>
+    }
+
+    @Override
+    public void setSettings(String settings) {
+<span class="nc" id="L127">        this.settings = settings;</span>
+<span class="nc" id="L128">    }</span>
+
+    @Override
+    public Integer getSamplingTimeout() {
+<span class="nc" id="L132">        return samplingTimeout;</span>
+    }
+
+    @Override
+    public void setSamplingTimeout(Integer timeout) {
+<span class="nc bnc" id="L137" title="All 4 branches missed.">        if (timeout != null &amp;&amp; timeout &lt; 0) {</span>
+<span class="nc" id="L138">            throw new IllegalArgumentException(&quot;A negative sampling timeout is not allowed&quot;);</span>
+        }
+<span class="nc" id="L140">        samplingTimeout = timeout;</span>
+<span class="nc" id="L141">    }</span>
+
+    @Override
+    public Integer getConnectRetryInterval() {
+<span class="nc" id="L145">        return connectRetryInterval;</span>
+    }
+
+    @Override
+    public void setConnectRetryInterval(Integer interval) {
+<span class="nc bnc" id="L150" title="All 4 branches missed.">        if (interval != null &amp;&amp; interval &lt; 0) {</span>
+<span class="nc" id="L151">            throw new IllegalArgumentException(&quot;A negative connect retry interval is not allowed&quot;);</span>
+        }
+<span class="nc" id="L153">        connectRetryInterval = interval;</span>
+<span class="nc" id="L154">    }</span>
+
+    @Override
+    public Boolean isDisabled() {
+<span class="nc" id="L158">        return disabled;</span>
+    }
+
+    @Override
+    public void setDisabled(Boolean disabled) {
+<span class="nc" id="L163">        this.disabled = disabled;</span>
+<span class="nc" id="L164">    }</span>
+
+    @Override
+    public ChannelConfig addChannel(String channelId) throws IdCollisionException {
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (channelId == null) {</span>
+<span class="nc" id="L170">            throw new IllegalArgumentException(&quot;The channel ID may not be null&quot;);</span>
+        }
+
+<span class="nc" id="L173">        ChannelConfigImpl.checkIdSyntax(channelId);</span>
+
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (driverParent.rootConfigParent.channelConfigsById.containsKey(channelId)) {</span>
+<span class="nc" id="L176">            throw new IdCollisionException(&quot;Collision with channel ID: &quot; + channelId);</span>
+        }
+
+<span class="nc" id="L179">        ChannelConfigImpl newChannel = new ChannelConfigImpl(channelId, this);</span>
+
+<span class="nc" id="L181">        driverParent.rootConfigParent.channelConfigsById.put(channelId, newChannel);</span>
+<span class="nc" id="L182">        channelConfigsById.put(channelId, newChannel);</span>
+<span class="nc" id="L183">        return newChannel;</span>
+    }
+
+    @Override
+    public ChannelConfig getChannel(String channelId) {
+<span class="nc" id="L188">        return channelConfigsById.get(channelId);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public Collection&lt;ChannelConfig&gt; getChannels() {
+<span class="nc" id="L194">        return (Collection&lt;ChannelConfig&gt;) (Collection&lt;?&gt;) Collections</span>
+<span class="nc" id="L195">                .unmodifiableCollection(channelConfigsById.values());</span>
+    }
+
+    @Override
+    public void delete() {
+<span class="nc" id="L200">        driverParent.deviceConfigsById.remove(id);</span>
+<span class="nc" id="L201">        clear();</span>
+<span class="nc" id="L202">    }</span>
+
+    void clear() {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : channelConfigsById.values()) {</span>
+<span class="nc" id="L206">            channelConfig.clear();</span>
+<span class="nc" id="L207">        }</span>
+<span class="nc" id="L208">        channelConfigsById.clear();</span>
+<span class="nc" id="L209">        driverParent.rootConfigParent.deviceConfigsById.remove(id);</span>
+<span class="nc" id="L210">        driverParent = null;</span>
+<span class="nc" id="L211">    }</span>
+
+    @Override
+    public DriverConfig getDriver() {
+<span class="nc" id="L215">        return driverParent;</span>
+    }
+
+    static void addDeviceFromDomNode(Node deviceConfigNode, DriverConfig parentConfig) throws ParseException {
+
+<span class="nc" id="L220">        String id = ChannelConfigImpl.getAttributeValue(deviceConfigNode, &quot;id&quot;);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (id == null) {</span>
+<span class="nc" id="L222">            throw new ParseException(&quot;device has no id attribute&quot;);</span>
+        }
+
+        DeviceConfigImpl config;
+        try {
+<span class="nc" id="L227">            config = (DeviceConfigImpl) parentConfig.addDevice(id);</span>
+<span class="nc" id="L228">        } catch (Exception e) {</span>
+<span class="nc" id="L229">            throw new ParseException(e);</span>
+<span class="nc" id="L230">        }</span>
+
+<span class="nc" id="L232">        NodeList deviceChildren = deviceConfigNode.getChildNodes();</span>
+
+        try {
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            for (int i = 0; i &lt; deviceChildren.getLength(); i++) {</span>
+<span class="nc" id="L236">                Node childNode = deviceChildren.item(i);</span>
+<span class="nc" id="L237">                String childName = childNode.getNodeName();</span>
+
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                if (childName.equals(&quot;#text&quot;)) {</span>
+<span class="nc" id="L240">                    continue;</span>
+                }
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                else if (childName.equals(&quot;channel&quot;)) {</span>
+<span class="nc" id="L243">                    ChannelConfigImpl.addChannelFromDomNode(childNode, config);</span>
+                }
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                else if (childName.equals(&quot;description&quot;)) {</span>
+<span class="nc" id="L246">                    config.setDescription(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                else if (childName.equals(&quot;deviceAddress&quot;)) {</span>
+<span class="nc" id="L249">                    config.setDeviceAddress(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                else if (childName.equals(&quot;settings&quot;)) {</span>
+<span class="nc" id="L252">                    config.setSettings(childNode.getTextContent());</span>
+                }
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                else if (childName.equals(&quot;samplingTimeout&quot;)) {</span>
+<span class="nc" id="L255">                    config.setSamplingTimeout(ChannelConfigImpl.timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                else if (childName.equals(&quot;connectRetryInterval&quot;)) {</span>
+<span class="nc" id="L258">                    config.setConnectRetryInterval(ChannelConfigImpl.timeStringToMillis(childNode.getTextContent()));</span>
+                }
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                else if (childName.equals(&quot;disabled&quot;)) {</span>
+<span class="nc" id="L261">                    config.disabled = Boolean.parseBoolean(childNode.getTextContent());</span>
+                }
+                else {
+<span class="nc" id="L264">                    throw new ParseException(&quot;found unknown tag:&quot; + childName);</span>
+                }
+            }
+<span class="nc" id="L267">        } catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L268">            throw new ParseException(e);</span>
+<span class="nc" id="L269">        }</span>
+
+<span class="nc" id="L271">    }</span>
+
+    Element getDomElement(Document document) {
+<span class="nc" id="L274">        Element parentElement = document.createElement(&quot;device&quot;);</span>
+<span class="nc" id="L275">        parentElement.setAttribute(&quot;id&quot;, id);</span>
+
+        Element childElement;
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (description != null) {</span>
+<span class="nc" id="L280">            childElement = document.createElement(&quot;description&quot;);</span>
+<span class="nc" id="L281">            childElement.setTextContent(description);</span>
+<span class="nc" id="L282">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L285" title="All 2 branches missed.">        if (deviceAddress != null) {</span>
+<span class="nc" id="L286">            childElement = document.createElement(&quot;deviceAddress&quot;);</span>
+<span class="nc" id="L287">            childElement.setTextContent(deviceAddress);</span>
+<span class="nc" id="L288">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (settings != null) {</span>
+<span class="nc" id="L292">            childElement = document.createElement(&quot;settings&quot;);</span>
+<span class="nc" id="L293">            childElement.setTextContent(settings);</span>
+<span class="nc" id="L294">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        if (samplingTimeout != null) {</span>
+<span class="nc" id="L298">            childElement = document.createElement(&quot;samplingTimeout&quot;);</span>
+<span class="nc" id="L299">            childElement.setTextContent(ChannelConfigImpl.millisToTimeString(samplingTimeout));</span>
+<span class="nc" id="L300">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        if (connectRetryInterval != null) {</span>
+<span class="nc" id="L304">            childElement = document.createElement(&quot;connectRetryInterval&quot;);</span>
+<span class="nc" id="L305">            childElement.setTextContent(ChannelConfigImpl.millisToTimeString(connectRetryInterval));</span>
+<span class="nc" id="L306">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L309" title="All 2 branches missed.">        if (disabled != null) {</span>
+<span class="nc" id="L310">            childElement = document.createElement(&quot;disabled&quot;);</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">            if (disabled) {</span>
+<span class="nc" id="L312">                childElement.setTextContent(&quot;true&quot;);</span>
+            }
+            else {
+<span class="nc" id="L315">                childElement.setTextContent(&quot;false&quot;);</span>
+            }
+<span class="nc" id="L317">            parentElement.appendChild(childElement);</span>
+        }
+
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : channelConfigsById.values()) {</span>
+<span class="nc" id="L321">            parentElement.appendChild(channelConfig.getDomElement(document));</span>
+<span class="nc" id="L322">        }</span>
+
+<span class="nc" id="L324">        return parentElement;</span>
+    }
+
+    DeviceConfigImpl cloneWithDefaults(DriverConfigImpl clonedParentConfig) {
+
+<span class="nc" id="L329">        DeviceConfigImpl configClone = new DeviceConfigImpl(id, clonedParentConfig);</span>
+
+<span class="nc bnc" id="L331" title="All 2 branches missed.">        if (description == null) {</span>
+<span class="nc" id="L332">            configClone.description = DESCRIPTION_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L335">            configClone.description = description;</span>
+        }
+
+<span class="nc bnc" id="L338" title="All 2 branches missed.">        if (deviceAddress == null) {</span>
+<span class="nc" id="L339">            configClone.deviceAddress = DEVICE_ADDRESS_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L342">            configClone.deviceAddress = deviceAddress;</span>
+        }
+
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (settings == null) {</span>
+<span class="nc" id="L346">            configClone.settings = SETTINGS_DEFAULT;</span>
+        }
+        else {
+<span class="nc" id="L349">            configClone.settings = settings;</span>
+        }
+
+<span class="nc bnc" id="L352" title="All 2 branches missed.">        if (samplingTimeout == null) {</span>
+<span class="nc" id="L353">            configClone.samplingTimeout = clonedParentConfig.samplingTimeout;</span>
+        }
+        else {
+<span class="nc" id="L356">            configClone.samplingTimeout = samplingTimeout;</span>
+        }
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (connectRetryInterval == null) {</span>
+<span class="nc" id="L360">            configClone.connectRetryInterval = clonedParentConfig.connectRetryInterval;</span>
+        }
+        else {
+<span class="nc" id="L363">            configClone.connectRetryInterval = connectRetryInterval;</span>
+        }
+
+<span class="nc bnc" id="L366" title="All 4 branches missed.">        if (disabled == null || clonedParentConfig.disabled) {</span>
+<span class="nc" id="L367">            configClone.disabled = clonedParentConfig.disabled;</span>
+        }
+        else {
+<span class="nc" id="L370">            configClone.disabled = disabled;</span>
+        }
+
+<span class="nc bnc" id="L373" title="All 2 branches missed.">        for (ChannelConfigImpl channelConfig : channelConfigsById.values()) {</span>
+<span class="nc" id="L374">            configClone.channelConfigsById.put(channelConfig.getId(), channelConfig.cloneWithDefaults(configClone));</span>
+<span class="nc" id="L375">        }</span>
+<span class="nc" id="L376">        return configClone;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusDriver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">ModbusDriver.java</span></div><h1>ModbusDriver.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.driver.modbus;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.config.DriverInfo;
+import org.openmuc.framework.config.ScanException;
+import org.openmuc.framework.config.ScanInterruptedException;
+import org.openmuc.framework.driver.modbus.rtu.ModbusConfigurationException;
+import org.openmuc.framework.driver.modbus.rtu.ModbusRTUConnection;
+import org.openmuc.framework.driver.modbus.tcp.ModbusTCPConnection;
+import org.openmuc.framework.driver.modbus.udp.ModbusUDPConnection;
+import org.openmuc.framework.driver.spi.Connection;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.DriverDeviceScanListener;
+import org.openmuc.framework.driver.spi.DriverService;
+import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+/**
+ * Main class of the modbus driver.
+ */
+@Component
+<span class="fc" id="L44">public final class ModbusDriver implements DriverService {</span>
+
+<span class="fc" id="L46">    private static final Logger logger = LoggerFactory.getLogger(ModbusDriver.class);</span>
+    private static final int DEFAULT_TIMEOUT_MS = 3000;
+
+    @Override
+    public DriverInfo getInfo() {
+
+<span class="fc" id="L52">        final String ID = &quot;modbus&quot;;</span>
+
+<span class="fc" id="L54">        final String DESCRIPTION = &quot;Driver to communicate with devices via Modbus protocol. The driver supports TCP, RTU and RTU over TCP.&quot;;</span>
+
+<span class="fc" id="L56">        final String TCP_ADDRESS = &quot;  TCP: &lt;ip&gt;[:&lt;port&gt;] (e.g. 192.168.30.103:502)&quot;;</span>
+<span class="fc" id="L57">        final String RTUTCP_ADDRESS = &quot;  RTUTCP: &lt;ip&gt;[:&lt;port&gt;] (e.g. 192.168.30.103:502)&quot;;</span>
+<span class="fc" id="L58">        final String RTU_ADDRESS = &quot;  RTU: &lt;serial port&gt; (e.g. /dev/ttyS0)&quot;;</span>
+<span class="fc" id="L59">        final String DEVICE_ADDRESS = &quot;The device address dependes on the selected type: \n&quot; + TCP_ADDRESS + &quot;\n&quot;</span>
+                + RTUTCP_ADDRESS + &quot;\n&quot; + RTU_ADDRESS;
+
+        // FIXME auto generate settings string from class to avoid inconsistency
+
+        // FIXME OpenMUC passes only the connection settings to the driver. Driver is unable to access the
+        // samplingTimeout specified in channels.xml. As workaround the timeout is added to the device settings for the
+        // modbus driver. timeoutInMs used for:
+        // TCP: m_Socket.setSoTimeout(m_Timeout);
+        // RTU: m_SerialPort.enableReceiveTimeout(ms);
+
+<span class="fc" id="L70">        final String TCP_SETTINGS = &quot;  TCP[:timeout=&lt;timoutInMs&gt;] (e.g. TCP or TCP:timeout=3000)&quot;;</span>
+<span class="fc" id="L71">        final String UDP_SETTINGS = &quot;  UDP[:timeout=&lt;timoutInMs&gt;] (e.g. UDP or UDP:timeout=3000)&quot;;</span>
+<span class="fc" id="L72">        final String RTUTCP_SETTINGS = &quot;  RTUTCP[:timeout=&lt;timoutInMs&gt;] &quot;;</span>
+<span class="fc" id="L73">        final String RTU_SETTINGS = &quot;  RTU:&lt;ENCODING&gt;:&lt;BAUDRATE&gt;:&lt;DATABITS&gt;:&lt;PARITY&gt;:&lt;STOPBITS&gt;:&lt;ECHO&gt;:&lt;FLOWCONTROL_IN&gt;:&lt;FLOWCONTEOL_OUT&gt;[:timeout=&lt;timoutInMs&gt;]&quot;;</span>
+<span class="fc" id="L74">        final String DEVICE_SETTINGS = &quot;Device settings depend on selected type: \n&quot; + TCP_SETTINGS + &quot;\n&quot;</span>
+                + UDP_SETTINGS + &quot;\n&quot; + RTUTCP_SETTINGS + &quot;\n&quot; + RTU_SETTINGS;
+
+<span class="fc" id="L77">        final String CHANNEL_ADDRESS = &quot;&lt;UnitId&gt;:&lt;PrimaryTable&gt;:&lt;Address&gt;:&lt;Datatyp&gt;&quot;;</span>
+
+<span class="fc" id="L79">        final String DEVICE_SCAN_SETTINGS = &quot;Device scan is not supported.&quot;;</span>
+
+<span class="fc" id="L81">        return new DriverInfo(ID, DESCRIPTION, DEVICE_ADDRESS, DEVICE_SETTINGS, CHANNEL_ADDRESS, DEVICE_SCAN_SETTINGS);</span>
+
+    }
+
+    @Override
+    public Connection connect(String deviceAddress, String settings) throws ConnectionException {
+
+        ModbusConnection connection;
+
+        // TODO consider retries in sampling timeout (e.g. one time 12000 ms or three times 4000 ms)
+        // FIXME quite inconvenient/complex to get the timeout from config, since the driver doesn't know the device id!
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (settings.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L94">            throw new ConnectionException(&quot;no device settings found in config. Please specify settings.&quot;);</span>
+        }
+        else {
+<span class="nc" id="L97">            String[] settingsArray = settings.split(&quot;:&quot;);</span>
+<span class="nc" id="L98">            String mode = settingsArray[0];</span>
+
+<span class="nc" id="L100">            int timeoutMs = getTimeoutFromSettings(settingsArray);</span>
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">            if (mode.equalsIgnoreCase(&quot;RTU&quot;)) {</span>
+                try {
+<span class="nc" id="L104">                    logger.info(&quot;New Modbus Connection on device: {}&quot;,deviceAddress);</span>
+<span class="nc" id="L105">                    connection = new ModbusRTUConnection(deviceAddress, settingsArray, timeoutMs);</span>
+<span class="nc" id="L106">                } catch (ModbusConfigurationException e) {</span>
+<span class="nc" id="L107">                    logger.error(&quot;Unable to create ModbusRTUConnection&quot;, e);</span>
+<span class="nc" id="L108">                    throw new ConnectionException();</span>
+<span class="nc" id="L109">                }</span>
+            }
+<span class="nc bnc" id="L111" title="All 2 branches missed.">            else if (mode.equalsIgnoreCase(&quot;TCP&quot;)) {</span>
+
+<span class="nc" id="L113">                connection = new ModbusTCPConnection(deviceAddress, timeoutMs, false);</span>
+            }
+<span class="nc bnc" id="L115" title="All 2 branches missed.">            else if (mode.equalsIgnoreCase(&quot;RTUTCP&quot;)) {</span>
+<span class="nc" id="L116">                connection = new ModbusTCPConnection(deviceAddress, timeoutMs, true);</span>
+            }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            else if (mode.equalsIgnoreCase(&quot;UDP&quot;)) {</span>
+<span class="nc" id="L119">                connection = new ModbusUDPConnection(deviceAddress, timeoutMs);</span>
+            }
+            else {
+<span class="nc" id="L122">                throw new ConnectionException(&quot;Unknown Mode. Use RTU, TCP or RTUTCP.&quot;);</span>
+            }
+        }
+<span class="nc" id="L125">        return connection;</span>
+
+    }
+
+    // FIXME 1: better timeout handling and general settings parsing for drivers
+    // FIXME 2: this should be the max timeout. the duration of each read channel should be subtracted from the max
+    // timeout
+    private int getTimeoutFromSettings(String[] settingsArray) {
+
+<span class="nc" id="L134">        int timeoutMs = DEFAULT_TIMEOUT_MS;</span>
+
+        try {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            for (String setting : settingsArray) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">                if (setting.startsWith(&quot;timeout&quot;)) {</span>
+<span class="nc" id="L139">                    String[] timeoutParam = setting.split(&quot;=&quot;);</span>
+<span class="nc" id="L140">                    timeoutMs = validateTimeout(timeoutParam);</span>
+                }
+            }
+
+<span class="nc" id="L144">        } catch (Exception e) {</span>
+<span class="nc" id="L145">            logger.warn(</span>
+                    &quot;Unable to parse timeout from settings. Using default timeout of &quot; + DEFAULT_TIMEOUT_MS + &quot; ms.&quot;);
+<span class="nc" id="L147">        }</span>
+
+<span class="nc" id="L149">        logger.info(&quot;Set sampling timeout to &quot; + timeoutMs + &quot; ms.&quot;);</span>
+
+<span class="nc" id="L151">        return timeoutMs;</span>
+    }
+
+    private int validateTimeout(String[] timeoutParam) {
+
+<span class="nc" id="L156">        int timeoutMs = Integer.valueOf(timeoutParam[1]).intValue();</span>
+
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (timeoutMs &lt;= 0) {</span>
+<span class="nc" id="L159">            throw new IllegalArgumentException(&quot;Invalid SamplingTimeout is smaller or equal 0.&quot;);</span>
+        }
+
+<span class="nc" id="L162">        return timeoutMs;</span>
+    }
+
+    @Override
+    public void scanForDevices(String settings, DriverDeviceScanListener listener)
+            throws UnsupportedOperationException, ArgumentSyntaxException, ScanException, ScanInterruptedException {
+<span class="nc" id="L168">        throw new UnsupportedOperationException();</span>
+    }
+
+    @Override
+    public void interruptDeviceScan() throws UnsupportedOperationException {
+<span class="nc" id="L173">        throw new UnsupportedOperationException();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChannelConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-api</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.config</a> &gt; <span class="el_source">ChannelConfig.java</span></div><h1>ChannelConfig.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.config;
+
+import java.util.List;
+
+import org.openmuc.framework.data.ValueType;
+
+public interface ChannelConfig {
+
+<span class="nc" id="L30">    Boolean DISABLED_DEFAULT = false;</span>
+    String DESCRIPTION_DEFAULT = &quot;&quot;;
+    String CHANNEL_ADDRESS_DEFAULT = &quot;&quot;;
+    String UNIT_DEFAULT = &quot;&quot;;
+<span class="nc" id="L34">    ValueType VALUE_TYPE_DEFAULT = ValueType.DOUBLE;</span>
+    int BYTE_ARRAY_SIZE_DEFAULT = 10;
+    int STRING_SIZE_DEFAULT = 10;
+    boolean LISTENING_DEFAULT = false;
+    int SAMPLING_INTERVAL_DEFAULT = -1;
+    int SAMPLING_TIME_OFFSET_DEFAULT = 0;
+    String SAMPLING_GROUP_DEFAULT = &quot;&quot;;
+    String SETTINGS_DEFAULT = &quot;&quot;;
+    int LOGGING_INTERVAL_DEFAULT = -1;
+    int LOGGING_TIME_OFFSET_DEFAULT = 0;
+    boolean LOGGING_EVENT_DEFAULT = false;
+    String LOGGING_SETTINGS_DEFAULT = &quot;&quot;;
+    String LOGGING_READER_DEFAULT = &quot;&quot;;
+
+    String getId();
+
+    void setId(String id) throws IdCollisionException;
+
+    String getDescription();
+
+    void setDescription(String description);
+
+    String getChannelAddress();
+
+    void setChannelAddress(String address);
+
+    String getUnit();
+
+    void setUnit(String unit);
+
+    ValueType getValueType();
+
+    void setValueType(ValueType type);
+
+    Integer getValueTypeLength();
+
+    void setValueTypeLength(Integer maxLength);
+
+    Double getScalingFactor();
+
+    void setScalingFactor(Double factor);
+
+    Double getValueOffset();
+
+    void setValueOffset(Double offset);
+
+    Boolean isListening();
+
+    void setListening(Boolean listening);
+
+    Integer getSamplingInterval();
+
+    void setSamplingInterval(Integer interval);
+
+    Integer getSamplingTimeOffset();
+
+    void setSamplingTimeOffset(Integer offset);
+
+    String getSamplingGroup();
+
+    void setSamplingGroup(String group);
+
+    String getSettings();
+
+    void setSettings(String settings);
+
+    Integer getLoggingInterval();
+
+    void setLoggingInterval(Integer interval);
+
+    String getReader();
+
+    void setReader(String reader);
+
+    Integer getLoggingTimeOffset();
+
+    void setLoggingTimeOffset(Integer offset);
+
+    Boolean isDisabled();
+
+    void setDisabled(Boolean disabled);
+
+    void delete();
+
+    DeviceConfig getDevice();
+
+    List&lt;ServerMapping&gt; getServerMappings();
+
+    void addServerMapping(ServerMapping serverMapping);
+
+    void deleteServerMappings(String id);
+
+    void setLoggingEvent(Boolean loggingEvent);
+
+    Boolean isLoggingEvent();
+
+    String getLoggingSettings();
+
+    void setLoggingSettings(String loggingSettings);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

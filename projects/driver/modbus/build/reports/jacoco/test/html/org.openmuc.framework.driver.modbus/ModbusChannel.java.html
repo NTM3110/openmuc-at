@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModbusChannel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-modbus</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.modbus</a> &gt; <span class="el_source">ModbusChannel.java</span></div><h1>ModbusChannel.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.modbus;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class ModbusChannel {
+
+<span class="fc" id="L28">    private static final Logger logger = LoggerFactory.getLogger(ModbusChannel.class);</span>
+
+    /** Contains values to define the access method of the channel */
+<span class="fc" id="L31">    public static enum EAccess {</span>
+<span class="fc" id="L32">        READ,</span>
+<span class="fc" id="L33">        WRITE</span>
+    }
+
+    /** A Parameter of the channel address */
+    public static final int IGNORE_UNIT_ID = -1;
+
+    /** A Parameter of the channel address */
+    private static final int UNITID = 0;
+
+    /** A Parameter of the channel address */
+    private static final int PRIMARYTABLE = 1;
+
+    /** A Parameter of the channel address */
+    private static final int ADDRESS = 2;
+
+    /** A Parameter of the channel address */
+    private static final int DATATYPE = 3;
+
+    /** Start address to read or write from */
+    private int startAddress;
+
+    /** Number of registers/coils to be read or written */
+    private int count;
+
+    /** Used to determine the register/coil count */
+    private EDatatype datatype;
+
+    /** Used to determine the appropriate transaction method */
+    private EFunctionCode functionCode;
+
+    /** Specifies whether the channel should be read or written */
+    private EAccess accessFlag;
+
+    /** */
+    private EPrimaryTable primaryTable;
+
+    private String channelAddress;
+
+    /**
+     * Is needed when the target device is behind a gateway/bridge which connects Modbus TCP with Modbus+ or Modbus
+     * Serial. Note: Some devices requires the unitId even if they are in a Modbus TCP Network and have their own IP.
+     * &quot;Like when a device ties its Ethernet and RS-485 ports together and broadcasts whatever shows up on one side,
+     * onto the other if the packet isn't for themselves, but isn't &quot;just a bridge&quot;.&quot;
+     */
+    private int unitId;
+
+<span class="fc" id="L79">    public ModbusChannel(String channelAddress, EAccess accessFlag) {</span>
+
+<span class="fc" id="L81">        channelAddress = channelAddress.toLowerCase();</span>
+<span class="fc" id="L82">        String[] addressParams = decomposeAddress(channelAddress);</span>
+<span class="pc bpc" id="L83" title="2 of 4 branches missed.">        if (addressParams != null &amp;&amp; checkAddressParams(addressParams)) {</span>
+<span class="fc" id="L84">            this.channelAddress = channelAddress;</span>
+<span class="fc" id="L85">            setUnitId(addressParams[UNITID]);</span>
+<span class="fc" id="L86">            setPrimaryTable(addressParams[PRIMARYTABLE]);</span>
+<span class="fc" id="L87">            setStartAddress(addressParams[ADDRESS]);</span>
+<span class="fc" id="L88">            setDatatype(addressParams[DATATYPE]);</span>
+<span class="fc" id="L89">            setCount(addressParams[DATATYPE]);</span>
+<span class="fc" id="L90">            setAccessFlag(accessFlag);</span>
+<span class="fc" id="L91">            setFunctionCode();</span>
+        }
+        else {
+<span class="nc" id="L94">            throw new RuntimeException(&quot;Address initialization faild! Invalid parameters used: &quot; + channelAddress);</span>
+        }
+
+<span class="fc" id="L97">    }</span>
+
+    public void update(EAccess access) {
+<span class="nc" id="L100">        setAccessFlag(access);</span>
+<span class="nc" id="L101">        setFunctionCode();</span>
+<span class="nc" id="L102">    }</span>
+
+    private String[] decomposeAddress(String channelAddress) {
+
+<span class="fc" id="L106">        String[] param = new String[4];</span>
+<span class="fc" id="L107">        String[] addressParams = channelAddress.toLowerCase().split(&quot;:&quot;);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (addressParams.length == 3) {</span>
+<span class="nc" id="L109">            param[UNITID] = &quot;&quot;;</span>
+<span class="nc" id="L110">            param[PRIMARYTABLE] = addressParams[0];</span>
+<span class="nc" id="L111">            param[ADDRESS] = addressParams[1];</span>
+<span class="nc" id="L112">            param[DATATYPE] = addressParams[2];</span>
+        }
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        else if (addressParams.length == 4) {</span>
+<span class="fc" id="L115">            param[UNITID] = addressParams[0];</span>
+<span class="fc" id="L116">            param[PRIMARYTABLE] = addressParams[1];</span>
+<span class="fc" id="L117">            param[ADDRESS] = addressParams[2];</span>
+<span class="fc" id="L118">            param[DATATYPE] = addressParams[3];</span>
+        }
+        else {
+<span class="nc" id="L121">            return null;</span>
+        }
+<span class="fc" id="L123">        return param;</span>
+    }
+
+    private boolean checkAddressParams(String[] params) {
+<span class="fc" id="L127">        boolean returnValue = false;</span>
+<span class="pc bpc" id="L128" title="3 of 4 branches missed.">        if ((params[UNITID].matches(&quot;\\d+?&quot;) || params[UNITID].equals(&quot;&quot;))</span>
+<span class="pc bpc" id="L129" title="2 of 4 branches missed.">                &amp;&amp; EPrimaryTable.isValidValue(params[PRIMARYTABLE]) &amp;&amp; params[ADDRESS].matches(&quot;\\d+?&quot;)</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                &amp;&amp; EDatatype.isValid(params[DATATYPE])) {</span>
+<span class="fc" id="L131">            returnValue = true;</span>
+        }
+<span class="fc" id="L133">        return returnValue;</span>
+    }
+
+    private void setFunctionCode() {
+<span class="fc bfc" id="L137" title="All 2 branches covered.">        if (accessFlag.equals(EAccess.READ)) {</span>
+<span class="fc" id="L138">            selectFunctionCodeForReading();</span>
+        }
+        else {
+<span class="fc" id="L141">            selectFunctionCodeForWriting();</span>
+        }
+<span class="fc" id="L143">    }</span>
+
+    /**
+     * Matches data type with function code
+     * 
+     * @throws Exception
+     */
+    private void selectFunctionCodeForReading() {
+
+<span class="pc bpc" id="L152" title="1 of 3 branches missed.">        switch (datatype) {</span>
+        case BOOLEAN:
+<span class="fc" id="L154">            setReadFunctionCodeIfCorrect(EPrimaryTable.COILS, EFunctionCode.FC_01_READ_COILS,</span>
+                    EPrimaryTable.DISCRETE_INPUTS, EFunctionCode.FC_02_READ_DISCRETE_INPUTS);
+<span class="fc" id="L156">            break;</span>
+        case SHORT:
+        case INT16:
+        case INT32:
+        case UINT16:
+        case UINT32:
+        case FLOAT:
+        case DOUBLE:
+        case LONG:
+        case BYTEARRAY:
+<span class="fc" id="L166">            setReadFunctionCodeIfCorrect(EPrimaryTable.HOLDING_REGISTERS, EFunctionCode.FC_03_READ_HOLDING_REGISTERS,</span>
+                    EPrimaryTable.INPUT_REGISTERS, EFunctionCode.FC_04_READ_INPUT_REGISTERS);
+<span class="fc" id="L168">            break;</span>
+        default:
+<span class="nc" id="L170">            throw new RuntimeException(&quot;read: Datatype &quot; + datatype.toString() + &quot; not supported yet!&quot;);</span>
+        }
+<span class="fc" id="L172">    }</span>
+
+    private void setReadFunctionCodeIfCorrect(EPrimaryTable ePrimaryTable1, EFunctionCode eFunctionCode1,
+            EPrimaryTable ePrimaryTable2, EFunctionCode eFunctionCode2) {
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (primaryTable.equals(ePrimaryTable1)) {</span>
+<span class="fc" id="L177">            functionCode = eFunctionCode1;</span>
+        }
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        else if (primaryTable.equals(ePrimaryTable2)) {</span>
+<span class="fc" id="L180">            functionCode = eFunctionCode2;</span>
+        }
+        else {
+<span class="nc" id="L183">            invalidReadAddressParameterCombination();</span>
+        }
+<span class="fc" id="L185">    }</span>
+
+    private void selectFunctionCodeForWriting() {
+<span class="pc bpc" id="L188" title="1 of 4 branches missed.">        switch (datatype) {</span>
+        case BOOLEAN:
+<span class="fc" id="L190">            setWriteFuctionCodeIfCorrect(EPrimaryTable.COILS, EFunctionCode.FC_05_WRITE_SINGLE_COIL);</span>
+<span class="fc" id="L191">            break;</span>
+        case SHORT:
+        case INT16:
+        case UINT16:
+<span class="fc" id="L195">            setWriteFuctionCodeIfCorrect(EPrimaryTable.HOLDING_REGISTERS, EFunctionCode.FC_06_WRITE_SINGLE_REGISTER);</span>
+<span class="fc" id="L196">            break;</span>
+        case INT32:
+        case UINT32:
+        case FLOAT:
+        case DOUBLE:
+        case LONG:
+        case BYTEARRAY:
+<span class="fc" id="L203">            setWriteFuctionCodeIfCorrect(EPrimaryTable.HOLDING_REGISTERS, EFunctionCode.FC_16_WRITE_MULTIPLE_REGISTERS);</span>
+<span class="fc" id="L204">            break;</span>
+        default:
+<span class="nc" id="L206">            throw new RuntimeException(&quot;write: Datatype &quot; + datatype.toString() + &quot; not supported yet!&quot;);</span>
+        }
+<span class="fc" id="L208">    }</span>
+
+    private void setWriteFuctionCodeIfCorrect(EPrimaryTable ePrimaryTable, EFunctionCode eFunctionCode) {
+<span class="pc bpc" id="L211" title="1 of 2 branches missed.">        if (primaryTable.equals(ePrimaryTable)) {</span>
+<span class="fc" id="L212">            functionCode = eFunctionCode;</span>
+        }
+        else {
+<span class="nc" id="L215">            invalidWriteAddressParameterCombination();</span>
+        }
+<span class="fc" id="L217">    }</span>
+
+    private void invalidWriteAddressParameterCombination() {
+<span class="nc" id="L220">        throw new RuntimeException(&quot;Invalid channel address parameter combination for writing. \n Datatype: &quot;</span>
+<span class="nc" id="L221">                + datatype.toString().toUpperCase() + &quot; PrimaryTable: &quot; + primaryTable.toString().toUpperCase());</span>
+    }
+
+    private void invalidReadAddressParameterCombination() {
+<span class="nc" id="L225">        throw new RuntimeException(&quot;Invalid channel address parameter combination for reading. \n Datatype: &quot;</span>
+<span class="nc" id="L226">                + datatype.toString().toUpperCase() + &quot; PrimaryTable: &quot; + primaryTable.toString().toUpperCase());</span>
+    }
+
+    private void setStartAddress(String startAddress) {
+<span class="fc" id="L230">        this.startAddress = Integer.parseInt(startAddress);</span>
+<span class="fc" id="L231">    }</span>
+
+    private void setDatatype(String datatype) {
+<span class="fc" id="L234">        this.datatype = EDatatype.getEnum(datatype);</span>
+<span class="fc" id="L235">    }</span>
+
+    private void setUnitId(String unitId) {
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">        if (unitId.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L239">            this.unitId = IGNORE_UNIT_ID;</span>
+        }
+        else {
+<span class="fc" id="L242">            this.unitId = Integer.parseInt(unitId);</span>
+        }
+<span class="fc" id="L244">    }</span>
+
+    private void setPrimaryTable(String primaryTable) {
+<span class="fc" id="L247">        this.primaryTable = EPrimaryTable.getEnumfromString(primaryTable);</span>
+<span class="fc" id="L248">    }</span>
+
+    public EPrimaryTable getPrimaryTable() {
+<span class="fc" id="L251">        return primaryTable;</span>
+    }
+
+    private void setCount(String addressParamDatatyp) {
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">        if (datatype.equals(EDatatype.BYTEARRAY)) {</span>
+            // TODO check syntax first? bytearray[n]
+
+            // special handling of the BYTEARRAY datatyp
+<span class="nc" id="L259">            String[] datatypParts = addressParamDatatyp.split(&quot;\\[|\\]&quot;); // split string either at [ or ]</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">            if (datatypParts.length == 2) {</span>
+<span class="nc" id="L261">                count = Integer.parseInt(datatypParts[1]);</span>
+            }
+<span class="nc" id="L263">        }</span>
+        else {
+            // all other datatyps
+<span class="fc" id="L266">            count = datatype.getRegisterSize();</span>
+        }
+<span class="fc" id="L268">    }</span>
+
+    private void setAccessFlag(EAccess accessFlag) {
+<span class="fc" id="L271">        this.accessFlag = accessFlag;</span>
+<span class="fc" id="L272">    }</span>
+
+    public int getStartAddress() {
+<span class="nc" id="L275">        return startAddress;</span>
+    }
+
+    public int getCount() {
+<span class="nc" id="L279">        return count;</span>
+    }
+
+    public EDatatype getDatatype() {
+<span class="fc" id="L283">        return datatype;</span>
+    }
+
+    public EFunctionCode getFunctionCode() {
+<span class="nc" id="L287">        return functionCode;</span>
+    }
+
+    public EAccess getAccessFlag() {
+<span class="fc" id="L291">        return accessFlag;</span>
+    }
+
+    public int getUnitId() {
+<span class="nc" id="L295">        return unitId;</span>
+    }
+
+    public String getChannelAddress() {
+<span class="nc" id="L299">        return channelAddress;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L304">        return &quot;channeladdress: &quot; + unitId + &quot;:&quot; + primaryTable.toString() + &quot;:&quot; + startAddress + &quot;:&quot;</span>
+<span class="nc" id="L305">                + datatype.toString();</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

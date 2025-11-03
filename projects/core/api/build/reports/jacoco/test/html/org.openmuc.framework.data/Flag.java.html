@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Flag.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-core-api</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.data</a> &gt; <span class="el_source">Flag.java</span></div><h1>Flag.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.data;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Flags indicates the state of a record. It identifies which type of error occurred or if the value is valid.&lt;br&gt;
+ * More informations of the occurred errors can often seen in the OpenMUC log files in the &quot;log&quot; folder.
+ */
+<span class="fc" id="L31">public enum Flag {</span>
+
+    /**
+     * Flag 1: Valid data.
+     */
+<span class="fc" id="L36">    VALID(1),</span>
+    /**
+     * Flag 2: Timeout occurred in a DataManager task. For example, if the sampling task took longer then the specified
+     * samplingTimeout then this flag is set.
+     */
+<span class="fc" id="L41">    TIMEOUT(2),</span>
+    /**
+     * Flag 3: If the error could not be specified.
+     */
+<span class="fc" id="L45">    UNKNOWN_ERROR(3),</span>
+    /**
+     * Flag 5: The device was still busy while sampling. This case can happen if the previous sampling failed due to a
+     * timeout (Flag 15). The sampling task couldn't start because an other sampling task is still running.
+     */
+<span class="fc" id="L50">    DEVICE_OR_INTERFACE_BUSY(5),</span>
+    /**
+     * Flag 6: If a access method is chosen which is not supported or implemented.
+     */
+<span class="fc" id="L54">    ACCESS_METHOD_NOT_SUPPORTED(6),</span>
+    /**
+     * Flag 7: This flag is mostly shown in listening mode and no value are received.
+     */
+<span class="fc" id="L58">    NO_VALUE_RECEIVED_YET(7),</span>
+    /**
+     * Flag 8: The driver tries to connect to the device.
+     */
+<span class="fc" id="L62">    CONNECTING(8),</span>
+    /**
+     * Flag 9: The driver was not able to connect and retries to connect after the configured time.
+     */
+<span class="fc" id="L66">    WAITING_FOR_CONNECTION_RETRY(9),</span>
+    /**
+     * Flag 10: The driver is disconnecting.
+     */
+<span class="fc" id="L70">    DISCONNECTING(10),</span>
+    /**
+     * Flag 11: The driver with the configured driver id could not found. Possible reasons:&lt;br&gt;
+     * - the driver bundle is missing&lt;br&gt;
+     * - the configured driver id is wrong
+     */
+<span class="fc" id="L76">    DRIVER_UNAVAILABLE(11),</span>
+    /**
+     * Flag 12: Neither sampling nor listening are activated
+     */
+<span class="fc" id="L80">    SAMPLING_AND_LISTENING_DISABLED(12),</span>
+    /**
+     * Flag 13: The channel is disabled.
+     */
+<span class="fc" id="L84">    DISABLED(13),</span>
+    /**
+     * Flag 14: The channel was deleted.
+     */
+<span class="fc" id="L88">    CHANNEL_DELETED(14),</span>
+    /**
+     * Flag 15: Started sampling task too late and timed out due to a timeout of the previous sampling task.
+     */
+<span class="fc" id="L92">    STARTED_LATE_AND_TIMED_OUT(15),</span>
+    /**
+     * Flag 16: The driver was not able to identify the error.
+     */
+<span class="fc" id="L96">    DRIVER_THREW_UNKNOWN_EXCEPTION(16),</span>
+    /**
+     * Flag 17: The communication device is not connected.
+     */
+<span class="fc" id="L100">    COMM_DEVICE_NOT_CONNECTED(17),</span>
+    /**
+     * Flag 18: The configured channel address does not fit to the driver channel address syntax.
+     */
+<span class="fc" id="L104">    DRIVER_ERROR_CHANNEL_ADDRESS_SYNTAX_INVALID(18),</span>
+    /**
+     * Flag 19: The driver was not able to find a channel with the configured name.
+     */
+<span class="fc" id="L108">    DRIVER_ERROR_CHANNEL_WITH_THIS_ADDRESS_NOT_FOUND(19),</span>
+    /**
+     * Flag 20: The channel is not accessible.
+     */
+<span class="fc" id="L112">    DRIVER_ERROR_CHANNEL_NOT_ACCESSIBLE(20),</span>
+    /**
+     * Flag 21: The channel is temporarily not accessible.
+     */
+<span class="fc" id="L116">    DRIVER_ERROR_CHANNEL_TEMPORARILY_NOT_ACCESSIBLE(21),</span>
+    /**
+     * Flag 22: The protocol value type is not convertible to this OpenMUC value type.
+     */
+<span class="fc" id="L120">    DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION(22),</span>
+    /**
+     * Flag 23: Infeasible to sample this group in one request. Perhaps the group is to big.
+     */
+<span class="fc" id="L124">    INFEASIBLE_TO_SAMPLE_CHANNEL_GROUP_IN_ONE_REQUEST(23),</span>
+    /**
+     * Flag 24: The driver could not find the group with the configured name.
+     */
+<span class="fc" id="L128">    DRIVER_ERROR_SAMPLING_GROUP_NOT_FOUND(24),</span>
+    /**
+     * Flag 25: The group is not accessible
+     */
+<span class="fc" id="L132">    DRIVER_ERROR_SAMPLING_GROUP_NOT_ACCESSIBLE(25),</span>
+    /**
+     * Flag 26: The channel is not part of the group.
+     */
+<span class="fc" id="L136">    DRIVER_ERROR_CHANNEL_NOT_PART_OF_SAMPLING_GROUP(26),</span>
+    /**
+     * Flag 27: It is not allowed to write null values.
+     */
+<span class="fc" id="L140">    CANNOT_WRITE_NULL_VALUE(27),</span>
+    /**
+     * Flag 28: Error while reading.
+     */
+<span class="fc" id="L144">    DRIVER_ERROR_READ_FAILURE(28),</span>
+    /**
+     * Flag 29: Connection exception. Connection is now disconnected or temporarily disconnected.
+     */
+<span class="fc" id="L148">    CONNECTION_EXCEPTION(29),</span>
+    /**
+     * Flag 30: Timeout occurred in driver. Try to increase device specific timeout in deviceSettings.
+     */
+<span class="fc" id="L152">    DRIVER_ERROR_TIMEOUT(30),</span>
+    /**
+     * Flag 31: The driver was not able to decoding the received response.
+     */
+<span class="fc" id="L156">    DRIVER_ERROR_DECODING_RESPONSE_FAILED(31),</span>
+    /**
+     * Flag 32: Data logging is not activated in the configuration.
+     */
+<span class="fc" id="L160">    DATA_LOGGING_NOT_ACTIVE(32),</span>
+    /**
+     * Flag 33: The driver error is not specified.
+     */
+<span class="fc" id="L164">    DRIVER_ERROR_UNSPECIFIED(33),</span>
+    /**
+     * Flag 34: Got a &quot;not a number&quot; value.
+     */
+<span class="fc" id="L168">    VALUE_IS_NAN(34),</span>
+    /**
+     * Flag 35: Got a &quot;infinity&quot; value.
+     */
+<span class="fc" id="L172">    VALUE_IS_INFINITY(35),</span>
+    /**
+     * Flag 50: Error flags for custom record states.
+     */
+<span class="fc" id="L176">    CUSTOM_ERROR_0(50),</span>
+    /**
+     * Flag 51: Error flags for custom record states.
+     */
+<span class="fc" id="L180">    CUSTOM_ERROR_1(51),</span>
+    /**
+     * Flag 52: Error flags for custom record states.
+     */
+<span class="fc" id="L184">    CUSTOM_ERROR_2(52),</span>
+    /**
+     * Flag 53: Error flags for custom record states.
+     */
+<span class="fc" id="L188">    CUSTOM_ERROR_3(53),</span>
+    /**
+     * Flag 54: Error flags for custom record states.
+     */
+<span class="fc" id="L192">    CUSTOM_ERROR_4(54),</span>
+    /**
+     * Flag 55: Error flags for custom record states.
+     */
+<span class="fc" id="L196">    CUSTOM_ERROR_5(55),</span>
+    /**
+     * Flag 56: Error flags for custom record states.
+     */
+<span class="fc" id="L200">    CUSTOM_ERROR_6(56),</span>
+    /**
+     * Flag 57: Error flags for custom record states.
+     */
+<span class="fc" id="L204">    CUSTOM_ERROR_7(57),</span>
+    /**
+     * Flag 58: Error flags for custom record states.
+     */
+<span class="fc" id="L208">    CUSTOM_ERROR_8(58),</span>
+    /**
+     * Flag 59: Error flags for custom record states.
+     */
+<span class="fc" id="L212">    CUSTOM_ERROR_9(59);</span>
+
+    private final int code;
+
+<span class="fc" id="L216">    private Flag(int code) {</span>
+<span class="fc" id="L217">        this.code = code;</span>
+<span class="fc" id="L218">    }</span>
+
+    public byte getCode() {
+<span class="fc" id="L221">        return (byte) code;</span>
+    }
+
+<span class="fc" id="L224">    private static final Map&lt;Byte, Flag&gt; idMap = new HashMap&lt;&gt;();</span>
+
+    static {
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        for (Flag enumInstance : Flag.values()) {</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">            if (idMap.put(enumInstance.getCode(), enumInstance) != null) {</span>
+<span class="nc" id="L229">                throw new IllegalArgumentException(&quot;duplicate ID: &quot; + enumInstance.getCode());</span>
+            }
+        }
+<span class="fc" id="L232">    }</span>
+
+    public static Flag newFlag(int code) {
+<span class="nc" id="L235">        Flag enumInstance = idMap.get((byte) code);</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">        if (enumInstance == null) {</span>
+<span class="nc" id="L237">            throw new IllegalArgumentException(&quot;Unknown Flag code: &quot; + code);</span>
+        }
+<span class="nc" id="L239">        return enumInstance;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

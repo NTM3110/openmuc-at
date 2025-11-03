@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MqttLogMsgBuilder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-mqtt</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.mqtt.util</a> &gt; <span class="el_source">MqttLogMsgBuilder.java</span></div><h1>MqttLogMsgBuilder.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+
+package org.openmuc.framework.datalogger.mqtt.util;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.openmuc.framework.datalogger.mqtt.dto.MqttLogChannel;
+import org.openmuc.framework.datalogger.mqtt.dto.MqttLogMsg;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+import org.openmuc.framework.parser.spi.ParserService;
+import org.openmuc.framework.parser.spi.SerializationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class MqttLogMsgBuilder {
+
+<span class="fc" id="L39">    private static final Logger logger = LoggerFactory.getLogger(MqttLogMsgBuilder.class);</span>
+
+    private final HashMap&lt;String, MqttLogChannel&gt; channelsToLog;
+    private final ParserService parserService;
+
+<span class="fc" id="L44">    public MqttLogMsgBuilder(HashMap&lt;String, MqttLogChannel&gt; channelsToLog, ParserService parserService) {</span>
+<span class="fc" id="L45">        this.channelsToLog = channelsToLog;</span>
+<span class="fc" id="L46">        this.parserService = parserService;</span>
+<span class="fc" id="L47">    }</span>
+
+    public List&lt;MqttLogMsg&gt; buildLogMsg(List&lt;LoggingRecord&gt; loggingRecordList, boolean isLogMultiple) {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        if (isLogMultiple) {</span>
+<span class="fc" id="L51">            return logMultiple(loggingRecordList);</span>
+        }
+        else {
+<span class="fc" id="L54">            return logSingle(loggingRecordList);</span>
+        }
+    }
+
+    private List&lt;MqttLogMsg&gt; logSingle(List&lt;LoggingRecord&gt; loggingRecords) {
+
+<span class="fc" id="L60">        List&lt;MqttLogMsg&gt; logMessages = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        for (LoggingRecord loggingRecord : loggingRecords) {</span>
+            try {
+<span class="fc" id="L64">                String topic = channelsToLog.get(loggingRecord.getChannelId()).topic;</span>
+<span class="fc" id="L65">                byte[] message = parserService.serialize(loggingRecord);</span>
+<span class="fc" id="L66">                logMessages.add(new MqttLogMsg(loggingRecord.getChannelId(), message, topic));</span>
+<span class="nc" id="L67">            } catch (SerializationException e) {</span>
+<span class="nc" id="L68">                logger.error(&quot;failed to parse records {}&quot;, e.getMessage());</span>
+<span class="fc" id="L69">            }</span>
+<span class="fc" id="L70">        }</span>
+
+<span class="fc" id="L72">        return logMessages;</span>
+    }
+
+    private List&lt;MqttLogMsg&gt; logMultiple(List&lt;LoggingRecord&gt; loggingRecords) {
+
+<span class="fc" id="L77">        List&lt;MqttLogMsg&gt; logMessages = new ArrayList&lt;&gt;();</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if (hasDifferentTopics()) {</span>
+
+<span class="fc" id="L81">            throw new UnsupportedOperationException(</span>
+                    &quot;logMultiple feature is an experimental feature: logMultiple=true is not possible with &quot;
+                            + &quot;different topics in logSettings. Set logMultiple=false OR leave it true &quot;
+                            + &quot;and assign same topic to all channels.&quot;);
+
+            // TODO make improvement: check only for given channels
+
+            // TODO make improvement:
+            // CASE A - OK
+            // ch1, ch2, ch3 = 5 s - topic1
+            // CASE B - NOT SUPPORTED YET
+            // ch1, ch2 logInterval = 5 s - topic1
+            // ch3, ch3 logInterval = 10 s - topic2
+            // ch4 logInterval 20 s - topic 3
+            // if isLogMultiple=true, then group channels per topic
+            // or default: log warning and use logSingle instead
+
+        }
+        else {
+            try {
+                // since all topics are the same, get the topic of
+<span class="fc" id="L102">                String topic = channelsToLog.get(loggingRecords.get(0).getChannelId()).topic;</span>
+<span class="fc" id="L103">                byte[] message = parserService.serialize(loggingRecords);</span>
+<span class="fc" id="L104">                String channelIds = loggingRecords.stream()</span>
+<span class="fc" id="L105">                        .map(record -&gt; record.getChannelId())</span>
+<span class="fc" id="L106">                        .collect(Collectors.toList())</span>
+<span class="fc" id="L107">                        .toString();</span>
+<span class="fc" id="L108">                logMessages.add(new MqttLogMsg(channelIds, message, topic));</span>
+<span class="nc" id="L109">            } catch (SerializationException e) {</span>
+<span class="nc" id="L110">                logger.error(&quot;failed to parse records {}&quot;, e.getMessage());</span>
+<span class="fc" id="L111">            }</span>
+
+        }
+
+<span class="fc" id="L115">        return logMessages;</span>
+    }
+
+    private boolean hasDifferentTopics() {
+<span class="fc" id="L119">        long distinct = channelsToLog.values().stream().map(channel -&gt; channel.topic).distinct().count();</span>
+        // If the count of this stream is smaller or equal to 1, then all the elements are equal. so &gt; 1 means unequal
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        return distinct &gt; 1;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

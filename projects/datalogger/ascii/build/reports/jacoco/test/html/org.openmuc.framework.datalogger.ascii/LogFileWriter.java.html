@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogFileWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-datalogger-ascii</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.datalogger.ascii</a> &gt; <span class="el_source">LogFileWriter.java</span></div><h1>LogFileWriter.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.datalogger.ascii;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.data.ValueType;
+import org.openmuc.framework.datalogger.ascii.exceptions.WrongCharacterException;
+import org.openmuc.framework.datalogger.ascii.exceptions.WrongScalingException;
+import org.openmuc.framework.datalogger.ascii.utils.Const;
+import org.openmuc.framework.datalogger.ascii.utils.IESDataFormatUtils;
+import org.openmuc.framework.datalogger.ascii.utils.LoggerUtils;
+import org.openmuc.framework.datalogger.spi.LogChannel;
+import org.openmuc.framework.datalogger.spi.LoggingRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LogFileWriter {
+
+<span class="fc" id="L50">    private static final Logger logger = LoggerFactory.getLogger(LogFileWriter.class);</span>
+<span class="fc" id="L51">    private final StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L52">    private final StringBuilder sbValue = new StringBuilder();</span>
+    private final String directoryPath;
+    private final boolean isFillUpFiles;
+    private File actualFile;
+
+<span class="fc" id="L57">    public LogFileWriter(String directoryPath, boolean isFillUpFiles) {</span>
+
+<span class="fc" id="L59">        this.isFillUpFiles = isFillUpFiles;</span>
+<span class="fc" id="L60">        this.directoryPath = directoryPath;</span>
+<span class="fc" id="L61">    }</span>
+
+    /**
+     * Main logger writing controller.
+     *
+     * @param group
+     *            log interval container group
+     * @param loggingInterval
+     *            logging interval
+     * @param logTimeOffset
+     *            logging time offset
+     * @param calendar
+     *            calendar of current time
+     * @param logChannelList
+     *            logging channel list
+     */
+    public void log(LogIntervalContainerGroup group, int loggingInterval, int logTimeOffset, Calendar calendar,
+            Map&lt;String, LogChannel&gt; logChannelList) {
+
+<span class="fc" id="L80">        PrintStream out = getStream(group, loggingInterval, logTimeOffset, calendar, logChannelList);</span>
+
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">        if (out == null) {</span>
+<span class="nc" id="L83">            return;</span>
+        }
+
+<span class="fc" id="L86">        List&lt;LoggingRecord&gt; logRecordContainer = group.getList();</span>
+
+        // TODO match column with container id, so that they don't get mixed up
+
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (isFillUpFiles) {</span>
+<span class="fc" id="L91">            fillUpFile(loggingInterval, logTimeOffset, calendar, logChannelList, logRecordContainer, out);</span>
+        }
+
+<span class="fc" id="L94">        String logLine = getLoggingLine(logRecordContainer, logChannelList, calendar, false);</span>
+
+<span class="fc" id="L96">        out.print(logLine); // print because of println makes different newline char on different systems</span>
+<span class="fc" id="L97">        out.flush();</span>
+<span class="fc" id="L98">        out.close();</span>
+<span class="fc" id="L99">    }</span>
+
+    private void fillUpFile(int loggingInterval, int logTimeOffset, Calendar calendar,
+            Map&lt;String, LogChannel&gt; logChannelList, List&lt;LoggingRecord&gt; loggingRecords, PrintStream out) {
+
+<span class="fc" id="L104">        Long lastLoglineTimestamp = AsciiLogger.getLastLoggedLineTimeStamp(loggingInterval, logTimeOffset);</span>
+
+<span class="pc bpc" id="L106" title="2 of 4 branches missed.">        if (lastLoglineTimestamp != null &amp;&amp; lastLoglineTimestamp &gt; 0) {</span>
+
+<span class="fc" id="L108">            long diff = calendar.getTimeInMillis() - lastLoglineTimestamp;</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">            if (diff &gt;= loggingInterval) {</span>
+
+<span class="fc" id="L111">                Calendar errCalendar = new GregorianCalendar(Locale.getDefault());</span>
+<span class="fc" id="L112">                errCalendar.setTimeInMillis(lastLoglineTimestamp);</span>
+
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">                if (errCalendar.get(Calendar.DAY_OF_YEAR) == calendar.get(Calendar.DAY_OF_YEAR)</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">                        &amp;&amp; errCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)) {</span>
+
+<span class="fc" id="L117">                    long numOfErrorLines = diff / loggingInterval;</span>
+
+<span class="fc bfc" id="L119" title="All 2 branches covered.">                    for (int i = 1; i &lt; numOfErrorLines; ++i) {</span>
+<span class="fc" id="L120">                        errCalendar.setTimeInMillis(lastLoglineTimestamp + ((long) loggingInterval * i));</span>
+<span class="fc" id="L121">                        out.print(getLoggingLine(loggingRecords, logChannelList, errCalendar, true));</span>
+                    }
+                }
+            }
+        }
+<span class="fc" id="L126">    }</span>
+
+    private String getLoggingLine(List&lt;LoggingRecord&gt; logRecordContainer, Map&lt;String, LogChannel&gt; logChannelList,
+            Calendar calendar, boolean isError32) {
+<span class="fc" id="L130">        sb.setLength(0);</span>
+
+<span class="fc" id="L132">        LoggerUtils.setLoggerTimestamps(sb, calendar);</span>
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        for (int i = 0; i &lt; logRecordContainer.size(); i++) {</span>
+<span class="fc" id="L135">            int size = Const.VALUE_SIZE_MINIMAL;</span>
+<span class="fc" id="L136">            boolean left = true;</span>
+
+<span class="fc" id="L138">            Record record = logRecordContainer.get(i).getRecord();</span>
+<span class="fc" id="L139">            String channelId = logRecordContainer.get(i).getChannelId();</span>
+<span class="fc" id="L140">            LogChannel logChannel = logChannelList.get(channelId);</span>
+
+<span class="fc" id="L142">            sbValue.setLength(0);</span>
+
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">            if (record != null) {</span>
+<span class="fc" id="L145">                Value recordValue = record.getValue();</span>
+<span class="fc" id="L146">                Record recordBackup = null;</span>
+
+<span class="fc bfc" id="L148" title="All 2 branches covered.">                if (isError32) {</span>
+<span class="fc" id="L149">                    recordBackup = logRecordContainer.get(i).getRecord();</span>
+<span class="fc" id="L150">                    logRecordContainer.set(i, new LoggingRecord(channelId, new Record(Flag.DATA_LOGGING_NOT_ACTIVE)));</span>
+                }
+<span class="fc" id="L152">                record = logRecordContainer.get(i).getRecord();</span>
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">                if (record.getFlag() == Flag.VALID) {</span>
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">                    if (recordValue == null) {</span>
+                        // write error flag
+<span class="nc" id="L157">                        LoggerUtils.buildError(sbValue, Flag.CANNOT_WRITE_NULL_VALUE);</span>
+<span class="nc" id="L158">                        size = getDataTypeSize(logChannel, i);</span>
+                    }
+                    else {
+<span class="fc" id="L161">                        ValueType valueType = logChannel.getValueType();</span>
+
+<span class="pc bpc" id="L163" title="1 of 9 branches missed.">                        switch (valueType) {</span>
+                        case BOOLEAN:
+<span class="fc" id="L165">                            sbValue.append((recordValue.asShort())).toString();</span>
+<span class="fc" id="L166">                            break;</span>
+                        case LONG:
+<span class="fc" id="L168">                            sbValue.append((recordValue.asLong())).toString();</span>
+<span class="fc" id="L169">                            size = Const.VALUE_SIZE_LONG;</span>
+<span class="fc" id="L170">                            break;</span>
+                        case INTEGER:
+<span class="fc" id="L172">                            sbValue.append((recordValue.asInt())).toString();</span>
+<span class="fc" id="L173">                            size = Const.VALUE_SIZE_INTEGER;</span>
+<span class="fc" id="L174">                            break;</span>
+                        case SHORT:
+<span class="fc" id="L176">                            sbValue.append((recordValue.asShort())).toString();</span>
+<span class="fc" id="L177">                            size = Const.VALUE_SIZE_SHORT;</span>
+<span class="fc" id="L178">                            break;</span>
+                        case DOUBLE:
+                        case FLOAT:
+<span class="fc" id="L181">                            size = Const.VALUE_SIZE_DOUBLE;</span>
+                            try {
+<span class="fc" id="L183">                                IESDataFormatUtils.convertDoubleToStringWithMaxLength(sbValue, recordValue.asDouble(),</span>
+                                        size);
+<span class="nc" id="L185">                            } catch (WrongScalingException e) {</span>
+<span class="nc" id="L186">                                LoggerUtils.buildError(sbValue, Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L187">                                logger.error(e.getMessage() + &quot; ChannelId: &quot; + channelId);</span>
+<span class="fc" id="L188">                            }</span>
+<span class="nc" id="L189">                            break;</span>
+                        case BYTE_ARRAY:
+<span class="fc" id="L191">                            left = false;</span>
+<span class="fc" id="L192">                            size = checkMinimalValueSize(getDataTypeSize(logChannel, i));</span>
+<span class="fc" id="L193">                            byte[] byteArray = recordValue.asByteArray();</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">                            if (byteArray.length &gt; size) {</span>
+<span class="nc" id="L195">                                LoggerUtils.buildError(sbValue, Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L196">                                logger.error(&quot;The byte array is too big, length is &quot;, byteArray.length,</span>
+<span class="nc" id="L197">                                        &quot; but max. length allowed is &quot;, size, &quot;, ChannelId: &quot;, channelId);</span>
+                            }
+                            else {
+<span class="fc" id="L200">                                sbValue.append(Const.HEXADECIMAL);</span>
+<span class="fc" id="L201">                                LoggerUtils.byteArrayToHexString(sbValue, byteArray);</span>
+                            }
+<span class="fc" id="L203">                            break;</span>
+                        case STRING:
+<span class="fc" id="L205">                            left = false;</span>
+<span class="fc" id="L206">                            size = checkMinimalValueSize(getDataTypeSize(logChannel, i));</span>
+<span class="fc" id="L207">                            sbValue.append(recordValue.asString());</span>
+<span class="fc" id="L208">                            int valueLength = sbValue.length();</span>
+                            try {
+<span class="fc" id="L210">                                checkStringValue(sbValue);</span>
+<span class="fc" id="L211">                            } catch (WrongCharacterException e) {</span>
+<span class="fc" id="L212">                                LoggerUtils.buildError(sbValue, Flag.UNKNOWN_ERROR);</span>
+<span class="fc" id="L213">                                logger.error(e.getMessage());</span>
+<span class="fc" id="L214">                            }</span>
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">                            if (valueLength &gt; size) {</span>
+<span class="nc" id="L216">                                LoggerUtils.buildError(sbValue, Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L217">                                logger.error(&quot;The string is too big, length is &quot;, valueLength,</span>
+<span class="nc" id="L218">                                        &quot; but max. length allowed is &quot;, size, &quot;, ChannelId: &quot;, channelId);</span>
+                            }
+                            break;
+                        case BYTE:
+<span class="fc" id="L222">                            sbValue.append(String.format(&quot;0x%02x&quot;, recordValue.asByte()));</span>
+<span class="fc" id="L223">                            break;</span>
+                        default:
+<span class="nc" id="L225">                            throw new RuntimeException(&quot;unsupported valueType&quot;);</span>
+                        }
+<span class="fc" id="L227">                    }</span>
+                }
+                else {
+                    // write error flag
+<span class="fc" id="L231">                    LoggerUtils.buildError(sbValue, record.getFlag());</span>
+<span class="fc" id="L232">                    size = checkMinimalValueSize(getDataTypeSize(logChannel, i));</span>
+                }
+
+<span class="fc bfc" id="L235" title="All 2 branches covered.">                if (isError32) {</span>
+<span class="fc" id="L236">                    logRecordContainer.set(i, new LoggingRecord(channelId, recordBackup));</span>
+                }
+<span class="fc" id="L238">            }</span>
+            else {
+                // got no data
+<span class="nc" id="L241">                LoggerUtils.buildError(sbValue, Flag.UNKNOWN_ERROR);</span>
+<span class="nc" id="L242">                size = checkMinimalValueSize(getDataTypeSize(logChannel, i));</span>
+            }
+
+<span class="fc bfc" id="L245" title="All 2 branches covered.">            if (left) {</span>
+<span class="fc" id="L246">                LoggerUtils.addSpaces(sbValue.length(), size, sb);</span>
+<span class="fc" id="L247">                sb.append(sbValue);</span>
+            }
+            else {
+<span class="fc" id="L250">                sb.append(sbValue);</span>
+<span class="fc" id="L251">                LoggerUtils.addSpaces(sbValue.length(), size, sb);</span>
+            }
+
+<span class="fc bfc" id="L254" title="All 2 branches covered.">            if (LoggerUtils.hasNext(logRecordContainer, i)) {</span>
+<span class="fc" id="L255">                sb.append(Const.SEPARATOR);</span>
+            }
+        }
+<span class="fc" id="L258">        sb.append(Const.LINESEPARATOR); // All systems with the same newline charter</span>
+<span class="fc" id="L259">        return sb.toString();</span>
+    }
+
+    /**
+     * Checks a string if it is IESData conform, e.g. wrong characters. If not it will drop a error.
+     *
+     * @param value
+     *            the string value which should be checked
+     */
+    private void checkStringValue(StringBuilder sbValue) throws WrongCharacterException {
+<span class="fc" id="L269">        String value = sbValue.toString();</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if (value.startsWith(Const.ERROR)) {</span>
+<span class="nc" id="L271">            throw new WrongCharacterException(&quot;Wrong character: String begins with: &quot; + Const.ERROR);</span>
+        }
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">        else if (value.startsWith(Const.HEXADECIMAL)) {</span>
+<span class="nc" id="L274">            throw new WrongCharacterException(&quot;Wrong character: String begins with: &quot; + Const.HEXADECIMAL);</span>
+        }
+<span class="fc bfc" id="L276" title="All 2 branches covered.">        else if (value.contains(Const.SEPARATOR)) {</span>
+<span class="fc" id="L277">            throw new WrongCharacterException(</span>
+                    &quot;Wrong character: String contains separator character: &quot; + Const.SEPARATOR);
+        }
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        else if (!value.matches(&quot;^[\\x00-\\x7F]*&quot;)) {</span>
+<span class="nc" id="L281">            throw new WrongCharacterException(&quot;Wrong character: Non ASCII character in String.&quot;);</span>
+        }
+<span class="fc" id="L283">    }</span>
+
+    private int checkMinimalValueSize(int size) {
+
+<span class="pc bpc" id="L287" title="1 of 2 branches missed.">        if (size &lt; Const.VALUE_SIZE_MINIMAL) {</span>
+<span class="nc" id="L288">            size = Const.VALUE_SIZE_MINIMAL;</span>
+        }
+<span class="fc" id="L290">        return size;</span>
+    }
+
+    /**
+     * Returns the PrintStream for logging.
+     *
+     * @param group
+     * @param loggingInterval
+     * @param date
+     * @param logChannelList
+     * @return the PrintStream for logging.
+     */
+    private PrintStream getStream(LogIntervalContainerGroup group, int loggingInterval, int logTimeOffset,
+            Calendar calendar, Map&lt;String, LogChannel&gt; logChannelList) {
+
+<span class="fc" id="L305">        String filename = LoggerUtils.buildFilename(loggingInterval, logTimeOffset, calendar);</span>
+
+<span class="fc" id="L307">        File file = new File(directoryPath + filename);</span>
+<span class="fc" id="L308">        actualFile = file;</span>
+<span class="fc" id="L309">        PrintStream out = null;</span>
+
+        try {
+<span class="fc bfc" id="L312" title="All 2 branches covered.">            if (file.exists()) {</span>
+<span class="fc" id="L313">                out = new PrintStream(new FileOutputStream(file, true), false, Const.CHAR_SET.toString());</span>
+            }
+            else {
+<span class="fc" id="L316">                out = new PrintStream(new FileOutputStream(file, true), false, Const.CHAR_SET.toString());</span>
+<span class="fc" id="L317">                String headerString = LogFileHeader.getIESDataFormatHeaderString(group, file.getName(), loggingInterval,</span>
+                        logChannelList);
+
+<span class="fc" id="L320">                out.print(headerString);</span>
+<span class="fc" id="L321">                out.flush();</span>
+            }
+<span class="nc" id="L323">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L324">            logger.error(&quot;&quot;, e);</span>
+<span class="nc" id="L325">        } catch (FileNotFoundException e) {</span>
+<span class="nc" id="L326">            logger.error(&quot;&quot;, e);</span>
+<span class="pc" id="L327">        }</span>
+<span class="fc" id="L328">        return out;</span>
+    }
+
+    /**
+     * Returns the size of a DataType / ValueType.
+     *
+     * @param logChannel
+     * @param iterator
+     * @return size of DataType / ValueType.
+     */
+    private int getDataTypeSize(LogChannel logChannel, int iterator) {
+
+        int size;
+
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">        if (logChannel != null) {</span>
+<span class="fc" id="L343">            boolean isByteArray = logChannel.getValueType().equals(ValueType.BYTE_ARRAY);</span>
+<span class="fc" id="L344">            boolean isString = logChannel.getValueType().equals(ValueType.STRING);</span>
+
+<span class="fc bfc" id="L346" title="All 2 branches covered.">            if (isString) {</span>
+                // get length from channel for String / ByteArray
+<span class="fc" id="L348">                size = logChannel.getValueTypeLength();</span>
+            }
+<span class="fc bfc" id="L350" title="All 2 branches covered.">            else if (isByteArray) {</span>
+<span class="fc" id="L351">                size = Const.HEXADECIMAL.length() + logChannel.getValueTypeLength() * 2;</span>
+            }
+            else {
+                // get length from channel for simple value types
+<span class="fc" id="L355">                size = LoggerUtils.getLengthOfValueType(logChannel.getValueType());</span>
+            }
+<span class="fc" id="L357">        }</span>
+        else {
+            // get length from file
+<span class="nc" id="L360">            ValueType vt = LoggerUtils.identifyValueType(iterator + Const.NUM_OF_TIME_TYPES_IN_HEADER + 1, actualFile);</span>
+<span class="nc" id="L361">            size = LoggerUtils.getLengthOfValueType(vt);</span>
+<span class="nc bnc" id="L362" title="All 6 branches missed.">            if ((vt.equals(ValueType.BYTE_ARRAY) || (vt.equals(ValueType.STRING)))</span>
+                    &amp;&amp; size &lt;= Const.VALUE_SIZE_MINIMAL) {
+<span class="nc" id="L364">                size = LoggerUtils.getValueTypeLengthFromFile(iterator + Const.NUM_OF_TIME_TYPES_IN_HEADER + 1,</span>
+                        actualFile);
+            }
+        }
+<span class="fc" id="L368">        return size;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
