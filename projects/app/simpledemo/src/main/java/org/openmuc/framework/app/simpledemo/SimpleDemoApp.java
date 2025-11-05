@@ -157,7 +157,7 @@ public final class SimpleDemoApp
 				}
 				String CnominalChannelName = "str" + (i+1) + "_Cnominal";
 				double Cnominal = -1.0;
-				Record CnominalRecord = getLatestLoggedValue(CnominalChannelName);
+				Record CnominalRecord = dataAccessService.getChannel(CnominalChannelName).getLatestRecord();
 				Cnominal = CnominalRecord.getValue().asDouble();
 				if(Cnominal < 0) {
 					logger.warn("Cnominal is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
@@ -352,29 +352,29 @@ public final class SimpleDemoApp
 		double strVoltage[] = Helper.calculateStringVoltage(stringNumber, cellNumber, powerCells);
 
 		for(int i = 0; i < stringNumber; i++) {
-			String base = "str" + (i+1) + "_";
-			Helper.Result result = Helper.getMaxVoltageBattery(i, cellNumber, powerCells);
-			maxVoltageIndex[i] = result.index;
-			maxVoltage[i] = result.value;
-			result = Helper.getMinVoltageBattery(i, cellNumber, powerCells);
-			minVoltageIndex[i] = result.index;
-			minVoltage[i] = result.value;
-			result = Helper.getMaxTemperatureBattery(i, cellNumber, powerCells);	
-			maxTempIndex[i] = result.index;
-			maxTemp[i] = result.value;
-			result = Helper.getMinTemperatureBattery(i, cellNumber, powerCells);
-			minTempIndex[i] = result.index;
-			minTemp[i] = result.value;
-			result = Helper.getMaxResistanceBattery(i, cellNumber, powerCells);
-			maxResistanceIndex[i] = result.index;
-			maxResistance[i] = result.value;
-			result = Helper.getMinResistanceBattery(i, cellNumber, powerCells);
-			minResistanceIndex[i] = result.index;
-			minResistance[i] = result.value;
-			averageResistance[i] = Helper.getAverageResistanceBattery(i, cellNumber, powerCells);
-			averageTemp[i] = Helper.getAverageTemperatureBattery(i, cellNumber, powerCells);
-			averageVoltage[i] = strVoltage[i] / cellNumbers[i];
-			// try{
+			try{
+				String base = "str" + (i+1) + "_";
+				Helper.Result result = Helper.getMaxVoltageBattery(i, cellNumber, powerCells);
+				maxVoltageIndex[i] = result.index;
+				maxVoltage[i] = result.value;
+				result = Helper.getMinVoltageBattery(i, cellNumber, powerCells);
+				minVoltageIndex[i] = result.index;
+				minVoltage[i] = result.value;
+				result = Helper.getMaxTemperatureBattery(i, cellNumber, powerCells);	
+				maxTempIndex[i] = result.index;
+				maxTemp[i] = result.value;
+				result = Helper.getMinTemperatureBattery(i, cellNumber, powerCells);
+				minTempIndex[i] = result.index;
+				minTemp[i] = result.value;
+				result = Helper.getMaxResistanceBattery(i, cellNumber, powerCells);
+				maxResistanceIndex[i] = result.index;
+				maxResistance[i] = result.value;
+				result = Helper.getMinResistanceBattery(i, cellNumber, powerCells);
+				minResistanceIndex[i] = result.index;
+				minResistance[i] = result.value;
+				averageResistance[i] = Helper.getAverageResistanceBattery(i, cellNumber, powerCells);
+				averageTemp[i] = Helper.getAverageTemperatureBattery(i, cellNumber, powerCells);
+				averageVoltage[i] = strVoltage[i] / cellNumbers[i];
 				long now = System.currentTimeMillis();
 				DoubleValue doubleStrVolValue = new DoubleValue(Double.parseDouble(DF.format(strVoltage[i])));
 				Record record = new Record(doubleStrVolValue, now, Flag.VALID);
@@ -451,9 +451,9 @@ public final class SimpleDemoApp
 				record = new Record(doubleStrSOCValue, now, Flag.VALID);
 				dataAccessService.getChannel(base + "string_SOC").setLatestRecord(record);
 
-			// }catch(NullPointerException e) {
-			// 	logger.warn("There is no value yet with this channel at string {}: {}, skipping push calculated data to channels this cycle.", i+1, e.getMessage());
-			// }
+			}catch(NullPointerException e) {
+				logger.warn("There is no value yet with this channel at string {}: {}, skipping push calculated data to channels this cycle.", i+1, e.getMessage());
+			}
 		}
 
 	}
@@ -480,7 +480,7 @@ public final class SimpleDemoApp
 	    updateTimer.scheduleAtFixedRate(task, (long) 1 * 1000, (long) 1 * 1000);
 	}
 	
-	private void setFirstOverallValue(int stringIndex, String cellNumberChannelName, String stringNameChannelName, String cellModelChannelName, String CnominalChannelName, String VnominalChannelName, String VcutoffChannelName, String VfloatChannelName) {
+	private void setFirstOverallValue(int stringIndex, String cellNumberChannelName, String stringNameChannelName,String cellBrandChannelName, String cellModelChannelName, String CnominalChannelName, String VnominalChannelName, String VcutoffChannelName, String VfloatChannelName) {
 		//Getting cell number from logged data
 		logger.info("GEtting Cell number from logged data for string {}", stringIndex+1);
 		Record cellNumberRecord = getLatestLoggedValue(cellNumberChannelName);
@@ -514,6 +514,21 @@ public final class SimpleDemoApp
 		else {
 			logger.warn("There is no logged data for stringName OF STRING {}. Maybe data log does not rise yet.", stringIndex);
 		}
+		//Getting cell brand from logged data
+		logger.info("GEtting the first cell brand from logged data for string {}", stringIndex+1);
+		Record cellBrandRecord = getLatestLoggedValue(cellBrandChannelName);
+		if(cellBrandRecord != null) {
+			String cellBrand = cellBrandRecord.getValue().asString();
+			logger.info("String {} has cell brand: {}", stringIndex+1, cellBrand);
+			long now = System.currentTimeMillis();
+			StringValue cellBrandValue = new StringValue(cellBrand);
+			Record cellBrandLatestRecord = new Record(cellBrandValue, now, Flag.VALID);
+			dataAccessService.getChannel(cellBrandChannelName).setLatestRecord(cellBrandLatestRecord);
+		}
+		else {
+			logger.warn("There is no logged data for cell brand OF STRING {}. Maybe data log does not rise yet.", stringIndex);
+		}
+
 		//Getting cell model from logged data
 		logger.info("GEtting the first cell model from logged data for string {}", stringIndex+1);
 		Record cellModelRecord = getLatestLoggedValue(cellModelChannelName);
@@ -612,6 +627,7 @@ public final class SimpleDemoApp
 		for(int i = 0; i < stringNumber_1; i++) {
 			String cellNumberChannelName = "str" + (i+1) + "_cell_number";
 			String stringNameChannelName = "str" + (i+1) + "_string_name";
+			String cellBrandChannelName = "str" + (i+1) + "_cell_brand";
 			String cellModelChannelName = "str" + (i+1) + "_cell_model";
 			String CnominalChannelName = "str" + (i+1) + "_Cnominal";
 			String VnominalChannelName = "str" + (i+1) + "_Vnominal";
@@ -621,7 +637,7 @@ public final class SimpleDemoApp
 
 			if(!isFirstInitAllDimension){
 				if(!isInitCellDimensions[i]){
-					setFirstOverallValue(i, cellNumberChannelName, stringNameChannelName, cellModelChannelName, CnominalChannelName, VnominalChannelName, VcutoffChannelName, VfloatChannelName);
+					setFirstOverallValue(i, cellNumberChannelName, stringNameChannelName, cellBrandChannelName, cellModelChannelName, CnominalChannelName, VnominalChannelName, VcutoffChannelName, VfloatChannelName);
 				}
 			}
 			else {
@@ -632,12 +648,60 @@ public final class SimpleDemoApp
 					if(maxCellNumber < cellNumbers[i]) {
 						maxCellNumber = cellNumbers[i];
 					}
+					long now = System.currentTimeMillis();
+					IntValue intCellNumberValue = new IntValue((int)cellNumbers[i]);
+					Record cellNumberLatestRecord = new Record(intCellNumberValue, now, Flag.VALID);
+					dataAccessService.getChannel(cellNumberChannelName).setLatestRecord(cellNumberLatestRecord);
+
 					String stringName = dataAccessService.getChannel(stringNameChannelName).getLatestRecord().getValue().asString();
 					logger.info("String {} has name: {}", i+1, stringName);
+					now = System.currentTimeMillis();
+					StringValue stringNameValue = new StringValue(stringName);
+					Record stringNameLatestRecord = new Record(stringNameValue, now, Flag.VALID);
+					dataAccessService.getChannel(stringNameChannelName).setLatestRecord(stringNameLatestRecord);
+
+					String cellBrand = dataAccessService.getChannel(cellBrandChannelName).getLatestRecord().getValue().asString();
+					logger.info("String {} has cell brand: {}", i+1, cellBrand);
+					now = System.currentTimeMillis();
+					StringValue cellBrandValue = new StringValue(cellBrand);
+					Record cellBrandLatestRecord = new Record(cellBrandValue, now, Flag.VALID);
+					dataAccessService.getChannel(cellBrandChannelName).setLatestRecord(cellBrandLatestRecord);
+
 					String cellModel = dataAccessService.getChannel(cellModelChannelName).getLatestRecord().getValue().asString();
 					logger.info("String {} has cell model: {}", i+1, cellModel);
+					now = System.currentTimeMillis();
+					StringValue cellModelValue = new StringValue(cellModel);
+					Record cellModelLatestRecord = new Record(cellModelValue, now, Flag.VALID);
+					dataAccessService.getChannel(cellModelChannelName).setLatestRecord(cellModelLatestRecord);
+
 					double Cnominal = dataAccessService.getChannel(CnominalChannelName).getLatestRecord().getValue().asDouble();
 					logger.info("String {} has Cnominal: {}", i+1, Cnominal);
+					now = System.currentTimeMillis();
+					DoubleValue doubleCnominalValue = new DoubleValue(Cnominal);
+					Record CnominalLatestRecord = new Record(doubleCnominalValue, now, Flag.VALID);
+					dataAccessService.getChannel(CnominalChannelName).setLatestRecord(CnominalLatestRecord);
+
+					double Vnominal = dataAccessService.getChannel(VnominalChannelName).getLatestRecord().getValue().asDouble();
+					logger.info("String {} has Vnominal: {}", i+1, Vnominal);
+					now = System.currentTimeMillis();
+					DoubleValue doubleVnominalValue = new DoubleValue(Vnominal);
+					Record VnominalLatestRecord = new Record(doubleVnominalValue, now, Flag.VALID);
+					dataAccessService.getChannel(VnominalChannelName).setLatestRecord(VnominalLatestRecord);
+
+					double Vcutoff = dataAccessService.getChannel(VcutoffChannelName).getLatestRecord().getValue().asDouble();
+					logger.info("String {} has Vcutoff: {}", i+1, Vcutoff);
+					now = System.currentTimeMillis();		
+					DoubleValue doubleVcutoffValue = new DoubleValue(Vcutoff);
+					Record VcutoffLatestRecord = new Record(doubleVcutoffValue, now, Flag.VALID);
+					dataAccessService.getChannel(VcutoffChannelName).setLatestRecord(VcutoffLatestRecord);	
+
+					double Vfloat = dataAccessService.getChannel(VfloatChannelName).getLatestRecord().getValue().asDouble();
+					logger.info("String {} has Vfloat: {}", i+1, Vfloat);
+					now = System.currentTimeMillis();		
+					DoubleValue doubleVfloatValue = new DoubleValue(Vfloat);
+					Record VfloatLatestRecord = new Record(doubleVfloatValue, now, Flag.VALID);
+					dataAccessService.getChannel(VfloatChannelName).setLatestRecord(VfloatLatestRecord);
+
 				}catch(NullPointerException e) {
 					logger.warn("There is no value yet with this channel: {}, error: {}", e.getMessage());
 				}catch(IndexOutOfBoundsException e){

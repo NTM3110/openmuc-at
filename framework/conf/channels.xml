@@ -26,6 +26,13 @@
         <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell_brand">
+        <description>Cell Brand</description>
+        <valueType length="64">STRING</valueType>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
       <channel id="str1_cell_model">
         <description>Cell Model</description>
         <valueType length="64">STRING</valueType>
