@@ -10,7 +10,7 @@ public class Helper {
             this.value = value;
         }
     }
-	public static double[] caculateStringVoltage(int stringNumber, int cellNumber, PowerCell[][] powerCells) {
+	public static double[] calculateStringVoltage(int stringNumber, int cellNumber, PowerCell[][] powerCells) {
 		double[] str_voltage = new double[stringNumber];
 		for(int i = 0; i < stringNumber; i++) {
 			for	(int j = 0; j < cellNumber; j++) {
@@ -63,7 +63,7 @@ public class Helper {
 		int minVoltageIndex = -1;
 		double minVoltage = 100.0;
 		for(int i = 0; i < cellNumber; i++) {
-			if(powerCells[stringIndex][i].getVoltage() > minVoltage) {
+			if(powerCells[stringIndex][i].getVoltage() < minVoltage) {
 				minVoltageIndex = i+1;
 				minVoltage = powerCells[stringIndex][i].getVoltage();
 			}
@@ -85,10 +85,15 @@ public class Helper {
 	
 	public static double getAverageResistanceBattery(int stringIndex, int cellNumber, PowerCell[][] powerCells) {
 		double averageResistance = 0.0;
+		int validCellCount = 0;
 		for(int i = 0; i < cellNumber; i++) {
-				averageResistance += powerCells[stringIndex][i].getResistance();
+			if (powerCells[stringIndex][i].getResistance() <= 0) {
+				continue;
+			}
+			averageResistance += powerCells[stringIndex][i].getResistance();
+			validCellCount++;
 		}
-		averageResistance /= cellNumber;
+		averageResistance /= validCellCount;
 		return averageResistance;
 	}
 	
@@ -96,7 +101,7 @@ public class Helper {
 		int minResistanceIndex = -1;
 		double minResistance = 100.0;
 		for(int i = 0; i < cellNumber; i++) {
-			if(powerCells[stringIndex][i].getResistance() > minResistance) {
+			if(powerCells[stringIndex][i].getResistance() < minResistance) {
 				minResistanceIndex = i+1;
 				minResistance = powerCells[stringIndex][i].getResistance();
 			}
@@ -118,10 +123,16 @@ public class Helper {
 	
 	public static double getAverageTemperatureBattery(int stringIndex, int cellNumber, PowerCell[][] powerCells) {
 		double averageTemp = 0.0;
+		int validCellCount = 0;
 		for(int i = 0; i < cellNumber; i++) {
+				if (powerCells[stringIndex][i].getTemp() <= 0) {
+					continue;
+					
+				}
 				averageTemp += powerCells[stringIndex][i].getTemp();
+				validCellCount++;
 		}
-		averageTemp /= cellNumber;
+		averageTemp /= validCellCount;
 		return averageTemp;
 	}
 	
@@ -129,7 +140,7 @@ public class Helper {
 		int minTempIndex = -1;
 		double minTemp = 100.0;
 		for(int i = 0; i < cellNumber; i++) {
-			if(powerCells[stringIndex][i].getResistance() > minTemp) {
+			if(powerCells[stringIndex][i].getResistance() < minTemp) {
 				minTempIndex = i+1;
 				minTemp = powerCells[stringIndex][i].getTemp();
 			}

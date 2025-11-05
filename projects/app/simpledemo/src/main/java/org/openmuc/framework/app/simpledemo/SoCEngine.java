@@ -29,11 +29,12 @@ public class SoCEngine {
     public double usedQ;
     
     
-	public SoCEngine(double VCutoff, double VFloat) {
-		ekfSoC = new EKFSoC(1, C_NOMINAL_AH, VCutoff, VFloat, R1, C1, alpha_temp,Math.pow(0.01,2));
+	public SoCEngine(double Cnominal, double Vcutoff, double Vfloat) {
+        this.C_NOMINAL_AH = Cnominal;
+        this.V_CUTOFF = Vcutoff;    
+        this.V_FLOAT = Vfloat;
+		ekfSoC = new EKFSoC(1,this.C_NOMINAL_AH, this.V_CUTOFF, this.V_FLOAT, R1, C1, alpha_temp,Math.pow(0.01,2));
 		r0Estimator = new R0Estimator(30, 0.2, 0.0003, 0.0001, 0.0001, 0.5, 0.2);
-		this.V_CUTOFF = VCutoff;
-		this.V_FLOAT = VFloat;
 		usedQ = 0.0;
 	}
 	
@@ -82,5 +83,17 @@ public class SoCEngine {
     }
     public double getCnominal() {
     	return this.C_NOMINAL_AH;
+    }
+    public void setVcutoff(double Vcutoff) {
+    	this.V_CUTOFF = Vcutoff;
+    }
+    public double getVcutoff() {
+    	return this.V_CUTOFF;
+    }
+    public void setVfloat(double Vfloat) {
+    	this.V_FLOAT = Vfloat;
+    }
+    public double getVfloat() {
+    	return this.V_FLOAT;
     }
 }

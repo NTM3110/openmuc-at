@@ -1,2 +1,79 @@
 framework/data/ascii/*.old*
 framework/data/ascii/*.old*
+
+
+# -----------------------------
+# Java / Gradle build artifacts
+# -----------------------------
+.gradle/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar  # keep the Gradle wrapper in VCS
+.gradle-local/
+**/.gradletasknamecache
+
+# Compiled classes
+**/*.class
+
+# Generated test & report outputs
+**/reports/
+**/test-results/
+**/test-results-*/ 
+**/jacoco/
+**/jacoco.exec
+**/coverage/
+**/cobertura/
+
+# -----------------------------
+# IDE / Tooling
+# -----------------------------
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+*.launch
+bin/
+
+# VS Code
+.vscode/
+
+# Sonar
+.sonar/
+
+# -----------------------------
+# Logs & Local env
+# -----------------------------
+*.log
+*.tmp
+*.swp
+*.swo
+*.orig
+*.rej
+
+# Environment / local configs
+*.env
+*.env.*
+local.properties
+
+# -----------------------------
+# OS-specific cruft
+# -----------------------------
+.DS_Store
+Thumbs.db
+
+# -----------------------------
+# OpenMUC / OSGi-friendly extras
+# (Uncomment if your build/runtime creates these)
+# -----------------------------
+# Dist/runtime drop-ins
+# dist/
+# runtime/
+# felix cache / osgi cache (varies by launcher)
+# **/felix-cache/
+# **/osgi-cache/
