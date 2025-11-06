@@ -329,6 +329,13 @@ public final class SimpleDemoApp
 						}
 						isSetSoCEngine = isSetSoCEngineDemo;
 					}
+					if (stringNumber != stringNumber_1) {
+						SoCEngine[] socEnginesDemo = new SoCEngine[stringNumber_1];
+						for(int i = 0; i < Math.min(stringNumber, stringNumber_1); i++) {
+							socEnginesDemo[i] = socEngines[i];
+						}
+						socEngines = socEnginesDemo;
+					}
 					stringNumber = stringNumber_1;
 					cellNumber = maxCellNumber;
 					channels = initiateChannel();
@@ -633,6 +640,12 @@ public final class SimpleDemoApp
 			cellNumbers = new int[index];
 		}
 		logger.info("-----------FINDING STR AND CELL NUMBER: string number: {}--------------", stringNumber_1);
+		if(stringNumber_1 == 0) {
+			logger.warn("String number is zero, skipping get cell dimension this cycle.");
+			maxCellNumber = 0;
+			return;
+		}
+
 		for(int i = 0; i < stringNumber_1; i++) {
 			String cellNumberChannelName = "str" + (i+1) + "_cell_number";
 			String stringNameChannelName = "str" + (i+1) + "_string_name";
