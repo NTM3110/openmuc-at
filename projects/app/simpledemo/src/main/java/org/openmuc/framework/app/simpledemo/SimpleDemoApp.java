@@ -85,6 +85,13 @@ public final class SimpleDemoApp
         updateTimer.purge();
 	}	
 
+	private void initiatePowerCells(){
+		for(int i = 0; i < stringNumber_1; i++) {
+			for	(int j = 0; j < cellNumber; j++) {
+				powerCells[i][j] = new PowerCell();
+			}
+		}
+	}
 	private Channel[][][] initiateChannel() {
 		
 		logger.info("Initiate Channel {}", APP_NAME);
@@ -100,7 +107,6 @@ public final class SimpleDemoApp
 		// logger.info("Current string number is {} with maxCellNumber = {}", stringNumber_1, maxCellNumber);
 		for(int i = 0; i < stringNumber; i++) {
 			for	(int j = 0; j < cellNumbers[i]; j++) {				
-				powerCells[i][j] = new PowerCell();
 				for(int k = 0; k < DATA_OPTION_NUM; k++){
 					if(k == 3) {
 						array[i][j][k] = "str" + (i+1) + "_total" + "_"+ OPTIONS[k];
@@ -289,6 +295,7 @@ public final class SimpleDemoApp
 				stringNumber = stringNumber_1;
 				cellNumber = maxCellNumber;
 				channels = initiateChannel();
+				initiatePowerCells();
 			}
 			else {
 				logger.info("Re-Initializing isInitSoC0 array if dimension changed: previous string number: {}, previous cell number: {}; new string number: {}, new cell number: {}", stringNumber, cellNumber, stringNumber_1, maxCellNumber);
@@ -325,6 +332,7 @@ public final class SimpleDemoApp
 					stringNumber = stringNumber_1;
 					cellNumber = maxCellNumber;
 					channels = initiateChannel();
+					initiatePowerCells();
 				}
 			}
 			logger.info("All cell dimensions are initialized: string number: {}, cell number: {}", stringNumber, cellNumber);
@@ -332,6 +340,7 @@ public final class SimpleDemoApp
 	}
 
 	private void pushCalculatedDatatoChannels() {
+		logger.info("Pushing calculated data to channels. stringNumber: {}, cellNumber: {}");
 		double strSOC[] = Helper.calculateStringSOC(stringNumber, cellNumber, powerCells);
 		double strSOH[] = Helper.calculateStringSOH(stringNumber, cellNumber, powerCells);
 		double maxVoltage[] = new double[stringNumber];
@@ -354,26 +363,26 @@ public final class SimpleDemoApp
 		for(int i = 0; i < stringNumber; i++) {
 			try{
 				String base = "str" + (i+1) + "_";
-				Helper.Result result = Helper.getMaxVoltageBattery(i, cellNumber, powerCells);
+				Helper.Result result = Helper.getMaxVoltageBattery(i, cellNumbers, powerCells);
 				maxVoltageIndex[i] = result.index;
 				maxVoltage[i] = result.value;
-				result = Helper.getMinVoltageBattery(i, cellNumber, powerCells);
+				result = Helper.getMinVoltageBattery(i, cellNumbers, powerCells);
 				minVoltageIndex[i] = result.index;
 				minVoltage[i] = result.value;
-				result = Helper.getMaxTemperatureBattery(i, cellNumber, powerCells);	
+				result = Helper.getMaxTemperatureBattery(i, cellNumbers, powerCells);	
 				maxTempIndex[i] = result.index;
 				maxTemp[i] = result.value;
-				result = Helper.getMinTemperatureBattery(i, cellNumber, powerCells);
+				result = Helper.getMinTemperatureBattery(i, cellNumbers, powerCells);
 				minTempIndex[i] = result.index;
 				minTemp[i] = result.value;
-				result = Helper.getMaxResistanceBattery(i, cellNumber, powerCells);
+				result = Helper.getMaxResistanceBattery(i, cellNumbers, powerCells);
 				maxResistanceIndex[i] = result.index;
 				maxResistance[i] = result.value;
-				result = Helper.getMinResistanceBattery(i, cellNumber, powerCells);
+				result = Helper.getMinResistanceBattery(i, cellNumbers, powerCells);
 				minResistanceIndex[i] = result.index;
 				minResistance[i] = result.value;
-				averageResistance[i] = Helper.getAverageResistanceBattery(i, cellNumber, powerCells);
-				averageTemp[i] = Helper.getAverageTemperatureBattery(i, cellNumber, powerCells);
+				averageResistance[i] = Helper.getAverageResistanceBattery(i, cellNumbers, powerCells);
+				averageTemp[i] = Helper.getAverageTemperatureBattery(i, cellNumbers, powerCells);
 				averageVoltage[i] = strVoltage[i] / cellNumbers[i];
 				long now = System.currentTimeMillis();
 				DoubleValue doubleStrVolValue = new DoubleValue(Double.parseDouble(DF.format(strVoltage[i])));
