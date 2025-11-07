@@ -647,7 +647,7 @@ public final class SimpleDemoApp
 		}
 
 		for(int i = 0; i < stringNumber_1; i++) {
-			String cellNumberChannelName = "str" + (i+1) + "_cell_number";
+			String cellNumberChannelName = "str" + (i+1) + "_cell_qty";
 			String stringNameChannelName = "str" + (i+1) + "_string_name";
 			String cellBrandChannelName = "str" + (i+1) + "_cell_brand";
 			String cellModelChannelName = "str" + (i+1) + "_cell_model";

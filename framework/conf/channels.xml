@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
   <driver id="virtual">
+    <device id="serial_port">
+      <description>Virtual Serial Ports</description>
+      <disabled>false</disabled>
+      <channel id="dev_serial_comm_number">
+        <description>Virtual Serial Port Number</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="dev_serial_comm_0_port">
+        <description>Virtual Serial Port 0</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="dev_serial_comm_1_port">
+        <description>Virtual Serial Port 2</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+    </device>
     <device id="str1_virtual">
       <description>String 1 calculated channels</description>
       <disabled>false</disabled>
-      <channel id="str1_cell_number">
+      <channel id="str1_cell_qty">
         <description>number of cells</description>
         <valueType>INTEGER</valueType>
         <loggingInterval>1s</loggingInterval>
@@ -234,11 +253,27 @@
         <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell3_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
     </device>
     <device id="str2_virtual">
       <description>String 2 calculated channels</description>
       <disabled>false</disabled>
-      <channel id="str2_cell_number">
+      <channel id="str2_cell_qty">
         <description>number of cells</description>
         <valueType>INTEGER</valueType>
         <loggingInterval>1s</loggingInterval>
@@ -484,12 +519,28 @@
         <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
+      <channel id="str2_cell4_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
     </device>
   </driver>
   <driver id="modbus">
     <device id="str1_modbus">
       <description>String 1 Modbus RTU</description>
-      <deviceAddress>/dev/pts/5</deviceAddress>
+      <deviceAddress>/dev/ttyV0</deviceAddress>
       <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
       <samplingTimeout>500ms</samplingTimeout>
       <connectRetryInterval>500ms</connectRetryInterval>
@@ -499,6 +550,8 @@
         <channelAddress>1:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell1_V">
@@ -506,6 +559,8 @@
         <channelAddress>1:HOLDING_REGISTERS:1:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell1_T">
@@ -513,6 +568,8 @@
         <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell2_R">
@@ -520,6 +577,8 @@
         <channelAddress>2:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell2_V">
@@ -527,6 +586,8 @@
         <channelAddress>2:HOLDING_REGISTERS:1:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell2_T">
@@ -534,6 +595,35 @@
         <channelAddress>2:HOLDING_REGISTERS:2:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_R">
+        <description>Single cell voltage (R) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_V">
+        <description>Single cell temperature (V) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_T">
+        <description>Single cell internal resistance (T) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_total_I">
@@ -541,12 +631,14 @@
         <channelAddress>6:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
     </device>
     <device id="str2_modbus">
       <description>String 2 Modbus RTU</description>
-      <deviceAddress>/dev/pts/7</deviceAddress>
+      <deviceAddress>dev/ttyV2</deviceAddress>
       <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
       <samplingTimeout>500ms</samplingTimeout>
       <connectRetryInterval>500ms</connectRetryInterval>
@@ -556,6 +648,8 @@
         <channelAddress>1:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell1_V">
@@ -563,6 +657,8 @@
         <channelAddress>1:HOLDING_REGISTERS:1:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell1_T">
@@ -570,6 +666,8 @@
         <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell2_R">
@@ -577,6 +675,8 @@
         <channelAddress>2:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell2_V">
@@ -584,6 +684,8 @@
         <channelAddress>2:HOLDING_REGISTERS:1:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell2_T">
@@ -591,6 +693,8 @@
         <channelAddress>2:HOLDING_REGISTERS:2:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell3_R">
@@ -598,6 +702,8 @@
         <channelAddress>3:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell3_V">
@@ -605,6 +711,8 @@
         <channelAddress>3:HOLDING_REGISTERS:1:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_cell3_T">
@@ -612,6 +720,35 @@
         <channelAddress>3:HOLDING_REGISTERS:2:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_R">
+        <description>Single cell voltage (R) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_V">
+        <description>Single cell temperature (V) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_T">
+        <description>Single cell internal resistance (T) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_total_I">
@@ -619,6 +756,8 @@
         <channelAddress>6:HOLDING_REGISTERS:0:INT16</channelAddress>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
     </device>
