@@ -124,11 +124,18 @@ public final class SimpleDemoApp
 	private Record getLatestLoggedValue(String channelName) {
 		Channel channel = dataAccessService.getChannel(channelName);
 		try {
-			long startTime = 1761773580L;
+			long startTime = 1761773580000L;
 			List<Record> records = channel.getLoggedRecords(startTime);
-			Record CnominalLatestRecord = records.get(records.size()-1);
-			logger.info("--> channel {}: {}",channel.getId(), CnominalLatestRecord.getValue());
-			return CnominalLatestRecord;
+			Record latestRecord = null;
+			long latestTimestamp = Long.MIN_VALUE;
+			for(Record record : records){
+					if(record.getTimestamp() > latestTimestamp){
+						latestTimestamp = record.getTimestamp();
+						latestRecord = record;
+					}
+			}
+			logger.info("Latest logged record for channel {} is: {}", channelName, latestRecord != null ? latestRecord.getValue().toString() : "null");
+			return latestRecord;
 		} catch (DataLoggerNotAvailableException | IOException e) {
 			// TODO Auto-generated catch block
 			logger.warn("SQL DATA Logger not ready; skipping read this cycle.");
@@ -269,7 +276,7 @@ public final class SimpleDemoApp
 					Record sohRecord = new Record(doubleSoHValue, now, Flag.VALID);
 					channels[si][sj][5].setLatestRecord(sohRecord);
 				}catch(NullPointerException e) {
-					logger.warn("There is no value yet with this channel at string {} cell {}", si+1, sj+1);
+					logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
 				}
 			}
 		}
@@ -500,8 +507,10 @@ public final class SimpleDemoApp
 		//Getting cell number from logged data
 		logger.info("GEtting Cell number from logged data for string {}", stringIndex+1);
 		Record cellNumberRecord = getLatestLoggedValue(cellNumberChannelName);
+		logger.info("-----------FINDING STR AND CELL NUMBER: cellNumberChannelName: {}", cellNumberChannelName);
 		if(cellNumberRecord != null) {
 			cellNumbers[stringIndex] = cellNumberRecord.getValue().asInt();
+			logger.info("String {} has cell number: {}", stringIndex+1, cellNumbers[stringIndex]);
 			if(maxCellNumber < cellNumbers[stringIndex]) {
 				maxCellNumber = cellNumbers[stringIndex];
 			}

@@ -221,6 +221,7 @@ public class DriverResourceServlet extends GenericServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType(APPLICATION_JSON);
+        logger.debug("POST DriverResourceServlet called");
         String[] pathAndQueryString = checkIfItIsACorrectRest(request, response, logger);
 
         if (pathAndQueryString != null) {
