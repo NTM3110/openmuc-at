@@ -27,6 +27,7 @@ import org.openmuc.framework.lib.rest1.Const;
 import org.openmuc.framework.server.restws.servlets.ChannelResourceServlet;
 import org.openmuc.framework.server.restws.servlets.ConnectServlet;
 import org.openmuc.framework.server.restws.servlets.DeviceResourceServlet;
+import org.openmuc.framework.server.restws.servlets.DeviceResourceServlet_v2;
 import org.openmuc.framework.server.restws.servlets.DriverResourceServlet;
 import org.openmuc.framework.server.restws.servlets.UserServlet;
 import org.osgi.service.component.ComponentContext;
@@ -50,6 +51,7 @@ public final class RestServer {
 
     private final ChannelResourceServlet chRServlet = new ChannelResourceServlet();
     private final DeviceResourceServlet devRServlet = new DeviceResourceServlet();
+    private final DeviceResourceServlet_v2 devRServlet_v2 = new DeviceResourceServlet_v2();
     private final DriverResourceServlet drvRServlet = new DriverResourceServlet();
     private final ConnectServlet connectServlet = new ConnectServlet();
     private final UserServlet userServlet = new UserServlet();
@@ -91,6 +93,7 @@ public final class RestServer {
 
         httpService.registerServlet(Const.ALIAS_CHANNELS, chRServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_DEVICES, devRServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_DEVICES_V2, devRServlet_v2, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_DRIVERS, drvRServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_USERS, userServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_CONNECT, connectServlet, null, securityHandler);

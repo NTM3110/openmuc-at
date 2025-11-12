@@ -128,6 +128,7 @@ public final class SimpleDemoApp
 			List<Record> records = channel.getLoggedRecords(startTime);
 			Record latestRecord = null;
 			long latestTimestamp = Long.MIN_VALUE;
+			logger.info("Number of logged records for channel {} is: {}", channelName, records.size());
 			for(Record record : records){
 					if(record.getTimestamp() > latestTimestamp){
 						latestTimestamp = record.getTimestamp();
@@ -160,10 +161,13 @@ public final class SimpleDemoApp
 		double vFloat = -1.0;
 		for (int i = 0; i < stringNumber; i++) {
 			try{
-				Record VcutoffRecord = dataAccessService.getChannel("str" + (i+1) + "_Vcutoff").getLatestRecord();
-				Record VfloatRecord = dataAccessService.getChannel("str" + (i+1) + "_Vfloat").getLatestRecord();
-				vCutoff = VcutoffRecord.getValue().asDouble();
-				vFloat = VfloatRecord.getValue().asDouble();
+				Record VnominalRecord = dataAccessService.getChannel("str" + (i+1) + "_Vnominal").getLatestRecord();
+				double Vnominal = VnominalRecord.getValue().asDouble();
+				if (Vnominal > 0.0) {
+					logger.info("SETSOCENGINE: Vnominal is 2.0V for string {}. Using default Vcutoff 1.75V and Vfloat 2.4V", i+1);
+					vCutoff = Vnominal - 0.15;
+					vFloat = Vnominal + 0.25;
+				}
 				if(vCutoff < 0 || vFloat < 0) {
 					logger.warn("Vcutoff or Vfloat is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
 					continue;
@@ -218,7 +222,7 @@ public final class SimpleDemoApp
 	private void setLatestSoC(PowerCell powerCell, double deltaT, boolean isInitSoC0, int stringIndex) {
 		if(!isInitSoC0) {
 			double firstSoC = socEngines[stringIndex].initialSoCFromVoltage(powerCell.getVoltage());
-			logger.info("Calculate the first SoC: voltage {}--------> firstSoc: {}", powerCell.getVoltage(), firstSoC);
+			// logger.info("Calculate the first SoC: voltage {}--------> firstSoc: {}", powerCell.getVoltage(), firstSoC);
 			powerCell.setSoc(firstSoC * 100);
 			logger.info("First SoC ----> {}", firstSoC*100);
 		}
@@ -242,23 +246,23 @@ public final class SimpleDemoApp
 	            final int sj = j;
 				try{
 					double current = channels[si][sj][3].getLatestRecord().getValue().asDouble() / 100;
-					logger.info("Value of of {}: -----> {}",channels[si][sj][3].getId(), current);
+					// logger.info("Value of of {}: -----> {}",channels[si][sj][3].getId(), current);
 	            	double voltage = channels[si][sj][1].getLatestRecord().getValue().asDouble() / 1000;
 					double temp = channels[si][sj][2].getLatestRecord().getValue().asDouble() / 100;
-					logger.info("OLD value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getVoltage());
-					logger.info("NEW value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, voltage);
+					// logger.info("OLD value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getVoltage());
+					// logger.info("NEW value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, voltage);
 					if((voltage - powerCells[si][sj].getVoltage()) > 0) {
 	            		current *= -1;
 					}
 					double resistance = channels[si][sj][0].getLatestRecord().getValue().asDouble() / 10000;
-					logger.info("Value of of {}: -----> {}",channels[si][sj][0].getId(), resistance);
+					// logger.info("Value of of {}: -----> {}",channels[si][sj][0].getId(), resistance);
 
 					powerCells[si][sj].setCurrent(current);
-					logger.info("Value of POWERCELL's Current of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getCurrent());
+					logger.info("I of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getCurrent());
 					powerCells[si][sj].setVoltage(voltage);
-					logger.info("Value of POWERCELL'S Voltage of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getVoltage());
+					logger.info("V of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getVoltage());
 					powerCells[si][sj].setTemp(temp);
-					logger.info("Value of POWERCELL'S Temperature of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getTemp());
+					logger.info("T of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getTemp());
 					powerCells[si][sj].setResistance(resistance);
 					
 					setLatestSoC(powerCells[si][sj], 1, isInitSoC0[si][sj], si);
@@ -266,12 +270,14 @@ public final class SimpleDemoApp
 						isInitSoC0[si][sj] = true;
 					}
 					long now = System.currentTimeMillis();
+					// logger.info("SoC of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getSoc());
 					DoubleValue doubleSoCValue = new DoubleValue(Double.parseDouble(DF.format(powerCells[si][sj].getSoc())));
 					Record socRecord = new Record(doubleSoCValue, now, Flag.VALID);
 					channels[si][sj][4].setLatestRecord(socRecord);
 
 
 					setLatestSoH(powerCells[si][sj]);
+					// logger.info("SoH of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getTemp());
 					DoubleValue doubleSoHValue = new DoubleValue(Double.parseDouble(DF.format(powerCells[si][sj].getSoh())));
 					Record sohRecord = new Record(doubleSoHValue, now, Flag.VALID);
 					channels[si][sj][5].setLatestRecord(sohRecord);
@@ -305,7 +311,7 @@ public final class SimpleDemoApp
 				initiatePowerCells();
 			}
 			else {
-				logger.info("Re-Initializing isInitSoC0 array if dimension changed: previous string number: {}, previous cell number: {}; new string number: {}, new cell number: {}", stringNumber, cellNumber, stringNumber_1, maxCellNumber);
+				// logger.info("Re-Initializing isInitSoC0 array if dimension changed: previous string number: {}, previous cell number: {}; new string number: {}, new cell number: {}", stringNumber, cellNumber, stringNumber_1, maxCellNumber);
 				if (stringNumber != stringNumber_1 || cellNumber != maxCellNumber) {
 					logger.info("Dimensions changed, re-initializing isInitSoC0 array.");
 					boolean [][] isInitSoC0Demo = new boolean[stringNumber_1][maxCellNumber];
@@ -503,18 +509,19 @@ public final class SimpleDemoApp
 	    updateTimer.scheduleAtFixedRate(task, (long) 1 * 1000, (long) 1 * 1000);
 	}
 	
-	private void setFirstOverallValue(int stringIndex, String cellNumberChannelName, String stringNameChannelName,String cellBrandChannelName, String cellModelChannelName, String CnominalChannelName, String VnominalChannelName, String VcutoffChannelName, String VfloatChannelName) {
+	private void setFirstOverallValue(int stringIndex, String cellNumberChannelName, String stringNameChannelName,String cellBrandChannelName, 
+					String cellModelChannelName, String CnominalChannelName, String VnominalChannelName) {
 		//Getting cell number from logged data
-		logger.info("GEtting Cell number from logged data for string {}", stringIndex+1);
+		// logger.info("GEtting Cell number from logged data for string {}", stringIndex+1);
 		Record cellNumberRecord = getLatestLoggedValue(cellNumberChannelName);
-		logger.info("-----------FINDING STR AND CELL NUMBER: cellNumberChannelName: {}", cellNumberChannelName);
+		// logger.info("-----------FINDING STR AND CELL NUMBER: cellNumberChannelName: {}", cellNumberChannelName);
 		if(cellNumberRecord != null) {
 			cellNumbers[stringIndex] = cellNumberRecord.getValue().asInt();
-			logger.info("String {} has cell number: {}", stringIndex+1, cellNumbers[stringIndex]);
+			// logger.info("String {} has cell number: {}", stringIndex+1, cellNumbers[stringIndex]);
 			if(maxCellNumber < cellNumbers[stringIndex]) {
 				maxCellNumber = cellNumbers[stringIndex];
 			}
-			logger.info("-----------FINDING STR AND CELL NUMBER: string {} has cell number: {}", stringIndex+1, cellNumbers[stringIndex]);
+			// logger.info("-----------FINDING STR AND CELL NUMBER: string {} has cell number: {}", stringIndex+1, cellNumbers[stringIndex]);
 			long now = System.currentTimeMillis();
 			IntValue intCellNumberValue = new IntValue((int)cellNumbers[stringIndex]);
 			Record cellNumberLatestRecord = new Record(intCellNumberValue, now, Flag.VALID);
@@ -539,6 +546,8 @@ public final class SimpleDemoApp
 		else {
 			logger.warn("There is no logged data for stringName OF STRING {}. Maybe data log does not rise yet.", stringIndex);
 		}
+
+
 		//Getting cell brand from logged data
 		logger.info("GEtting the first cell brand from logged data for string {}", stringIndex+1);
 		Record cellBrandRecord = getLatestLoggedValue(cellBrandChannelName);
@@ -596,34 +605,78 @@ public final class SimpleDemoApp
 		else {
 			logger.warn("There is no logged data for Vnominal OF STRING {}. Maybe data log does not rise yet.", stringIndex);
 		}
-		//Getting Vcutoff from logged data
-		logger.info("GEtting the first Vcutoff from logged data for string {}", stringIndex+1);
-		Record VcutoffRecord = getLatestLoggedValue(VcutoffChannelName);
-		if(VcutoffRecord != null) {
-			double Vcutoff = VcutoffRecord.getValue().asDouble();
-			logger.info("String {} has Vcutoff: {}", stringIndex+1, Vcutoff);
-			long now = System.currentTimeMillis();
-			DoubleValue doubleVcutoffValue = new DoubleValue(Vcutoff);
-			Record VcutoffLatestRecord = new Record(doubleVcutoffValue, now, Flag.VALID);
-			dataAccessService.getChannel(VcutoffChannelName).setLatestRecord(VcutoffLatestRecord);
+	}
+
+	private void setSiteNameUsernamePasswordSerialComm() {
+		String siteNameChannelName = "site_name_1";
+		String userNameChannelName = "account_1_username";
+		String passwordChannelName = "account_1_password";
+
+		//Getting site name from logged data
+		logger.info("GEtting the first site name from logged data");
+		Record siteNameRecord = getLatestLoggedValue(siteNameChannelName);
+		if(siteNameRecord != null) {
+			String siteNameStr = siteNameRecord.getValue().asString();
+			logger.info("Site name is: {}", siteNameStr);
+			long nowInit = System.currentTimeMillis();
+			StringValue siteNameValue = new StringValue(siteNameStr);
+			Record siteNameLatestRecord = new Record(siteNameValue, nowInit, Flag.VALID);
+			dataAccessService.getChannel(siteNameChannelName).setLatestRecord(siteNameLatestRecord);
 		}
 		else {
-			logger.warn("There is no logged data for Vcutoff OF STRING {}. Maybe data log does not rise yet.", stringIndex);
+			logger.warn("There is no logged data for siteName. Maybe data log does not rise yet.");
 		}
-		//Getting Vfloat from logged data
-		logger.info("GEtting the first Vfloat from logged data for string {}", stringIndex+1);
-		Record VfloatRecord = getLatestLoggedValue(VfloatChannelName);
-		if(VfloatRecord != null) {
-			double Vfloat = VfloatRecord.getValue().asDouble();
-			logger.info("String {} has Vfloat: {}", stringIndex+1, Vfloat);
+
+		// Getting username from logged data
+		logger.info("GEtting the first username from logged data");
+		Record userNameRecord = getLatestLoggedValue(userNameChannelName);
+		if(userNameRecord != null) {
+			String usernameStr = userNameRecord.getValue().asString();
+			logger.info("Username is: {}", usernameStr);
 			long now = System.currentTimeMillis();
-			DoubleValue doubleVfloatValue = new DoubleValue(Vfloat);
-			Record VfloatLatestRecord = new Record(doubleVfloatValue, now, Flag.VALID);
-			dataAccessService.getChannel(VfloatChannelName).setLatestRecord(VfloatLatestRecord);
+			StringValue userNameValue = new StringValue(usernameStr);
+			Record userNameLatestRecord = new Record(userNameValue, now, Flag.VALID);
+			dataAccessService.getChannel(userNameChannelName).setLatestRecord(userNameLatestRecord);
 		}
 		else {
-			logger.warn("There is no logged data for Vfloat OF STRING {}. Maybe data log does not rise yet.", stringIndex);
+			logger.warn("There is no logged data for username. Maybe data log does not rise yet.");
 		}
+		
+		//Getting password from logged data
+		logger.info("GEtting the first password from logged data");
+		Record passwordRecord = getLatestLoggedValue(passwordChannelName);
+		if(passwordRecord != null) {
+			String passwordStr = passwordRecord.getValue().asString();
+			logger.info("Password is: {}", passwordStr);
+			long now = System.currentTimeMillis();
+			StringValue passwordValue = new StringValue(passwordStr);
+			Record passwordLatestRecord = new Record(passwordValue, now, Flag.VALID);
+			dataAccessService.getChannel(passwordChannelName).setLatestRecord(passwordLatestRecord);
+		}
+		else {
+			logger.warn("There is no logged data for password. Maybe data log does not rise yet.");
+		}
+		
+		logger.info("Getting the first serial communication settings from logged data");
+		for(int i = 0; i < 2; i++) {
+			logger.info("Getting serial communication settings for index {}", i+1);
+		
+			String serialCommChannelName = "dev_serial_comm_"+ i;
+			Record serialCommRecord = getLatestLoggedValue(serialCommChannelName);
+			if(serialCommRecord != null) {
+				String serialCommStr = serialCommRecord.getValue().asString();
+				logger.info("Serial communication setting is: {}", serialCommStr);
+				long now = System.currentTimeMillis();
+				StringValue serialCommValue = new StringValue(serialCommStr);
+				Record serialCommLatestRecord = new Record(serialCommValue, now, Flag.VALID);
+				dataAccessService.getChannel(serialCommChannelName).setLatestRecord(serialCommLatestRecord);
+			}
+			else {
+				logger.warn("There is no logged data for serial communication setting. Maybe data log does not rise yet.");
+			}
+		}
+		// logger.info("Getting the second ");
+
 	}
 
 	private void getCellDimension() {
@@ -662,13 +715,13 @@ public final class SimpleDemoApp
 			String cellModelChannelName = "str" + (i+1) + "_cell_model";
 			String CnominalChannelName = "str" + (i+1) + "_Cnominal";
 			String VnominalChannelName = "str" + (i+1) + "_Vnominal";
-			String VcutoffChannelName = "str" + (i+1) + "_Vcutoff";
-			String VfloatChannelName = "str" + (i+1) + "_Vfloat";
 
 
 			if(!isFirstInitAllDimension){
 				if(!isInitCellDimensions[i]){
-					setFirstOverallValue(i, cellNumberChannelName, stringNameChannelName, cellBrandChannelName, cellModelChannelName, CnominalChannelName, VnominalChannelName, VcutoffChannelName, VfloatChannelName);
+					// setSiteNameUsernamePassword();
+					setFirstOverallValue(i, cellNumberChannelName, stringNameChannelName, cellBrandChannelName, cellModelChannelName, CnominalChannelName, VnominalChannelName);
+					setSiteNameUsernamePasswordSerialComm();
 				}
 			}
 			else {
@@ -718,20 +771,6 @@ public final class SimpleDemoApp
 					DoubleValue doubleVnominalValue = new DoubleValue(Vnominal);
 					Record VnominalLatestRecord = new Record(doubleVnominalValue, now, Flag.VALID);
 					dataAccessService.getChannel(VnominalChannelName).setLatestRecord(VnominalLatestRecord);
-
-					double Vcutoff = dataAccessService.getChannel(VcutoffChannelName).getLatestRecord().getValue().asDouble();
-					logger.info("String {} has Vcutoff: {}", i+1, Vcutoff);
-					now = System.currentTimeMillis();		
-					DoubleValue doubleVcutoffValue = new DoubleValue(Vcutoff);
-					Record VcutoffLatestRecord = new Record(doubleVcutoffValue, now, Flag.VALID);
-					dataAccessService.getChannel(VcutoffChannelName).setLatestRecord(VcutoffLatestRecord);	
-
-					double Vfloat = dataAccessService.getChannel(VfloatChannelName).getLatestRecord().getValue().asDouble();
-					logger.info("String {} has Vfloat: {}", i+1, Vfloat);
-					now = System.currentTimeMillis();		
-					DoubleValue doubleVfloatValue = new DoubleValue(Vfloat);
-					Record VfloatLatestRecord = new Record(doubleVfloatValue, now, Flag.VALID);
-					dataAccessService.getChannel(VfloatChannelName).setLatestRecord(VfloatLatestRecord);
 
 				}catch(NullPointerException e) {
 					logger.warn("There is no value yet with this channel: {}, error: {}", e.getMessage());

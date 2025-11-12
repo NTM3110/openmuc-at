@@ -32,6 +32,7 @@ public class Const {
 
     public static final String ALIAS_CHANNELS = "/rest/channels";
     public static final String ALIAS_DEVICES = "/rest/devices";
+    public static final String ALIAS_DEVICES_V2 = "/rest/devices_v2";
     public static final String ALIAS_DRIVERS = "/rest/drivers";
     public static final String ALIAS_USERS = "/rest/users";
     public static final String ALIAS_CONTROLS = "/rest/controlls";

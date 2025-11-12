@@ -169,6 +169,33 @@ public class FromJson {
         }
     }
 
+    public void setDeviceConfigV2(DeviceConfig deviceConfig, String id) throws JsonSyntaxException,
+            IdCollisionException, RestConfigIsNotCorrectException, MissingJsonObjectException {
+        JsonElement jseDevice = jsonObject.get(Const.CONFIGS);
+
+        if (!jseDevice.isJsonNull()) {
+            RestDeviceConfigMapper.setDeviceConfig(deviceConfig, gson.fromJson(jseDevice, RestDeviceConfig.class), id);
+        }
+        else {
+            throw new MissingJsonObjectException();
+        }
+        JsonElement jseChannels = jsonObject.get(Const.CHANNELS);
+        if(jseChannels.isJsonArray()) {
+            JsonArray jsa = jseChannels.getAsJsonArray();
+            Iterator<JsonElement> iteratorJsonArray = jsa.iterator();
+            while (iteratorJsonArray.hasNext()) {
+                JsonObject jsoIterated = iteratorJsonArray.next().getAsJsonObject();
+                String channelId = jsoIterated.get(Const.ID).getAsString();
+                RestChannelConfig rcc = gson.fromJson(jsoIterated, RestChannelConfig.class);
+                ChannelConfig channelConfig = deviceConfig.addChannel(channelId);
+                RestChannelConfigMapper.setChannelConfig(channelConfig, rcc, channelId);
+            }
+        }
+        else {
+            throw new MissingJsonObjectException();
+        }
+    }
+
     public void setDriverConfig(DriverConfig driverConfig, String id) throws JsonSyntaxException, IdCollisionException,
             RestConfigIsNotCorrectException, MissingJsonObjectException {
 

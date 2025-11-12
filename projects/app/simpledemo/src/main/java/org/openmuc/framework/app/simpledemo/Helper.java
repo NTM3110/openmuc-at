@@ -32,7 +32,7 @@ public class Helper {
 			for	(int j = 0; j < cellNumber; j++) {
 				final int si = i; // final copies for capture
 	            final int sj = j;
-				if (powerCells[si][sj].getSoc() > 0) {
+				if (powerCells[si][sj].getSoc() >= 0) {
 	            	str_SOC[si] += powerCells[si][sj].getSoc();
 			        validCellCount++;
 				}							
