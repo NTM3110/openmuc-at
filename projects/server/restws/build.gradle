@@ -9,6 +9,10 @@ dependencies {
     implementation group: "commons-codec", name: "commons-codec", version: commonsCodecVersion
 
     implementation group: 'org.apache.felix', name: 'org.apache.felix.http.servlet-api', version: apacheFelixServletVersion
+    
+    // JNA for native network configuration
+    implementation group: 'net.java.dev.jna', name: 'jna', version: '5.13.0'
+    implementation group: 'net.java.dev.jna', name: 'jna-platform', version: '5.13.0'
 }
 
 jar {
