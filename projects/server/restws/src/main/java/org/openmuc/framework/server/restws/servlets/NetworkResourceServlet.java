@@ -29,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.openmuc.framework.lib.rest1.ToJson;
 import org.openmuc.framework.lib.rest1.FromJson;
-import org.openmuc.framework.lib.rest1.exceptions.MissingJsonObjectException;
 import org.openmuc.framework.server.restws.NetworkManager;
 import org.openmuc.framework.server.restws.NetworkManager.NetworkConfig;
 import org.slf4j.Logger;
@@ -112,7 +111,7 @@ public class NetworkResourceServlet extends GenericServlet {
     /**
      * Get all network configurations
      */
-    private void doGetAllNetworkConfigs(HttpServletResponse response) throws IOException {
+    private void doGetAllNetworkConfigs(HttpServletResponse response) throws IOException, ServletException {
         ToJson json = new ToJson();
         JsonArray configArray = new JsonArray();
 
@@ -131,7 +130,7 @@ public class NetworkResourceServlet extends GenericServlet {
     /**
      * Get specific network configuration
      */
-    private void doGetNetworkConfig(String configId, HttpServletResponse response) throws IOException {
+    private void doGetNetworkConfig(String configId, HttpServletResponse response) throws IOException, ServletException {
         NetworkConfig config = findConfigById(configId);
         if (config == null) {
             // Try to read from file
@@ -154,7 +153,7 @@ public class NetworkResourceServlet extends GenericServlet {
      * Update network configuration
      */
     private void doUpdateNetworkConfig(String configId, FromJson json, HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
         NetworkConfig existingConfig = findConfigById(configId);
         if (existingConfig == null) {
             ServletLib.sendHTTPErrorAndLogDebug(response, HttpServletResponse.SC_NOT_FOUND, logger,
@@ -206,12 +205,9 @@ public class NetworkResourceServlet extends GenericServlet {
             sendJson(responseJson, response);
             response.setStatus(HttpServletResponse.SC_OK);
 
-            logger.info("Successfully updated network config for {}: IP={}, Subnet={}, Gateway={}, DHCP={}", configId,
-                    ipAddress, subnetMask, gateway, dhcp);
+            logger.info("Successfully updated network config for {}: IP={}, Subnet={}, Gateway={}, DHCP={}",
+                    configId, ipAddress, subnetMask, gateway, dhcp);
 
-        } catch (MissingJsonObjectException e) {
-            ServletLib.sendHTTPErrorAndLogDebug(response, HttpServletResponse.SC_BAD_REQUEST, logger,
-                    "Invalid JSON format: " + e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating network config", e);
             ServletLib.sendHTTPErrorAndLogErr(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, logger,
