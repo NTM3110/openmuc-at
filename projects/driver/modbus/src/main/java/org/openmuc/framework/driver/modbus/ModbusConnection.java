@@ -59,6 +59,7 @@ import com.ghgande.j2mod.modbus.procimg.Register;
 import com.ghgande.j2mod.modbus.procimg.SimpleRegister;
 import com.ghgande.j2mod.modbus.util.BitVector;
 
+
 public abstract class ModbusConnection implements Connection {
 
     private static final Logger logger = LoggerFactory.getLogger(ModbusConnection.class);
@@ -152,6 +153,7 @@ public abstract class ModbusConnection implements Connection {
         } catch (ModbusIOException e) {
             logger.error("ModbusIOException while reading samplingGroup:" + samplingGroup, e);
             disconnect();
+            
             throw new ConnectionException(e);
         } catch (ModbusException e) {
             logger.error("Unable to read ChannelGroup " + samplingGroup, e);
