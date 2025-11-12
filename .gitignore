@@ -77,3 +77,6 @@ Thumbs.db
 # felix cache / osgi cache (varies by launcher)
 # **/felix-cache/
 # **/osgi-cache/
+# --- OpenMUC runtime cache & logs ---
+framework/felix-cache/**/*.info
+framework/log/**/*.log

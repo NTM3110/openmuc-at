@@ -20,7 +20,6 @@ public class SoHEngine {
     }
 	
 
-
 	public static double usedQ;
 	public static Status updatedSoHNominal(double deltaT, double current, int temperature, boolean isStart, boolean isEnd) {
     	if(isStart) usedQ += current * deltaT * TemperatureFactor.getFactor(temperature);
