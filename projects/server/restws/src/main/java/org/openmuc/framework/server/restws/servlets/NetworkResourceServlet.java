@@ -123,7 +123,7 @@ public class NetworkResourceServlet extends GenericServlet {
             configArray.add(configToJsonObject(configToUse));
         }
 
-        json.addJsonArray(CONFIGS, configArray);
+        json.getJsonObject().add(CONFIGS, configArray);
         sendJson(json, response);
         response.setStatus(HttpServletResponse.SC_OK);
     }
