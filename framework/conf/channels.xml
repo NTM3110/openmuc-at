@@ -9,13 +9,6 @@
         <valueType>BOOLEAN</valueType>
         <disabled>false</disabled>
       </channel>
-      <channel id="bms_error_code">
-        <description>BMS Error Code</description>
-        <valueType>INTEGER</valueType>
-        <loggingInterval>1s</loggingInterval>
-        <loggingSettings>sqllogger:</loggingSettings>
-        <disabled>false</disabled>
-      </channel>
     </device>
     <device id="serial_port">
       <description>Virtual Serial Ports</description>

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.text.DecimalFormat;
@@ -43,11 +44,19 @@ public final class SimpleDemoApp
    private static final Logger logger = LoggerFactory.getLogger(SimpleDemoApp.class);
 	private static final String APP_NAME = "ATEnergy BMS App";
 	private static final String[] OPTIONS = {"R", "V", "T", "I", "SOC", "SOH"};
+	private static final List<String> STRING_CHANNEL_TEMPLATES = Arrays.asList(
+        "str%d_cell_qty",
+        "str%d_Cnominal",
+        "str%d_string_name",
+        "str%d_cell_brand",
+        "str%d_cell_model",
+        "str%d_Vnominal"
+);
 	private static final int DATA_OPTION_NUM = 6;
 	private static final DecimalFormatSymbols DFS = DecimalFormatSymbols.getInstance(Locale.US);
 	private static final DecimalFormat DF = new DecimalFormat("#0.000", DFS);
 
-	List<String> channelNames = new ArrayList<>();
+	List<String> latestSaveChannelNames = new ArrayList<>();
 	private int stringNumber;
 	private int stringNumber_1;
 	private int cellNumber;
@@ -290,6 +299,7 @@ public final class SimpleDemoApp
 		}
 	}
 
+
 	private void checkInitCellDimensions() {
 		if(!isFirstInitAllDimension){
 			isFirstInitAllDimension = true;
@@ -495,17 +505,17 @@ public final class SimpleDemoApp
 	    TimerTask task = new TimerTask() {
 	        @Override
 	        public void run() {
-				getCellDimension();
-				checkInitCellDimensions();
-				if(isFirstInitAllDimension && stringNumber > 0 && cellNumber > 0) {
-					logger.info("Cell dimensions are ready. Initializing power cells and channels.");
-					setSoCEngine(stringNumber);
-	        		calculateSoCSoH();
-					pushCalculatedDatatoChannels();
-				}
-				else{
-					logger.info("Cell dimensions are not ready yet. Skipping this cycle.");
-				}
+				// getCellDimension();
+				// checkInitCellDimensions();
+				// if(isFirstInitAllDimension && stringNumber > 0 && cellNumber > 0) {
+				// 	logger.info("Cell dimensions are ready. Initializing power cells and channels.");
+				// 	setSoCEngine(stringNumber);
+	        	// 	calculateSoCSoH();
+				// 	pushCalculatedDatatoChannels();
+				// }
+				// else{
+				// 	logger.info("Cell dimensions are not ready yet. Skipping this cycle.");
+				// }
 	        }
 	    };
 	    updateTimer.scheduleAtFixedRate(task, (long) 1 * 1000, (long) 1 * 1000);
@@ -793,15 +803,26 @@ public final class SimpleDemoApp
 		// socEngine = new SoCEngine();
 	}
 
+	private void saveLatestSavedChannelName(){
+		latestSaveChannelNames.add("soh_process_status");
+		latestSaveChannelNames.add("dev_serial_comm_number");
+		latestSaveChannelNames.add("dev_serial_comm_0");
+		latestSaveChannelNames.add("dev_serial_comm_1");
+		latestSaveChannelNames.add("dev_serial_comm_2");
+		latestSaveChannelNames.add("site_name_1");
+		latestSaveChannelNames.add("account_1_username");
+		latestSaveChannelNames.add("account_1_password");
+	}
 	private void applyListeners() {
 		logger.info("Applying listeners for {}", APP_NAME);
-		String channelID = "account_1_username";
-		Channel channel = dataAccessService.getChannel(channelID);
-		channel.addListener(record ->{
-			if (record.getValue() != null) {
-                LatestValuesDao.updateString(channelID, record.getValue().asString());
-            }
-		});
+		for(String channelID : latestSaveChannelNames){
+			Channel channel = dataAccessService.getChannel(channelID);
+			channel.addListener(record ->{
+				if (record.getValue() != null) {
+					LatestValuesDao.updateString(channelID, record.getValue().asString());
+				}
+			});
+		}
 	}
 
 }
