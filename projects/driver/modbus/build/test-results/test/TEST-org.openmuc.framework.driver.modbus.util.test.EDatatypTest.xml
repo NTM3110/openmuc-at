@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.driver.modbus.util.test.EDatatypTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-10-21T03:20:33" hostname="shou-Dell-G15-5511" time="0.003">
+<testsuite name="org.openmuc.framework.driver.modbus.util.test.EDatatypTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:41:08" hostname="shou-ThinkPad-E14-Gen-5" time="0.004">
   <properties/>
   <testcase name="isValidDatatypTest()" classname="org.openmuc.framework.driver.modbus.util.test.EDatatypTest" time="0.002"/>
-  <testcase name="getSupportedDatatypesTest()" classname="org.openmuc.framework.driver.modbus.util.test.EDatatypTest" time="0.0"/>
+  <testcase name="getSupportedDatatypesTest()" classname="org.openmuc.framework.driver.modbus.util.test.EDatatypTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

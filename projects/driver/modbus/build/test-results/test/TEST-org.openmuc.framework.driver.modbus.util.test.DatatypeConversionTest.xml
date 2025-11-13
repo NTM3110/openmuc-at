@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" tests="24" skipped="0" failures="0" errors="0" timestamp="2025-10-21T03:20:33" hostname="shou-Dell-G15-5511" time="0.03">
+<testsuite name="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" tests="24" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:41:08" hostname="shou-ThinkPad-E14-Gen-5" time="0.046">
   <properties/>
-  <testcase name="test_signedInt8_To_Bytes()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.004"/>
-  <testcase name="test_bytes_To_UnignedInt8()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_unsignedInt32_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
-  <testcase name="test_bytes_To_UnignedInt16_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_signedInt8_To_Bytes()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.008"/>
+  <testcase name="test_bytes_To_UnignedInt8()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_unsignedInt32_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.002"/>
+  <testcase name="test_bytes_To_UnignedInt16_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.002"/>
   <testcase name="test_signedInt64_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_bytes_To_SignedInt32_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
-  <testcase name="test_bytes_To_UnignedInt32_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
-  <testcase name="test_unsignedInt32_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_unsignedInt16_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_bytes_To_UnignedInt32_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_signedInt64_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
+  <testcase name="test_bytes_To_UnignedInt32_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
+  <testcase name="test_unsignedInt32_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_unsignedInt16_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_bytes_To_UnignedInt32_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_signedInt64_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_signedInt32_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_unsignedInt8_To_Bytes()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
-  <testcase name="test_bytes_To_SignedInt64_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
+  <testcase name="test_bytes_To_SignedInt64_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_bytes_To_SignedInt8()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
   <testcase name="test_bytes_To_SignedInt16_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_bytes_To_UnignedInt16_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_bytes_To_SignedInt32_LittelEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_signedInt32_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_reverseByteOrder()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
-  <testcase name="test_bytes_To_SignedInt16_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_unsignedInt16_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
-  <testcase name="test_signedInt16_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.0"/>
+  <testcase name="test_bytes_To_SignedInt16_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_unsignedInt16_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
+  <testcase name="test_signedInt16_To_Bytes_LittleEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <testcase name="test_signedInt16_To_Bytes_BigEndian()" classname="org.openmuc.framework.driver.modbus.util.test.DatatypeConversionTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>

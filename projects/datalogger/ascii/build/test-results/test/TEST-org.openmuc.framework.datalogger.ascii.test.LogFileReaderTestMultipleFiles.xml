@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:27" hostname="shou-Dell-G15-5511" time="0.076">
+<testsuite name="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" tests="4" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:19:16" hostname="shou-ThinkPad-E14-Gen-5" time="0.092">
   <properties/>
-  <testcase name="tc009_t1_t2_within_available_data_with_three_files()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.043"/>
-  <testcase name="tc010_test_getValues()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.029"/>
+  <testcase name="tc009_t1_t2_within_available_data_with_three_files()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.052"/>
+  <testcase name="tc010_test_getValues()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.034"/>
   <testcase name="tc_012_test_getLatestFile()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.002"/>
   <testcase name="tc_011_test_getAllDataFiles()" classname="org.openmuc.framework.datalogger.ascii.test.LogFileReaderTestMultipleFiles" time="0.001"/>
   <system-out><![CDATA[### Setup() LogFileReaderTestMultipleFiles

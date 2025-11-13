@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.datalogger.sql.SqlWriterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:30" hostname="shou-Dell-G15-5511" time="0.015">
+<testsuite name="org.openmuc.framework.datalogger.sql.SqlWriterTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:19:21" hostname="shou-ThinkPad-E14-Gen-5" time="0.014">
   <properties/>
-  <testcase name="writeEventBasedContainerToDb()" classname="org.openmuc.framework.datalogger.sql.SqlWriterTest" time="0.015"/>
+  <testcase name="writeEventBasedContainerToDb()" classname="org.openmuc.framework.datalogger.sql.SqlWriterTest" time="0.014"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

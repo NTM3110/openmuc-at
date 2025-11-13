@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.text.DecimalFormat;
@@ -46,6 +47,7 @@ public final class SimpleDemoApp
 	private static final DecimalFormatSymbols DFS = DecimalFormatSymbols.getInstance(Locale.US);
 	private static final DecimalFormat DF = new DecimalFormat("#0.000", DFS);
 
+	List<String> channelNames = new ArrayList<>();
 	private int stringNumber;
 	private int stringNumber_1;
 	private int cellNumber;
@@ -790,4 +792,16 @@ public final class SimpleDemoApp
 		// double vFloat = 2.25;
 		// socEngine = new SoCEngine();
 	}
+
+	private void applyListeners() {
+		logger.info("Applying listeners for {}", APP_NAME);
+		String channelID = "account_1_username";
+		Channel channel = dataAccessService.getChannel(channelID);
+		channel.addListener(record ->{
+			if (record.getValue() != null) {
+                LatestValuesDao.updateString(channelID, record.getValue().asString());
+            }
+		});
+	}
+
 }

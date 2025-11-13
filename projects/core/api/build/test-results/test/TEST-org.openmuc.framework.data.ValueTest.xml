@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.data.ValueTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:25" hostname="shou-Dell-G15-5511" time="0.007">
+<testsuite name="org.openmuc.framework.data.ValueTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:19:13" hostname="shou-ThinkPad-E14-Gen-5" time="0.015">
   <properties/>
   <testcase name="booleanValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
-  <testcase name="byteValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
+  <testcase name="byteValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.002"/>
   <testcase name="stringValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
   <testcase name="longValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
-  <testcase name="floatValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.0"/>
-  <testcase name="byteArrayValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.0"/>
-  <testcase name="shortValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.0"/>
-  <testcase name="doubleValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
-  <testcase name="intValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.0"/>
+  <testcase name="floatValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
+  <testcase name="byteArrayValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
+  <testcase name="shortValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
+  <testcase name="doubleValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.0"/>
+  <testcase name="intValueEqualsHashCodeTest()" classname="org.openmuc.framework.data.ValueTest" time="0.001"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>

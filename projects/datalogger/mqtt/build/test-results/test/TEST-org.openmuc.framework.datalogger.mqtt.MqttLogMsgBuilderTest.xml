@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-10-21T01:39:28" hostname="shou-Dell-G15-5511" time="0.022">
+<testsuite name="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:19:19" hostname="shou-ThinkPad-E14-Gen-5" time="0.042">
   <properties/>
-  <testcase name="test_logTwoChannels_differentTopic_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.006"/>
-  <testcase name="test_logSingleChannel_multipleFalse()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.011"/>
-  <testcase name="test_logTwoChannels_sameTopic_multipleFalse()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.001"/>
-  <testcase name="test_logSingleChannel_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.002"/>
-  <testcase name="test_logTwoChannels_sameTopic_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.001"/>
+  <testcase name="test_logTwoChannels_differentTopic_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.011"/>
+  <testcase name="test_logSingleChannel_multipleFalse()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.016"/>
+  <testcase name="test_logTwoChannels_sameTopic_multipleFalse()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.004"/>
+  <testcase name="test_logSingleChannel_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.003"/>
+  <testcase name="test_logTwoChannels_sameTopic_multipleTrue()" classname="org.openmuc.framework.datalogger.mqtt.MqttLogMsgBuilderTest" time="0.003"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
