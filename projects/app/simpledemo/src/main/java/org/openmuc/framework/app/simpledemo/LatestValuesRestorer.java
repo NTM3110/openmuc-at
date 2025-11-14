@@ -1,4 +1,4 @@
-package org.openmuc.framework.app.bms;
+package org.openmuc.framework.app.simpledemo;
 
 import org.openmuc.framework.dataaccess.DataAccessService;
 import org.osgi.service.component.annotations.Reference;
@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LatestValuesRestorer {
 
@@ -26,7 +28,7 @@ public class LatestValuesRestorer {
     //     this.dataManager = dm;
     // }
 
-    public static int restoreAll(DataAccessService dataAccessService) {
+    public static int restoreAll(DataAccessService dataAccessService, List<String> restoredChannelIds) {
         String sql = "SELECT channelid, value_type, value_double, value_string, value_boolean " +
                      "FROM latest_values";
 
@@ -55,6 +57,8 @@ public class LatestValuesRestorer {
                 else {
                     continue; // invalid row, skip
                 }
+                if(!restoredChannelIds.contains(channelId)) continue;
+                logger.info("Restoring channel {}: value: {}", channelId, v);
                 long now = System.currentTimeMillis();
                 Record r = new Record(v, now, Flag.VALID); // no time, just value
                 dataAccessService.getChannel(channelId).setLatestRecord(r);

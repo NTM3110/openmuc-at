@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-11-13T02:41:08" hostname="shou-ThinkPad-E14-Gen-5" time="0.014">
+<testsuite name="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2025-11-14T01:33:03" hostname="shou-ThinkPad-E14-Gen-5" time="0.009">
   <properties/>
-  <testcase name="testValidReadAddresses()" classname="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" time="0.01"/>
-  <testcase name="testValidWriteAddresses()" classname="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" time="0.003"/>
+  <testcase name="testValidReadAddresses()" classname="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" time="0.006"/>
+  <testcase name="testValidWriteAddresses()" classname="org.openmuc.framework.driver.modbustcp.test.ModbusTcpChannelTest" time="0.002"/>
   <system-out><![CDATA[0:DISCRETE_INPUTS:0:BOOLEAN and resulting READ:DISCRETE_INPUTS:BOOLEAN are valid.
 0:COILS:0:BOOLEAN and resulting READ:COILS:BOOLEAN are valid.
 0:INPUT_REGISTERS:0:SHORT and resulting READ:INPUT_REGISTERS:SHORT are valid.

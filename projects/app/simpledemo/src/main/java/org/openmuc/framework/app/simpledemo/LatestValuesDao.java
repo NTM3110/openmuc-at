@@ -1,4 +1,4 @@
-package org.openmuc.framework.app.bms;
+package org.openmuc.framework.app.simpledemo;
 
 import java.sql.*;
 import org.slf4j.Logger;

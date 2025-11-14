@@ -1,11 +1,24 @@
 def projectName = "OpenMUC App - Simple Demo"
+def jdbcVersion =  '1.1.0'
+configurations.create('embed')
 
 dependencies {
     implementation project(':openmuc-core-api')
+    implementation group: 'org.postgresql', name: 'postgresql', version: '42.7.2'
+    implementation group: 'com.h2database', name: 'h2', version: '2.3.232'
+    embed group: 'org.osgi', name: 'org.osgi.service.jdbc', version: jdbcVersion
+    api group: 'org.osgi', name: 'org.osgi.service.jdbc', version: jdbcVersion
 }
 
 jar {
-    bnd('Bundle-Name': projectName)
+    bnd('Bundle-Name': projectName, 'Bundle-ClassPath': '.,lib/org.osgi.service.jdbc-'+jdbcVersion+'.jar',
+            'Export-Package': 'org.osgi.service.jdbc',
+            'Import-Package': 'org.postgresql,javax.sql,org.h2.tools,' +
+                    'org.openmuc.framework.*,' +
+                    'org.osgi.*,org.slf4j,!org.osgi.service.jdbc,' + jarDefaultImportPackageVersion)
+    into('lib') {
+        from configurations.embed
+    }
 }
 
 publishing {

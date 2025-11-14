@@ -57,6 +57,395 @@
         <disabled>false</disabled>
       </channel>
     </device>
+    <device id="str1_virtual">
+      <description>String 1 calculated channels</description>
+      <disabled>false</disabled>
+      <channel id="str1_cell_qty">
+        <description>number of cells</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_Cnominal">
+        <description>C nominal</description>
+        <unit>Ah</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_string_name">
+        <description>String name</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell_brand">
+        <description>Cell Brand</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell_model">
+        <description>Cell Model</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_Vnominal">
+        <description>V nominal</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_string_vol">
+        <description>String Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_voltage_cell_id">
+        <description>Max V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_voltage_cell_id">
+        <description>Min V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_temp_cell_id">
+        <description>Max T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_temp_cell_id">
+        <description>Min T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_rst_cell_id">
+        <description>Max R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_rst_cell_id">
+        <description>Min R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_average_vol">
+        <description>Average V</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_average_temp">
+        <description>Average T</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_average_rst">
+        <description>Average Cell R</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_voltage_value">
+        <description>Max Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_voltage_value">
+        <description>Min Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_temp_value">
+        <description>Max Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_temp_value">
+        <description>Min Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_max_rst_value">
+        <description>Max Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_min_rst_value">
+        <description>Min Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_string_SOC">
+        <description>String SoC</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_string_SOH">
+        <description>String SoH</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell1_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell1_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="str2_virtual">
+      <description>String 2 calculated channels</description>
+      <disabled>false</disabled>
+      <channel id="str2_cell_qty">
+        <description>number of cells</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_Cnominal">
+        <description>C nominal</description>
+        <unit>Ah</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_name">
+        <description>String name</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell_brand">
+        <description>Cell Brand</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell_model">
+        <description>Cell Model</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_Vnominal">
+        <description>V nominal</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_vol">
+        <description>String Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_voltage_cell_id">
+        <description>Max V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_voltage_cell_id">
+        <description>Min V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_temp_cell_id">
+        <description>Max T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_temp_cell_id">
+        <description>Min T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_rst_cell_id">
+        <description>Max R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_rst_cell_id">
+        <description>Min R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_vol">
+        <description>Average V</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_temp">
+        <description>Average T</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_rst">
+        <description>Average Cell R</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_voltage_value">
+        <description>Max Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_voltage_value">
+        <description>Min Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_temp_value">
+        <description>Max Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_temp_value">
+        <description>Min Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_rst_value">
+        <description>Max Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_rst_value">
+        <description>Min Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_SOC">
+        <description>String SoC</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_SOH">
+        <description>String SoH</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+    </device>
   </driver>
-  <driver id="modbus"/>
+  <driver id="modbus">
+    <device id="str1_modbus">
+      <description>String 1 Modbus RTU</description>
+      <deviceAddress>/dev/ttyS1</deviceAddress>
+      <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
+      <samplingTimeout>8s</samplingTimeout>
+      <connectRetryInterval>8s</connectRetryInterval>
+      <disabled>false</disabled>
+      <channel id="str1_cell1_R">
+        <description>Cell (R) (str1_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell1_V">
+        <description>Cell (V) (str1_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell1_T">
+        <description>Cell (T) (str1_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_total_I">
+        <description>String 1 (I)</description>
+        <channelAddress>106:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>1500ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_pack</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="str2_modbus">
+      <description>String 2 Modbus RTU</description>
+      <deviceAddress>/dev/ttyS7</deviceAddress>
+      <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
+      <samplingTimeout>8s</samplingTimeout>
+      <connectRetryInterval>8s</connectRetryInterval>
+      <disabled>false</disabled>
+      <channel id="str2_cell1_R">
+        <description>Cell (R) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_V">
+        <description>Cell (V) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_T">
+        <description>Cell (T) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_total_I">
+        <description>String 2 (I)</description>
+        <channelAddress>106:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>1500ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_pack</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+  </driver>
 </configuration>
