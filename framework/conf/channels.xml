@@ -206,6 +206,54 @@
         <valueType>DOUBLE</valueType>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell2_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell2_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell4_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell4_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell5_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell5_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
     </device>
     <device id="str2_virtual">
       <description>String 2 calculated channels</description>
@@ -356,6 +404,18 @@
         <valueType>DOUBLE</valueType>
         <disabled>false</disabled>
       </channel>
+      <channel id="str2_cell2_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
     </device>
   </driver>
   <driver id="modbus">
@@ -393,6 +453,114 @@
         <samplingGroup>str1_sg_slave_1</samplingGroup>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell2_R">
+        <description>Cell (R) (str1_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell2_V">
+        <description>Cell (V) (str1_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell2_T">
+        <description>Cell (T) (str1_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_R">
+        <description>Cell (R) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_V">
+        <description>Cell (V) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell3_T">
+        <description>Cell (T) (str1_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell4_R">
+        <description>Cell (R) (str1_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell4_V">
+        <description>Cell (V) (str1_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell4_T">
+        <description>Cell (T) (str1_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell5_R">
+        <description>Cell (R) (str1_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>1200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell5_V">
+        <description>Cell (V) (str1_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>1200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell5_T">
+        <description>Cell (T) (str1_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>1200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
       <channel id="str1_total_I">
         <description>String 1 (I)</description>
         <channelAddress>106:HOLDING_REGISTERS:0:INT16</channelAddress>
@@ -405,7 +573,7 @@
     </device>
     <device id="str2_modbus">
       <description>String 2 Modbus RTU</description>
-      <deviceAddress>/dev/ttyS7</deviceAddress>
+      <deviceAddress>/dev/ttyS1</deviceAddress>
       <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
       <samplingTimeout>8s</samplingTimeout>
       <connectRetryInterval>8s</connectRetryInterval>
@@ -435,6 +603,33 @@
         <samplingInterval>8s</samplingInterval>
         <samplingTimeOffset>0</samplingTimeOffset>
         <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_R">
+        <description>Cell (R) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_V">
+        <description>Cell (V) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_T">
+        <description>Cell (T) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>8s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
         <disabled>false</disabled>
       </channel>
       <channel id="str2_total_I">

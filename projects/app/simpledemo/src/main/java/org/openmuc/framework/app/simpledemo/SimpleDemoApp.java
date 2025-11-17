@@ -55,12 +55,16 @@ public final class SimpleDemoApp
         "str%d_cell_model",
         "str%d_Vnominal"
 );
+	private final Object listenerLock = new Object();
+
+	
 	private static final int DATA_OPTION_NUM = 6;
 	private static final DecimalFormatSymbols DFS = DecimalFormatSymbols.getInstance(Locale.US);
 	private static final DecimalFormat DF = new DecimalFormat("#0.000", DFS);
 
 	List<String> latestSaveChannelNames = new ArrayList<>();
 	private final Map<String, RecordListener> listeners = new HashMap<>();
+	
 
 	boolean isRestored = false;
 	private int stringNumber;
@@ -90,9 +94,16 @@ public final class SimpleDemoApp
 	@Reference
 	private DataAccessService dataAccessService;
 
+	ChannelValueController controller;
+
 	@Activate
 	private void activate() {
 		logger.info("Activating {}", APP_NAME);
+		if (dataAccessService == null) {
+            throw new IllegalStateException("DataAccessService was not injected");
+        }
+
+        controller = new ChannelValueController(dataAccessService);
 		initiate();
 	}
 
@@ -365,6 +376,7 @@ public final class SimpleDemoApp
 				socEngines = new SoCEngine[stringNumber_1];
 				stringNumber = stringNumber_1;
 				updateLatestSaveChannelNames(stringNumber);
+				controller.syncChannelSet(latestSaveChannelNames);
 				applyListeners();
 				cellNumber = maxCellNumber;
 				channels = initiateChannel();
@@ -406,6 +418,7 @@ public final class SimpleDemoApp
 						isSetSoCEngine = isSetSoCEngineDemo;
 						socEngines = socEnginesDemo;
 						updateLatestSaveChannelNames(stringNumber_1);
+						controller.syncChannelSet(latestSaveChannelNames);
 						applyListeners();
 						// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
 						// setFirstOverallStringValue(stringNumber_1);
@@ -567,6 +580,7 @@ public final class SimpleDemoApp
 				// }
 				if(isRestored == false) {
 					if(LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames) > 0) {
+						controller.seedFromChannels(latestSaveChannelNames);
 						isRestored = true;
 					}
 				}
@@ -884,20 +898,7 @@ public final class SimpleDemoApp
 			logger.info("Setting up listener for channel: {}", channelID);
 			// Reuse existing listener if we already created one
 			RecordListener listener = listeners.computeIfAbsent(channelID, id -> (record -> {
-				if (record.getValue() != null) {
-					if((channelID.startsWith("str") && channelID.contains("_cell_qty")) || channelID.equals("dev_serial_comm_number") || (channelID.startsWith("str") && channelID.contains("_Cnominal")) || (channelID.startsWith("str") && channelID.contains("_Vnominal"))){
-						LatestValuesDao.updateDouble(id, record.getValue().asDouble());
-					}
-					else if(channelID.equals("soh_process_status")) {
-						LatestValuesDao.updateBoolean(id, record.getValue().asBoolean());
-					}
-					else
-					LatestValuesDao.updateString(id, record.getValue().asString());
-
-					logger.info("Listener triggered for channel: {} latest value: {}", channelID, dataAccessService.getChannel(channelID).getLatestRecord().getValue().toString());
-
-					// dataAccessService.getChannel(channelID).setLatestRecord(record);
-				}
+				controller.processListenerEvent(id, record); 
 			}));
 
 			Channel channel = dataAccessService.getChannel(channelID);
