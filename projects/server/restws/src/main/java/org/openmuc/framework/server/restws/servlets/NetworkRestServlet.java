@@ -1,7 +1,6 @@
 package org.openmuc.framework.server.restws.servlets;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -151,14 +150,13 @@ public class NetworkRestServlet extends GenericServlet {
         logger.info("NetworkRestServlet: doPut called");
         response.setContentType(APPLICATION_JSON);
 
-        // Common OpenMUC REST path validation
         String[] pathAndQueryString = checkIfItIsACorrectRest(request, response, logger);
         if (pathAndQueryString == null) {
-            return; // error already written by helper
+            return; // error already written
         }
 
         // /rest/network/{iface}
-        String pathInfo = request.getPathInfo();       // e.g. "/enp0s31f6"
+        String pathInfo = request.getPathInfo();       // e.g. "/wlp0s20f3"
         String iface = null;
         if (pathInfo != null && pathInfo.length() > 1) {
             iface = pathInfo.substring(1);             // remove leading '/'
@@ -167,11 +165,11 @@ public class NetworkRestServlet extends GenericServlet {
         // Parse JSON body
         FromJson json = ServletLib.getFromJson(request, logger, response);
         if (json == null) {
-            return; // helper already sent an error
+            return;
         }
         JsonObject obj = json.getJsonObject();
 
-        // If iface not in path, allow { "iface": "enp0s31f6", ... } in JSON
+        // If iface not in path, allow { "iface": "wlp0s20f3", ... } in JSON
         if (iface == null || iface.isEmpty()) {
             iface = getOptString(obj, "iface");
         }
@@ -204,10 +202,17 @@ public class NetworkRestServlet extends GenericServlet {
         String mask = null;
         String gw = null;
 
+        // raw DNS string from JSON (for echoing back in response)
+        String dnsRaw = null;
+        // split DNS entries (for script args)
+        String dns1 = null;
+        String dns2 = null;
+
         if ("static".equalsIgnoreCase(mode)) {
             ip   = getOptString(obj, "ipAddress");
             mask = getOptString(obj, "subnetMask");
             gw   = getOptString(obj, "gateway");
+            dnsRaw = getOptString(obj, "dns");  // e.g. "8.8.8.8" or "8.8.8.8,1.1.1.1"
 
             if (ip == null || mask == null || gw == null) {
                 ServletLib.sendHTTPErrorAndLogDebug(
@@ -218,6 +223,17 @@ public class NetworkRestServlet extends GenericServlet {
                         "",
                         "");
                 return;
+            }
+
+            // Parse dnsRaw into up to two entries (split by comma or whitespace)
+            if (dnsRaw != null && !dnsRaw.trim().isEmpty()) {
+                String[] parts = dnsRaw.trim().split("[,\\s]+");
+                if (parts.length >= 1) {
+                    dns1 = parts[0];
+                }
+                if (parts.length >= 2) {
+                    dns2 = parts[1];
+                }
             }
         }
         else if (!"dhcp".equalsIgnoreCase(mode)) {
@@ -237,7 +253,9 @@ public class NetworkRestServlet extends GenericServlet {
                 mode,
                 ip,
                 mask,
-                gw // DNS list – extend if your script supports it
+                gw,
+                dns1,
+                dns2
         );
 
         try {
@@ -250,7 +268,8 @@ public class NetworkRestServlet extends GenericServlet {
                     + "\"applied\":{"
                         + "\"ipAddress\":" + (ip == null ? "null" : "\"" + escapeJson(ip) + "\"") + ","
                         + "\"subnetMask\":" + (mask == null ? "null" : "\"" + escapeJson(mask) + "\"") + ","
-                        + "\"gateway\":" + (gw == null ? "null" : "\"" + escapeJson(gw) + "\"")
+                        + "\"gateway\":" + (gw == null ? "null" : "\"" + escapeJson(gw) + "\"") + ","
+                        + "\"dns\":" + (dnsRaw == null ? "null" : "\"" + escapeJson(dnsRaw) + "\"")
                     + "},"
                     + "\"exitCode\":" + exec.exitCode + ","
                     + "\"stdout\":\"" + escapeJson(exec.stdout) + "\","
