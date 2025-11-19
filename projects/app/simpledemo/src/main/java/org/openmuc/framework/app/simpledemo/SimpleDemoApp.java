@@ -67,6 +67,7 @@ public final class SimpleDemoApp
 	private int stringNumber_1;
 	private int cellNumber = 1;
 	private boolean isFirstSoC = true;
+	private boolean isCellNumberChanged = false;
 
 
 	private boolean isInitPowerCells = false;
@@ -382,6 +383,28 @@ public final class SimpleDemoApp
 					cellNumber = maxCellNumber;
 					channels = initiateChannel();
 				}
+				else if (isCellNumberChanged){
+					// logger.info("No dimension change detected.");
+					logger.info("Dimensions changed, re-initializing isInitSoC0 array.");
+					isInitSoC0 = new boolean[stringNumber_1][maxCellNumber];
+
+					powerCells = new PowerCell[stringNumber_1][maxCellNumber];
+
+					initiatePowerCells();
+
+					isSetSoCEngine = new boolean[stringNumber_1];
+					socEngines = new SoCEngine[stringNumber_1];
+					
+					updateLatestSaveChannelNames(stringNumber_1);
+					applyListeners();
+						// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
+						// setFirstOverallStringValue(stringNumber_1);
+					
+					stringNumber = stringNumber_1;
+					cellNumber = maxCellNumber;
+					channels = initiateChannel();
+					isCellNumberChanged = false;
+				}
 				// initiatePowerCells();
 			}
 			logger.info("All cell dimensions are initialized: string number: {}, cell number: {}", stringNumber, cellNumber);
@@ -643,8 +666,9 @@ public final class SimpleDemoApp
 					if((channelID.startsWith("str") && channelID.contains("_cell_qty")) || channelID.equals("dev_serial_comm_number") || (channelID.startsWith("str") && channelID.contains("_Cnominal")) || (channelID.startsWith("str") && channelID.contains("_Vnominal"))){
 						LatestValuesDao.updateDouble(id, record.getValue().asDouble());
 						if(channelID.startsWith("str") && channelID.contains("_cell_qty")){
-							getCellDimension();
-							channels = initiateChannel();
+							// getCellDimension();
+							// channels = initiateChannel();
+							isCellNumberChanged = true;
 						}
 					}
 					else if(channelID.equals("soh_process_status")) {
