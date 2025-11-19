@@ -634,6 +634,10 @@ public final class SimpleDemoApp
 				if (record.getValue() != null) {
 					if((channelID.startsWith("str") && channelID.contains("_cell_qty")) || channelID.equals("dev_serial_comm_number") || (channelID.startsWith("str") && channelID.contains("_Cnominal")) || (channelID.startsWith("str") && channelID.contains("_Vnominal"))){
 						LatestValuesDao.updateDouble(id, record.getValue().asDouble());
+						if(channelID.startsWith("str") && channelID.contains("_cell_qty")){
+							getCellDimension();
+							channels = initiateChannel();
+						}
 					}
 					else if(channelID.equals("soh_process_status")) {
 						LatestValuesDao.updateBoolean(id, record.getValue().asBoolean());
