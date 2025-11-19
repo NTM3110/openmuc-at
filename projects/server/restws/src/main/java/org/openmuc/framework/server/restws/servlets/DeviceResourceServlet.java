@@ -69,6 +69,7 @@ public class DeviceResourceServlet extends GenericServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType(APPLICATION_JSON);
+        logger.info("DeviceResourceServlet: doGet called");
         String[] pathAndQueryString = checkIfItIsACorrectRest(request, response, logger);
 
         if (pathAndQueryString != null) {

@@ -550,6 +550,980 @@
         <loggingSettings>sqllogger:</loggingSettings>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell21_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell21_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell22_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell22_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell23_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell23_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell24_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell24_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell25_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell25_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell26_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell26_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell27_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell27_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell28_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell28_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell29_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell29_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell30_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell30_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell31_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell31_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell32_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell32_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell33_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell33_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell34_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell34_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell35_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell35_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell36_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell36_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell37_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell37_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell38_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell38_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell39_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell39_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell40_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell40_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="str2_virtual">
+      <description>String 2 calculated channels</description>
+      <disabled>false</disabled>
+      <channel id="str2_cell_qty">
+        <description>number of cells</description>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_Cnominal">
+        <description>C nominal</description>
+        <unit>Ah</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_name">
+        <description>String name</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell_brand">
+        <description>Cell Brand</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell_model">
+        <description>Cell Model</description>
+        <valueType length="64">STRING</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_Vnominal">
+        <description>V nominal</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_vol">
+        <description>String Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_voltage_cell_id">
+        <description>Max V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_voltage_cell_id">
+        <description>Min V Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_temp_cell_id">
+        <description>Max T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_temp_cell_id">
+        <description>Min T Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_rst_cell_id">
+        <description>Max R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_rst_cell_id">
+        <description>Min R Cell ID</description>
+        <valueType>INTEGER</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_vol">
+        <description>Average Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_temp">
+        <description>Average Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_average_rst">
+        <description>Average Cell R</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_voltage_value">
+        <description>Max Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_voltage_value">
+        <description>Min Cell Voltage</description>
+        <unit>V</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_temp_value">
+        <description>Max Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_temp_value">
+        <description>Min Cell Temperature</description>
+        <unit>C</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_max_rst_value">
+        <description>Max Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_min_rst_value">
+        <description>Min Cell Internal Resistance</description>
+        <unit>miliOhm</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_SOC">
+        <description>String SoC</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_string_SOH">
+        <description>String SoH</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell3_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell3_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell5_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell5_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell6_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell6_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell7_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell7_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell8_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell8_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell9_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell9_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell10_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell10_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell11_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell11_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell12_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell12_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell13_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell13_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell14_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell14_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell15_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell15_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell16_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell16_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell17_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell17_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell18_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell18_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell19_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell19_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell20_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell20_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell21_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell21_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell22_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell22_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell23_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell23_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell24_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell24_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell25_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell25_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell26_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell26_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell27_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell27_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell28_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell28_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell29_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell29_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell30_SOC">
+        <description>State of Charge</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell30_SOH">
+        <description>State of Health</description>
+        <unit>%</unit>
+        <valueType>DOUBLE</valueType>
+        <loggingInterval>1m</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
     </device>
   </driver>
   <driver id="modbus">
@@ -1160,6 +2134,606 @@
         <samplingGroup>str1_sg_slave_20</samplingGroup>
         <disabled>false</disabled>
       </channel>
+      <channel id="str1_cell21_R">
+        <description>Cell (R) (str1_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1021:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell21_V">
+        <description>Cell (V) (str1_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1221:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell21_T">
+        <description>Cell (T) (str1_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1421:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell22_R">
+        <description>Cell (R) (str1_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1022:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell22_V">
+        <description>Cell (V) (str1_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1222:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell22_T">
+        <description>Cell (T) (str1_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1422:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell23_R">
+        <description>Cell (R) (str1_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1023:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell23_V">
+        <description>Cell (V) (str1_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1223:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell23_T">
+        <description>Cell (T) (str1_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1423:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell24_R">
+        <description>Cell (R) (str1_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1024:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell24_V">
+        <description>Cell (V) (str1_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1224:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell24_T">
+        <description>Cell (T) (str1_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1424:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell25_R">
+        <description>Cell (R) (str1_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1025:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell25_V">
+        <description>Cell (V) (str1_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1225:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell25_T">
+        <description>Cell (T) (str1_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1425:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell26_R">
+        <description>Cell (R) (str1_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1026:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell26_V">
+        <description>Cell (V) (str1_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1226:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell26_T">
+        <description>Cell (T) (str1_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1426:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell27_R">
+        <description>Cell (R) (str1_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1027:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell27_V">
+        <description>Cell (V) (str1_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1227:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell27_T">
+        <description>Cell (T) (str1_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1427:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell28_R">
+        <description>Cell (R) (str1_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1028:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell28_V">
+        <description>Cell (V) (str1_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1228:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell28_T">
+        <description>Cell (T) (str1_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1428:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell29_R">
+        <description>Cell (R) (str1_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1029:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell29_V">
+        <description>Cell (V) (str1_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1229:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell29_T">
+        <description>Cell (T) (str1_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1429:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell30_R">
+        <description>Cell (R) (str1_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1030:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell30_V">
+        <description>Cell (V) (str1_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1230:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell30_T">
+        <description>Cell (T) (str1_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1430:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell31_R">
+        <description>Cell (R) (str1_cell31)</description>
+        <channelAddress>31:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1031:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_31</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell31_V">
+        <description>Cell (V) (str1_cell31)</description>
+        <channelAddress>31:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1231:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_31</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell31_T">
+        <description>Cell (T) (str1_cell31)</description>
+        <channelAddress>31:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1431:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_31</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell32_R">
+        <description>Cell (R) (str1_cell32)</description>
+        <channelAddress>32:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1032:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_32</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell32_V">
+        <description>Cell (V) (str1_cell32)</description>
+        <channelAddress>32:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1232:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_32</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell32_T">
+        <description>Cell (T) (str1_cell32)</description>
+        <channelAddress>32:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1432:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_32</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell33_R">
+        <description>Cell (R) (str1_cell33)</description>
+        <channelAddress>33:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1033:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_33</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell33_V">
+        <description>Cell (V) (str1_cell33)</description>
+        <channelAddress>33:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1233:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_33</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell33_T">
+        <description>Cell (T) (str1_cell33)</description>
+        <channelAddress>33:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1433:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_33</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell34_R">
+        <description>Cell (R) (str1_cell34)</description>
+        <channelAddress>34:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1034:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_34</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell34_V">
+        <description>Cell (V) (str1_cell34)</description>
+        <channelAddress>34:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1234:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_34</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell34_T">
+        <description>Cell (T) (str1_cell34)</description>
+        <channelAddress>34:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1434:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_34</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell35_R">
+        <description>Cell (R) (str1_cell35)</description>
+        <channelAddress>35:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1035:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_35</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell35_V">
+        <description>Cell (V) (str1_cell35)</description>
+        <channelAddress>35:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1235:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_35</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell35_T">
+        <description>Cell (T) (str1_cell35)</description>
+        <channelAddress>35:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1435:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_35</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell36_R">
+        <description>Cell (R) (str1_cell36)</description>
+        <channelAddress>36:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1036:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_36</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell36_V">
+        <description>Cell (V) (str1_cell36)</description>
+        <channelAddress>36:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1236:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_36</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell36_T">
+        <description>Cell (T) (str1_cell36)</description>
+        <channelAddress>36:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1436:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_36</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell37_R">
+        <description>Cell (R) (str1_cell37)</description>
+        <channelAddress>37:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1037:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_37</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell37_V">
+        <description>Cell (V) (str1_cell37)</description>
+        <channelAddress>37:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1237:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_37</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell37_T">
+        <description>Cell (T) (str1_cell37)</description>
+        <channelAddress>37:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1437:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_37</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell38_R">
+        <description>Cell (R) (str1_cell38)</description>
+        <channelAddress>38:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1038:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_38</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell38_V">
+        <description>Cell (V) (str1_cell38)</description>
+        <channelAddress>38:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1238:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_38</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell38_T">
+        <description>Cell (T) (str1_cell38)</description>
+        <channelAddress>38:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1438:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_38</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell39_R">
+        <description>Cell (R) (str1_cell39)</description>
+        <channelAddress>39:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1039:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_39</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell39_V">
+        <description>Cell (V) (str1_cell39)</description>
+        <channelAddress>39:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1239:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_39</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell39_T">
+        <description>Cell (T) (str1_cell39)</description>
+        <channelAddress>39:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1439:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_39</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell40_R">
+        <description>Cell (R) (str1_cell40)</description>
+        <channelAddress>40:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1040:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_40</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell40_V">
+        <description>Cell (V) (str1_cell40)</description>
+        <channelAddress>40:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1240:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_40</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str1_cell40_T">
+        <description>Cell (T) (str1_cell40)</description>
+        <channelAddress>40:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1440:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str1_sg_slave_40</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
       <channel id="str1_total_I">
         <description>String 1 (I)</description>
         <channelAddress>106:HOLDING_REGISTERS:0:INT16</channelAddress>
@@ -1176,6 +2750,937 @@
         <description>String 1 (T ambient)</description>
         <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
         <serverMapping id="modbus">HOLDING_REGISTERS:1701:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="str2_modbus">
+      <description>String 2 Modbus RTU</description>
+      <deviceAddress>/dev/ttyS7</deviceAddress>
+      <settings>RTU:SERIAL_ENCODING_RTU:9600:DATABITS_8:PARITY_NONE:STOPBITS_1:ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE</settings>
+      <samplingTimeout>15s</samplingTimeout>
+      <connectRetryInterval>15s</connectRetryInterval>
+      <disabled>false</disabled>
+      <channel id="str2_cell1_R">
+        <description>Cell (R) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1001:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_V">
+        <description>Cell (V) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1201:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell1_T">
+        <description>Cell (T) (str2_cell1)</description>
+        <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1401:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_1</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_R">
+        <description>Cell (R) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1002:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_V">
+        <description>Cell (V) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1202:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell2_T">
+        <description>Cell (T) (str2_cell2)</description>
+        <channelAddress>2:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1402:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_2</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell3_R">
+        <description>Cell (R) (str2_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1003:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell3_V">
+        <description>Cell (V) (str2_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1203:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell3_T">
+        <description>Cell (T) (str2_cell3)</description>
+        <channelAddress>3:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1403:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_3</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_R">
+        <description>Cell (R) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1004:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_V">
+        <description>Cell (V) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1204:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell4_T">
+        <description>Cell (T) (str2_cell4)</description>
+        <channelAddress>4:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1404:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_4</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell5_R">
+        <description>Cell (R) (str2_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1005:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell5_V">
+        <description>Cell (V) (str2_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1205:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell5_T">
+        <description>Cell (T) (str2_cell5)</description>
+        <channelAddress>5:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1405:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_5</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell6_R">
+        <description>Cell (R) (str2_cell6)</description>
+        <channelAddress>6:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1006:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_6</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell6_V">
+        <description>Cell (V) (str2_cell6)</description>
+        <channelAddress>6:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1206:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_6</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell6_T">
+        <description>Cell (T) (str2_cell6)</description>
+        <channelAddress>6:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1406:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_6</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell7_R">
+        <description>Cell (R) (str2_cell7)</description>
+        <channelAddress>7:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1007:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_7</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell7_V">
+        <description>Cell (V) (str2_cell7)</description>
+        <channelAddress>7:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1207:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_7</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell7_T">
+        <description>Cell (T) (str2_cell7)</description>
+        <channelAddress>7:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1407:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_7</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell8_R">
+        <description>Cell (R) (str2_cell8)</description>
+        <channelAddress>8:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1008:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_8</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell8_V">
+        <description>Cell (V) (str2_cell8)</description>
+        <channelAddress>8:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1208:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_8</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell8_T">
+        <description>Cell (T) (str2_cell8)</description>
+        <channelAddress>8:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1408:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_8</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell9_R">
+        <description>Cell (R) (str2_cell9)</description>
+        <channelAddress>9:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1009:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_9</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell9_V">
+        <description>Cell (V) (str2_cell9)</description>
+        <channelAddress>9:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1209:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_9</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell9_T">
+        <description>Cell (T) (str2_cell9)</description>
+        <channelAddress>9:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1409:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_9</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell10_R">
+        <description>Cell (R) (str2_cell10)</description>
+        <channelAddress>10:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1010:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_10</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell10_V">
+        <description>Cell (V) (str2_cell10)</description>
+        <channelAddress>10:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1210:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_10</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell10_T">
+        <description>Cell (T) (str2_cell10)</description>
+        <channelAddress>10:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1410:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_10</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell11_R">
+        <description>Cell (R) (str2_cell11)</description>
+        <channelAddress>11:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1011:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_11</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell11_V">
+        <description>Cell (V) (str2_cell11)</description>
+        <channelAddress>11:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1211:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_11</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell11_T">
+        <description>Cell (T) (str2_cell11)</description>
+        <channelAddress>11:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1411:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>500ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_11</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell12_R">
+        <description>Cell (R) (str2_cell12)</description>
+        <channelAddress>12:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1012:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_12</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell12_V">
+        <description>Cell (V) (str2_cell12)</description>
+        <channelAddress>12:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1212:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_12</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell12_T">
+        <description>Cell (T) (str2_cell12)</description>
+        <channelAddress>12:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1412:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>550ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_12</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell13_R">
+        <description>Cell (R) (str2_cell13)</description>
+        <channelAddress>13:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1013:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_13</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell13_V">
+        <description>Cell (V) (str2_cell13)</description>
+        <channelAddress>13:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1213:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_13</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell13_T">
+        <description>Cell (T) (str2_cell13)</description>
+        <channelAddress>13:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1413:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>600ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_13</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell14_R">
+        <description>Cell (R) (str2_cell14)</description>
+        <channelAddress>14:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1014:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_14</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell14_V">
+        <description>Cell (V) (str2_cell14)</description>
+        <channelAddress>14:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1214:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_14</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell14_T">
+        <description>Cell (T) (str2_cell14)</description>
+        <channelAddress>14:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1414:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>650ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_14</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell15_R">
+        <description>Cell (R) (str2_cell15)</description>
+        <channelAddress>15:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1015:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_15</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell15_V">
+        <description>Cell (V) (str2_cell15)</description>
+        <channelAddress>15:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1215:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_15</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell15_T">
+        <description>Cell (T) (str2_cell15)</description>
+        <channelAddress>15:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1415:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>700ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_15</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell16_R">
+        <description>Cell (R) (str2_cell16)</description>
+        <channelAddress>16:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1016:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_16</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell16_V">
+        <description>Cell (V) (str2_cell16)</description>
+        <channelAddress>16:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1216:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_16</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell16_T">
+        <description>Cell (T) (str2_cell16)</description>
+        <channelAddress>16:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1416:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>750ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_16</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell17_R">
+        <description>Cell (R) (str2_cell17)</description>
+        <channelAddress>17:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1017:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_17</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell17_V">
+        <description>Cell (V) (str2_cell17)</description>
+        <channelAddress>17:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1217:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_17</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell17_T">
+        <description>Cell (T) (str2_cell17)</description>
+        <channelAddress>17:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1417:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>800ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_17</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell18_R">
+        <description>Cell (R) (str2_cell18)</description>
+        <channelAddress>18:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1018:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_18</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell18_V">
+        <description>Cell (V) (str2_cell18)</description>
+        <channelAddress>18:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1218:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_18</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell18_T">
+        <description>Cell (T) (str2_cell18)</description>
+        <channelAddress>18:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1418:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>850ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_18</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell19_R">
+        <description>Cell (R) (str2_cell19)</description>
+        <channelAddress>19:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1019:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_19</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell19_V">
+        <description>Cell (V) (str2_cell19)</description>
+        <channelAddress>19:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1219:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_19</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell19_T">
+        <description>Cell (T) (str2_cell19)</description>
+        <channelAddress>19:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1419:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>900ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_19</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell20_R">
+        <description>Cell (R) (str2_cell20)</description>
+        <channelAddress>20:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1020:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_20</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell20_V">
+        <description>Cell (V) (str2_cell20)</description>
+        <channelAddress>20:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1220:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_20</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell20_T">
+        <description>Cell (T) (str2_cell20)</description>
+        <channelAddress>20:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1420:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>950ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_20</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell21_R">
+        <description>Cell (R) (str2_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1021:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell21_V">
+        <description>Cell (V) (str2_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1221:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell21_T">
+        <description>Cell (T) (str2_cell21)</description>
+        <channelAddress>21:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1421:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>0</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_21</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell22_R">
+        <description>Cell (R) (str2_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1022:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell22_V">
+        <description>Cell (V) (str2_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1222:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell22_T">
+        <description>Cell (T) (str2_cell22)</description>
+        <channelAddress>22:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1422:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>50ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_22</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell23_R">
+        <description>Cell (R) (str2_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1023:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell23_V">
+        <description>Cell (V) (str2_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1223:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell23_T">
+        <description>Cell (T) (str2_cell23)</description>
+        <channelAddress>23:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1423:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>100ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_23</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell24_R">
+        <description>Cell (R) (str2_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1024:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell24_V">
+        <description>Cell (V) (str2_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1224:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell24_T">
+        <description>Cell (T) (str2_cell24)</description>
+        <channelAddress>24:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1424:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>150ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_24</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell25_R">
+        <description>Cell (R) (str2_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1025:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell25_V">
+        <description>Cell (V) (str2_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1225:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell25_T">
+        <description>Cell (T) (str2_cell25)</description>
+        <channelAddress>25:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1425:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>200ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_25</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell26_R">
+        <description>Cell (R) (str2_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1026:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell26_V">
+        <description>Cell (V) (str2_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1226:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell26_T">
+        <description>Cell (T) (str2_cell26)</description>
+        <channelAddress>26:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1426:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_26</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell27_R">
+        <description>Cell (R) (str2_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1027:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell27_V">
+        <description>Cell (V) (str2_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1227:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell27_T">
+        <description>Cell (T) (str2_cell27)</description>
+        <channelAddress>27:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1427:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>300ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_27</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell28_R">
+        <description>Cell (R) (str2_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1028:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell28_V">
+        <description>Cell (V) (str2_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1228:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell28_T">
+        <description>Cell (T) (str2_cell28)</description>
+        <channelAddress>28:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1428:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>350ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_28</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell29_R">
+        <description>Cell (R) (str2_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1029:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell29_V">
+        <description>Cell (V) (str2_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1229:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell29_T">
+        <description>Cell (T) (str2_cell29)</description>
+        <channelAddress>29:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1429:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>400ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_29</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell30_R">
+        <description>Cell (R) (str2_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1030:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell30_V">
+        <description>Cell (V) (str2_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:1:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1230:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_cell30_T">
+        <description>Cell (T) (str2_cell30)</description>
+        <channelAddress>30:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1430:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>450ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_slave_30</samplingGroup>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_total_I">
+        <description>String 2 (I)</description>
+        <channelAddress>106:HOLDING_REGISTERS:0:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1602:INTEGER</serverMapping>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>1s</samplingInterval>
+        <samplingTimeOffset>250ms</samplingTimeOffset>
+        <samplingGroup>str2_sg_pack</samplingGroup>
+        <loggingInterval>1s</loggingInterval>
+        <loggingSettings>sqllogger:</loggingSettings>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="str2_ambient_T">
+        <description>String 2 (T ambient)</description>
+        <channelAddress>1:HOLDING_REGISTERS:2:INT16</channelAddress>
+        <serverMapping id="modbus">HOLDING_REGISTERS:1702:INTEGER</serverMapping>
         <valueType>INTEGER</valueType>
         <samplingInterval>1s</samplingInterval>
         <samplingTimeOffset>250ms</samplingTimeOffset>

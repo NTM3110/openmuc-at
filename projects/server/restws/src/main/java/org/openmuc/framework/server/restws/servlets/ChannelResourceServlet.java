@@ -55,7 +55,7 @@ import com.google.gson.JsonSyntaxException;
 
 public class ChannelResourceServlet extends GenericServlet {
 
-    private static final String REQUESTED_REST_PATH_IS_NOT_AVAILABLE = "Requested rest path is not available";
+    private static final String REQUESTED_REST_PATH_IS_NOT_AVAILABLE = "Requested rest path is not available-updated.";
     private static final long serialVersionUID = -702876016040151438L;
     private static final Logger logger = LoggerFactory.getLogger(ChannelResourceServlet.class);
 
@@ -66,6 +66,7 @@ public class ChannelResourceServlet extends GenericServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.setContentType(APPLICATION_JSON);
+        logger.info("ChannelResourceServlet: doGet called");
         String[] pathAndQueryString = checkIfItIsACorrectRest(request, response, logger);
 
         if (pathAndQueryString == null) {
