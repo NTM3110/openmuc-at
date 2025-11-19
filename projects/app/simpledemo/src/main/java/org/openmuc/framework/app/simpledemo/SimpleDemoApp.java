@@ -244,6 +244,14 @@ public final class SimpleDemoApp
 						logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
 						continue;
 					}
+					if(channels[si][sj][3] == null || 
+					   channels[si][sj][1] == null ||
+					   channels[si][sj][2] == null ||
+					   channels[si][sj][0] == null) {
+						logger.warn("----------------- MODBUS: There is no channel yet at string {} cell {} --------------", si+1, sj+1);
+						channels = initiateChannel();
+						continue;
+					}
 					double current = channels[si][sj][3].getLatestRecord().getValue().asDouble() / 100;
 					// logger.info("Value of of {}: -----> {}",channels[si][sj][3].getId(), current);
 	            	double voltage = channels[si][sj][1].getLatestRecord().getValue().asDouble() / 1000;
