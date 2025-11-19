@@ -236,14 +236,6 @@ public final class SimpleDemoApp
 				final int si = i; // final copies for capture
 	            final int sj = j;
 				// try{
-
-					if(channels[si][sj][3].getLatestRecord().getValue() == null ||
-					   channels[si][sj][1].getLatestRecord().getValue() == null ||
-					   channels[si][sj][2].getLatestRecord().getValue() == null ||
-					   channels[si][sj][0].getLatestRecord().getValue() == null) {
-						logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
-						continue;
-					}
 					if(channels[si][sj][3] == null || 
 					   channels[si][sj][1] == null ||
 					   channels[si][sj][2] == null ||
@@ -252,6 +244,14 @@ public final class SimpleDemoApp
 						channels = initiateChannel();
 						continue;
 					}
+					if(channels[si][sj][3].getLatestRecord().getValue() == null ||
+					   channels[si][sj][1].getLatestRecord().getValue() == null ||
+					   channels[si][sj][2].getLatestRecord().getValue() == null ||
+					   channels[si][sj][0].getLatestRecord().getValue() == null) {
+						logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
+						continue;
+					}
+					
 					double current = channels[si][sj][3].getLatestRecord().getValue().asDouble() / 100;
 					// logger.info("Value of of {}: -----> {}",channels[si][sj][3].getId(), current);
 	            	double voltage = channels[si][sj][1].getLatestRecord().getValue().asDouble() / 1000;
