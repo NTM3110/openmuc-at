@@ -119,11 +119,11 @@ public final class SimpleDemoApp
 		
 		logger.info("DATA OPTION NUMBER {}", DATA_OPTION_NUM);
 		if(stringNumber <= 0) return null;
-		Channel[][][] channels = new Channel[stringNumber][cellNumber][DATA_OPTION_NUM];
-		String[][][] array = new String[stringNumber][cellNumber][DATA_OPTION_NUM];
+		Channel[][][] channels = new Channel[stringNumber_1][cellNumber][DATA_OPTION_NUM];
+		String[][][] array = new String[stringNumber_1][cellNumber][DATA_OPTION_NUM];
 		
 		// logger.info("Current string number is {} with maxCellNumber = {}", stringNumber_1, maxCellNumber);
-		for(int i = 0; i < stringNumber; i++) {
+		for(int i = 0; i < stringNumber_1; i++) {
 			for	(int j = 0; j < cellNumbers[i]; j++) {				
 				for(int k = 0; k < DATA_OPTION_NUM; k++){
 					if(k == 3) {
