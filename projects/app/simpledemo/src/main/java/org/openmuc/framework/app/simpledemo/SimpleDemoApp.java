@@ -68,6 +68,7 @@ public final class SimpleDemoApp
 	private int cellNumber = 1;
 	private boolean isFirstSoC = true;
 	private boolean isCellNumberChanged = false;
+	private boolean isUpdatedOverall = false;
 
 
 	private boolean isInitPowerCells = false;
@@ -379,8 +380,8 @@ public final class SimpleDemoApp
 					updateLatestSaveChannelNames(stringNumber_1);
 					applyListeners();
 						// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
-						// setFirstOverallStringValue(stringNumber_1);
-					
+					// setFirstOverallStringValue(stringNumber_1);
+					// LatestValuesRestorer.restoreAll()
 					stringNumber = stringNumber_1;
 					cellNumber = maxCellNumber;
 					channels = initiateChannel();
@@ -399,7 +400,7 @@ public final class SimpleDemoApp
 					
 					updateLatestSaveChannelNames(stringNumber_1);
 					applyListeners();
-						// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
+					// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
 						// setFirstOverallStringValue(stringNumber_1);
 					
 					stringNumber = stringNumber_1;
@@ -579,6 +580,13 @@ public final class SimpleDemoApp
 							isRestored = true;
 						}
 					}
+					// if(isUpdatedOverall){
+					// 	if(LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames) > 0) {
+					// 		logger.info("Updated the overall channel!!!!");
+					// 	}
+					// 	isUpdatedOverall = false;
+					// 	isRestoredAfterUpdated = true;
+					// }
 				}
 				// setFirstOverallStringValue(stringNumber);
 	        }
@@ -683,6 +691,8 @@ public final class SimpleDemoApp
 					logger.info("Listener triggered for channel: {} latest value: {}", channelID, dataAccessService.getChannel(channelID).getLatestRecord().getValue().toString());
 
 					// dataAccessService.getChannel(channelID).setLatestRecord(record);
+					// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
+					isUpdatedOverall = true;
 				}
 			}));
 
