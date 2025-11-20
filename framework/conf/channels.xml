@@ -16,22 +16,26 @@
       <channel id="dev_serial_comm_number">
         <description>Virtual Serial Port Number</description>
         <valueType>INTEGER</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="dev_serial_comm_0">
         <description>Virtual Serial Port 0</description>
         <valueType length="128">STRING</valueType>
         <disabled>false</disabled>
+        <samplingInterval>2m</samplingInterval>
       </channel>
       <channel id="dev_serial_comm_1">
         <description>Virtual Serial Port 1</description>
         <valueType length="128">STRING</valueType>
         <disabled>false</disabled>
+        <samplingInterval>2m</samplingInterval>
       </channel>
       <channel id="dev_serial_comm_2">
         <description>Virtual Serial Port 2</description>
         <valueType length="128">STRING</valueType>
         <disabled>false</disabled>
+        <samplingInterval>2m</samplingInterval>
       </channel>
     </device>
     <device id="virtual_site">
@@ -40,6 +44,7 @@
       <channel id="site_name_1">
         <description>Site Name</description>
         <valueType length="64">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
     </device>
@@ -49,11 +54,13 @@
       <channel id="account_1_username">
         <description>Account 1 Username</description>
         <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="account_1_password">
         <description>Account 1 Password</description>
         <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
     </device>
@@ -63,33 +70,39 @@
       <channel id="str1_cell_qty">
         <description>number of cells</description>
         <valueType>INTEGER</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_Cnominal">
         <description>C nominal</description>
         <unit>Ah</unit>
         <valueType>DOUBLE</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_string_name">
         <description>String name</description>
         <valueType length="64">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell_brand">
         <description>Cell Brand</description>
         <valueType length="64">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_cell_model">
         <description>Cell Model</description>
         <valueType length="64">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_Vnominal">
         <description>V nominal</description>
         <unit>V</unit>
         <valueType>DOUBLE</valueType>
+        <samplingInterval>2m</samplingInterval>
         <disabled>false</disabled>
       </channel>
       <channel id="str1_string_vol">
