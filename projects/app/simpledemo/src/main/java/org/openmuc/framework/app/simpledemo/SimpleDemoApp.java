@@ -680,6 +680,13 @@ public final class SimpleDemoApp
 							// getCellDimension();
 							// channels = initiateChannel();
 							isCellNumberChanged = true;
+							// int stringIndex = Integer.parseInt(id.replaceAll("\\D+", ""));
+							// if(record.getValue().asDouble() != cellNumbers[stringIndex]){
+
+							// }
+							
+							
+
 						}
 					}
 					else if(channelID.equals("soh_process_status")) {
@@ -692,6 +699,7 @@ public final class SimpleDemoApp
 
 					// dataAccessService.getChannel(channelID).setLatestRecord(record);
 					// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
+					
 					isUpdatedOverall = true;
 				}
 			}));
