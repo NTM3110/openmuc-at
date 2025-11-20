@@ -148,7 +148,7 @@ public final class SimpleDemoApp
 			}
 		}
 	}
-	private void setSoCEngine(int stringNumber) {
+	private int setSoCEngine(int stringNumber) {
 		double vCutoff = -1.0;
 		double vFloat = -1.0;
 		for (int i = 0; i < stringNumber; i++) {
@@ -207,8 +207,10 @@ public final class SimpleDemoApp
 				}
 			}catch(NullPointerException e) {
 				logger.warn("There is no value yet with this channel at string {}: {}, skipping set SoC engine this cycle.", i+1, e.getMessage());
+				return 0;
 			}
 		}
+		return 1;
 	}
 	
 	private void setLatestSoC(PowerCell powerCell, double deltaT, boolean isInitSoC0, int stringIndex) {
@@ -564,9 +566,10 @@ public final class SimpleDemoApp
 					checkInitCellDimensions();
 					if(isFirstInitAllVariables && stringNumber > 0 && cellNumber > 0) {
 						logger.info("Cell dimensions are ready. Initializing power cells and channels.");
-						setSoCEngine(stringNumber);
-						calculateSoCSoH();
-						pushCalculatedDatatoChannels();
+						if(setSoCEngine(stringNumber) == 1){
+							calculateSoCSoH();
+							pushCalculatedDatatoChannels();
+						}
 					}
 					else{
 						logger.info("Cell dimensions are not ready yet. Skipping this cycle.");
