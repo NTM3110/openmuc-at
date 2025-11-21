@@ -128,32 +128,36 @@ public abstract class ModbusConnection implements Connection {
 
         // NOTE: containerListHandle is null if something changed in configuration!!!
 
-        ModbusChannelGroup channelGroup = null;
+        List<ModbusChannelGroup> channelGroups = null;
 
         // use existing channelGroup
         if (containerListHandle != null) {
-            if (containerListHandle instanceof ModbusChannelGroup) {
-                channelGroup = (ModbusChannelGroup) containerListHandle;
+            if (containerListHandle instanceof List) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    List<ModbusChannelGroup> castedList = (List<ModbusChannelGroup>) containerListHandle;
+                    channelGroups = castedList;
+                } catch (ClassCastException e) {
+                    // ignore
+                }
             }
         }
 
         // create new channelGroup
-        if (channelGroup == null) {
-            ArrayList<ModbusChannel> channelList = new ArrayList<>();
-            for (ChannelRecordContainer container : containers) {
-                channelList.add(getModbusChannel(container.getChannelAddress(), EAccess.READ));
-            }
-            channelGroup = new ModbusChannelGroup(samplingGroup, channelList);
+        if (channelGroups == null) {
+            channelGroups = createChannelGroups(containers, samplingGroup);
         }
 
         // read all channels of the group
         try {
-            readChannelGroup(channelGroup, containers);
+            for (ModbusChannelGroup group : channelGroups) {
+                readChannelGroup(group, containers);
+            }
 
         } catch (ModbusIOException e) {
             logger.error("ModbusIOException while reading samplingGroup:" + samplingGroup, e);
             disconnect();
-            
+
             throw new ConnectionException(e);
         } catch (ModbusException e) {
             logger.error("Unable to read ChannelGroup " + samplingGroup, e);
@@ -162,7 +166,67 @@ public abstract class ModbusConnection implements Connection {
             // and the framework collapses.
             setChannelsWithErrorFlag(containers);
         }
-        return channelGroup;
+        return channelGroups;
+    }
+
+    private List<ModbusChannelGroup> createChannelGroups(List<ChannelRecordContainer> containers,
+            String samplingGroup) {
+
+        List<ModbusChannel> allChannels = new ArrayList<>();
+        for (ChannelRecordContainer container : containers) {
+            allChannels.add(getModbusChannel(container.getChannelAddress(), EAccess.READ));
+        }
+
+        // Sort channels by start address
+        java.util.Collections.sort(allChannels, new java.util.Comparator<ModbusChannel>() {
+            @Override
+            public int compare(ModbusChannel o1, ModbusChannel o2) {
+                return Integer.compare(o1.getStartAddress(), o2.getStartAddress());
+            }
+        });
+
+        List<ModbusChannelGroup> groups = new ArrayList<>();
+        ArrayList<ModbusChannel> currentGroupChannels = new ArrayList<>();
+        
+        // Max registers per request (Modbus standard is usually 125 registers)
+        final int MAX_REGISTERS = 125; 
+        // Max gap to allow between channels before splitting (to avoid reading too much unused data)
+        final int MAX_GAP = 20;
+
+        ModbusChannel previousChannel = null;
+        int groupStartAddress = -1;
+
+        for (ModbusChannel channel : allChannels) {
+            if (currentGroupChannels.isEmpty()) {
+                currentGroupChannels.add(channel);
+                groupStartAddress = channel.getStartAddress();
+                previousChannel = channel;
+                continue;
+            }
+
+            int currentEnd = channel.getStartAddress() + channel.getCount();
+            int groupSize = currentEnd - groupStartAddress;
+            int gap = channel.getStartAddress() - (previousChannel.getStartAddress() + previousChannel.getCount());
+
+            if (groupSize > MAX_REGISTERS || gap > MAX_GAP) {
+                // Close current group
+                groups.add(new ModbusChannelGroup(samplingGroup, currentGroupChannels));
+                
+                // Start new group
+                currentGroupChannels = new ArrayList<>();
+                currentGroupChannels.add(channel);
+                groupStartAddress = channel.getStartAddress();
+            } else {
+                currentGroupChannels.add(channel);
+            }
+            previousChannel = channel;
+        }
+
+        if (!currentGroupChannels.isEmpty()) {
+            groups.add(new ModbusChannelGroup(samplingGroup, currentGroupChannels));
+        }
+
+        return groups;
     }
 
     private void readChannelGroup(ModbusChannelGroup channelGroup, List<ChannelRecordContainer> containers)
