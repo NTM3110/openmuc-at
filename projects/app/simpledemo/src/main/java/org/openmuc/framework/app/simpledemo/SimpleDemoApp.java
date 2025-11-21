@@ -94,13 +94,13 @@ public final class SimpleDemoApp
 
 	@Activate
 	private void activate() {
-		logger.info("Activating {}", APP_NAME);
+		// logger.info("Activating {}", APP_NAME);
 		initiate();
 	}
 
 	@Deactivate
 	private void deactivate() {
-		logger.info("Deactivating {}", APP_NAME);
+		// logger.info("Deactivating {}", APP_NAME);
         updateTimer.cancel();
         updateTimer.purge();
 	}	
@@ -114,12 +114,12 @@ public final class SimpleDemoApp
 	}
 	private Channel[][][] initiateChannel() {
 		
-		logger.info("Initiate Channel {}", APP_NAME);
+		// logger.info("Initiate Channel {}", APP_NAME);
 
 		// stringNumber_1 = 2; //TODO: change back to get from dimension function
 		// maxCellNumber = 2; //TODO: change back to get from dimension function
 		
-		logger.info("DATA OPTION NUMBER {}", DATA_OPTION_NUM);
+		// logger.info("DATA OPTION NUMBER {}", DATA_OPTION_NUM);
 		if(stringNumber <= 0) return null;
 		Channel[][][] channels = new Channel[stringNumber_1][cellNumber][DATA_OPTION_NUM];
 		String[][][] array = new String[stringNumber_1][cellNumber][DATA_OPTION_NUM];
@@ -157,12 +157,12 @@ public final class SimpleDemoApp
 				Record VnominalRecord = dataAccessService.getChannel("str" + (i+1) + "_Vnominal").getLatestRecord();
 				double Vnominal = VnominalRecord.getValue().asDouble();
 				if (Vnominal > 0.0) {
-					logger.info("SETSOCENGINE: Vnominal is 2.0V for string {}. Using default Vcutoff 1.75V and Vfloat 2.4V", i+1);
+					// logger.info("SETSOCENGINE: Vnominal is 2.0V for string {}. Using default Vcutoff 1.75V and Vfloat 2.4V", i+1);
 					vCutoff = Vnominal - 0.15;
 					vFloat = Vnominal + 0.25;
 				}
 				if(vCutoff < 0 || vFloat < 0) {
-					logger.warn("Vcutoff or Vfloat is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
+					// logger.warn("Vcutoff or Vfloat is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
 					continue;
 				}
 				String CnominalChannelName = "str" + (i+1) + "_Cnominal";
@@ -170,26 +170,26 @@ public final class SimpleDemoApp
 				Record CnominalRecord = dataAccessService.getChannel(CnominalChannelName).getLatestRecord();
 				Cnominal = CnominalRecord.getValue().asDouble();
 				if(Cnominal < 0) {
-					logger.warn("Cnominal is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
+					// logger.warn("Cnominal is not set properly yet for string {}. Skipping set SoC engine this cycle.", i+1);
 					continue;
 				}
 				// logger.info("Old value: String {}: Cnominal: {}, Vcutoff: {}, Vfloat: {}", i+1, socEngines[i]!=null?socEngines[i].getCnominal():"null", socEngines[i]!=null?socEngines[i].getVcutoff():"null", socEngines[i]!=null?socEngines[i].getVfloat():"null");
-				logger.info("New Value: String {}: Cnominal: {}, Vcutoff: {}, Vfloat: {}", i+1, Cnominal, vCutoff, vFloat);
+				// logger.info("New Value: String {}: Cnominal: {}, Vcutoff: {}, Vfloat: {}", i+1, Cnominal, vCutoff, vFloat);
 				boolean isSoCEngineChanged = false;
 				if (isSetSoCEngine[i]) {
 					if(socEngines[i].getVcutoff() != vCutoff) {
 						socEngines[i].setVcutoff(vCutoff);
-						logger.info("Update Vcutoff for string {} to {}", i+1, vCutoff);
+						// logger.info("Update Vcutoff for string {} to {}", i+1, vCutoff);
 						isSoCEngineChanged = true;
 					}
 					if(socEngines[i].getCnominal() != Cnominal) {
 						socEngines[i].setCnominal(Cnominal);
-						logger.info("Update Cnominal for string {} to {}", i+1, Cnominal);
+						// logger.info("Update Cnominal for string {} to {}", i+1, Cnominal);
 						isSoCEngineChanged = true;
 					}
 					if (socEngines[i].getVfloat() != vFloat) {
 						socEngines[i].setVfloat(vFloat);
-						logger.info("Update Vfloat for string {} to {}", i+1, vFloat);
+						// logger.info("Update Vffloat for string {} to {}", i+1, vFloat);
 						isSoCEngineChanged = true;
 					}
 					if (isSoCEngineChanged) {
@@ -198,16 +198,16 @@ public final class SimpleDemoApp
 						double VfloatNew = socEngines[i].getVfloat();
 						double CnominalNew = socEngines[i].getCnominal();
 						socEngines[i] = new SoCEngine(CnominalNew, VcutoffNew, VfloatNew);
-						logger.info("Re-initialize SoC engine for string {} due to parameter change.", i+1);
+						// logger.info("Re-initialize SoC engine for string {} due to parameter change.", i+1);
 					}
 				}
 				if(!isSetSoCEngine[i]) {
 					socEngines[i] = new SoCEngine(Cnominal, vCutoff, vFloat);		
 					isSetSoCEngine[i] = true;
-					logger.info("Set SoC engine for string {} with Cnominal: {}, Vcutoff: {}, Vfloat: {}", i+1, Cnominal, vCutoff, vFloat);
+					// logger.info("Set SoC engine for string {} with Cnominal: {}, Vcutoff: {}, Vfloat: {}", i+1, Cnominal, vCutoff, vFloat);
 				}
 			}catch(NullPointerException e) {
-				logger.warn("There is no value yet with this channel at string {}: {}, skipping set SoC engine this cycle.", i+1, e.getMessage());
+				// logger.warn("There is no value yet with this channel at string {}: {}, skipping set SoC engine this cycle.", i+1, e.getMessage());
 				return 0;
 			}
 		}
@@ -219,12 +219,12 @@ public final class SimpleDemoApp
 			double firstSoC = socEngines[stringIndex].initialSoCFromVoltage(powerCell.getVoltage());
 			// logger.info("Calculate the first SoC: voltage {}--------> firstSoc: {}", powerCell.getVoltage(), firstSoC);
 			powerCell.setSoc(firstSoC * 100);
-			logger.info("First SoC ----> {}", firstSoC*100);
+			// logger.info("First SoC ----> {}", firstSoC*100);
 		}
 		else {
 			double currentSoC = socEngines[stringIndex].updatedSoCEKF(powerCell.getVoltage(), powerCell.getCurrent(), powerCell.getTemp(), deltaT);
 			powerCell.setSoc(currentSoC*100);
-			logger.info("SetLatestSoC ----> currentSoC: {}", currentSoC*100);
+			// logger.info("SetLatestSoC ----> currentSoC: {}", currentSoC*100);
 		}
 	}
 
@@ -244,7 +244,7 @@ public final class SimpleDemoApp
 					   channels[si][sj][1] == null ||
 					   channels[si][sj][2] == null ||
 					   channels[si][sj][0] == null) {
-						logger.warn("----------------- MODBUS: There is no channel yet at string {} cell {} --------------", si+1, sj+1);
+						// logger.warn("----------------- MODBUS: There is no channel yet at string {} cell {} --------------", si+1, sj+1);
 						channels = initiateChannel();
 						continue;
 					}
@@ -252,7 +252,7 @@ public final class SimpleDemoApp
 					   channels[si][sj][1].getLatestRecord().getValue() == null ||
 					   channels[si][sj][2].getLatestRecord().getValue() == null ||
 					   channels[si][sj][0].getLatestRecord().getValue() == null) {
-						logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
+						// logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
 						continue;
 					}
 					
@@ -319,7 +319,7 @@ public final class SimpleDemoApp
 			}
 		}
 
-		logger.info("Updated latestSaveChannelNames: {}", latestSaveChannelNames);
+		// logger.info("Updated latestSaveChannelNames: {}", latestSaveChannelNames);
 	}
 	
 	private void setFirstOverallStringValue(int stringCount){
@@ -327,9 +327,9 @@ public final class SimpleDemoApp
 			for(String template: STRING_CHANNEL_TEMPLATES){
 				try{
 					String stringNameChannel = String.format(template, i+1);
-					logger.info("First overall string name for string {}: {}", i+1, stringNameChannel);
+					// logger.info("First overall string name for string {}: {}", i+1, stringNameChannel);
 					Record record = dataAccessService.getChannel(stringNameChannel).getLatestRecord();
-					logger.info("First overall string value for string {}: {}", i+1, record.getValue().toString());
+					// logger.info("First overall string value for string {}: {}", i+1, record.getValue().toString());
 					dataAccessService.getChannel(stringNameChannel).setLatestRecord(record);
 				}
 				catch(NullPointerException e){
@@ -566,14 +566,14 @@ public final class SimpleDemoApp
 					getCellDimension();
 					checkInitCellDimensions();
 					if(isFirstInitAllVariables && stringNumber > 0 && cellNumber > 0) {
-						logger.info("Cell dimensions are ready. Initializing power cells and channels.");
+						// logger.info("Cell dimensions are ready. Initializing power cells and channels.");
 						if(setSoCEngine(stringNumber) == 1){
 							calculateSoCSoH();
 							pushCalculatedDatatoChannels();
 						}
 					}
 					else{
-						logger.info("Cell dimensions are not ready yet. Skipping this cycle.");
+						// logger.info("Cell dimensions are not ready yet. Skipping this cycle.");
 					}
 					if(isRestored == false) {
 						if(LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames) > 0) {
@@ -604,7 +604,7 @@ public final class SimpleDemoApp
 			}
 		}
 		if(stringNumber != index){
-			logger.info("String number changed from {} to {}, re-initializing cell dimensions.", stringNumber, index);
+			// logger.info("String number changed from {} to {}, re-initializing cell dimensions.", stringNumber, index);
 		}
 		if(!isFirstInitAllDimension){
 			cellNumbers = new int[index];
@@ -630,7 +630,7 @@ public final class SimpleDemoApp
 			try{
 				Record cellNumberRecord = dataAccessService.getChannel(cellNumberChannelName).getLatestRecord();
 				cellNumbers[i] = cellNumberRecord.getValue().asInt();
-				logger.info("String {} has cell number: {}", i+1, cellNumbers[i]);
+				// logger.info("String {} has cell number: {}", i+1, cellNumbers[i]);
 				if(maxCellNumber < cellNumbers[i]) {
 					maxCellNumber = cellNumbers[i];
 				}
@@ -643,19 +643,19 @@ public final class SimpleDemoApp
 	}
 	
 	private void initiate() {
-		logger.info("Initiating {}", APP_NAME);
-		logger.info("Getting the 1st cell dimension!!!!!");
+		// logger.info("Initiating {}", APP_NAME);
+		// logger.info("Getting the 1st cell dimension!!!!!");
 		initUpdateTimer();
 	}
 
 	private void applyListeners() {
-    	logger.info("Applying listeners for {}", APP_NAME);
+    	// logger.info("Applying listeners for {}", APP_NAME);
 
     // 1) Remove listeners for channels that are no longer in the list
 		for (Iterator<Map.Entry<String, RecordListener>> it = listeners.entrySet().iterator(); it.hasNext(); ) {
 			Map.Entry<String, RecordListener> entry = it.next();
 			String channelId = entry.getKey();
-			logger.info("Checking listener for channel: {}", channelId);
+			// logger.info("Checking listener for channel: {}", channelId);
 			RecordListener listener = entry.getValue();
 
 			if (!latestSaveChannelNames.contains(channelId)) {
@@ -670,7 +670,7 @@ public final class SimpleDemoApp
 		// 2) Add listeners for all channels we want to track
 		for (String channelID : latestSaveChannelNames) {
 
-			logger.info("Setting up listener for channel: {}", channelID);
+			// logger.info("Setting up listener for channel: {}", channelID);
 			// Reuse existing listener if we already created one
 			RecordListener listener = listeners.computeIfAbsent(channelID, id -> (record -> {
 				if (record.getValue() != null) {
@@ -680,13 +680,10 @@ public final class SimpleDemoApp
 							// getCellDimension();
 							// channels = initiateChannel();
 							isCellNumberChanged = true;
-							// int stringIndex = Integer.parseInt(id.replaceAll("\\D+", ""));
-							// if(record.getValue().asDouble() != cellNumbers[stringIndex]){
-
-							// }
-							
-							
-
+							int stringIndex = Integer.parseInt(id.replaceAll("\\D+", ""));
+							if(record.getValue().asDouble() != cellNumbers[stringIndex]){
+								LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
+							}
 						}
 					}
 					else if(channelID.equals("soh_process_status")) {
@@ -695,7 +692,7 @@ public final class SimpleDemoApp
 					else
 					LatestValuesDao.updateString(id, record.getValue().asString());
 
-					logger.info("Listener triggered for channel: {} latest value: {}", channelID, dataAccessService.getChannel(channelID).getLatestRecord().getValue().toString());
+					// logger.info("Listener triggered for channel: {} latest value: {}", channelID, dataAccessService.getChannel(channelID).getLatestRecord().getValue().toString());
 
 					// dataAccessService.getChannel(channelID).setLatestRecord(record);
 					// LatestValuesRestorer.restoreAll(dataAccessService, latestSaveChannelNames);
