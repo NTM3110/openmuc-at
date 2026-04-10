@@ -14,8 +14,13 @@ import java.io.InputStreamReader;
 
 public class ExportLatestValuesCsvServlet extends GenericServlet{
     private final DataSource dataSource;
-    public ExportLatestValuesCsvServlet(DataSource dataSource){
+    private final org.openmuc.framework.dataaccess.DataAccessService dataAccessService;
+    private final org.openmuc.framework.config.ConfigService configService;
+
+    public ExportLatestValuesCsvServlet(DataSource dataSource, org.openmuc.framework.dataaccess.DataAccessService dataAccessService, org.openmuc.framework.config.ConfigService configService){
         this.dataSource = dataSource;
+        this.dataAccessService = dataAccessService;
+        this.configService = configService;
     }
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -33,7 +38,7 @@ public class ExportLatestValuesCsvServlet extends GenericServlet{
         try (InputStream is = filePart.getInputStream();
              BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
 
-            CsvExportUtil.importCsv(reader, dataSource);
+            CsvExportUtil.importCsv(reader, dataSource, dataAccessService, configService);
 
             response.setStatus(HttpServletResponse.SC_OK);
             response.getWriter().write("{\"status\":\"ok\"}");

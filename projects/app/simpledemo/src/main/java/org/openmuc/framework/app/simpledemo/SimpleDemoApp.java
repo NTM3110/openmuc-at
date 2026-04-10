@@ -25,9 +25,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.nio.file.*;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.*;
 
 @Component(service = {})
@@ -35,6 +41,10 @@ public final class SimpleDemoApp {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleDemoApp.class);
 	private static final String APP_NAME = "ATEnergy BMS App";
 	private static final String[] OPTIONS = { "R", "V", "T", "I", "SOC", "SOH" };
+	private static final String CSV_LOG_DIR = "./log/csv";
+	private static final DateTimeFormatter FILENAME_FORMATTER = DateTimeFormatter.ofPattern("ddMMyy");
+	private static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+	private static final ZoneId LOCAL_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 	private static final List<String> STRING_CHANNEL_TEMPLATES = Arrays.asList(
         "str%d_cell_qty",
         "str%d_Cnominal",
@@ -43,6 +53,7 @@ public final class SimpleDemoApp {
         "str%d_cell_model",
         "str%d_Vcutoff",
 		"str%d_Vfloat",
+        "str%d_R_new",
         "str%d_serial_port_id"
 );
 	private static final int DATA_OPTION_NUM = 6;
@@ -74,6 +85,7 @@ public final class SimpleDemoApp {
 	private Channel[][][] channels;
 	private Timer updateTimer;
     private Timer updateDbTimer;
+	private Timer csvLoggerTimer;
 	private SoCEngine socEngine;
 	private SoCEngine[] socEngines;
 	// private SoHEngine sohEngine;
@@ -88,6 +100,7 @@ public final class SimpleDemoApp {
 		logger.info("Activating {}", APP_NAME);
         initiate();
         initDbUpdateTimer();
+		initCsvLoggerTimer();
 	}
 
 	@Deactivate
@@ -97,6 +110,10 @@ public final class SimpleDemoApp {
 		updateTimer.purge();
         updateDbTimer.cancel();
         updateDbTimer.purge();
+		if (csvLoggerTimer != null) {
+			csvLoggerTimer.cancel();
+			csvLoggerTimer.purge();
+		}
 	}
 
 	private void initiatePowerCells() {
@@ -282,8 +299,8 @@ public final class SimpleDemoApp {
 		}
 	}
 
-	private void setLatestSoH(PowerCell powerCell) {
-		double currentSoH = SoHEngine.updatedSoHRegular(powerCell.getResistance());
+	private void setLatestSoH(PowerCell powerCell, double rNew) {
+		double currentSoH = SoHEngine.updatedSoHRegular(powerCell.getResistance(), rNew);
 		powerCell.setSoh(currentSoH*100);
 		// logger.info("SetLatestSoH ----> currentSoH: {}", currentSoH*100);
 	}
@@ -330,6 +347,15 @@ public final class SimpleDemoApp {
 				// logger.info("T of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getTemp());
 				powerCells[si][sj].setResistance(resistance);
 				
+				double rNew = 1450.0;
+				try {
+					Channel rNewChannel = dataAccessService.getChannel("str" + stringIds[si] + "_R_new");
+					if (rNewChannel != null && rNewChannel.getLatestRecord() != null && rNewChannel.getLatestRecord().getValue() != null) {
+						rNew = rNewChannel.getLatestRecord().getValue().asDouble();
+						if (rNew <= 0) rNew = 1450.0;
+					}
+				} catch (Exception e) {}
+
 				setLatestSoC(powerCells[si][sj], 1, isInitSoC0[si][sj], si);
 				if(isInitSoC0[si][sj] == false) {
 					isInitSoC0[si][sj] = true;
@@ -340,7 +366,7 @@ public final class SimpleDemoApp {
 				Record socRecord = new Record(doubleSoCValue, now, Flag.VALID);
 				channels[si][sj][4].setLatestRecord(socRecord);
 
-                setLatestSoH(powerCells[si][sj]);
+                setLatestSoH(powerCells[si][sj], rNew);
 				DoubleValue doubleSoHValue = new DoubleValue(
 						Double.parseDouble(DF.format(powerCells[si][sj].getSoh())));
 				Record sohRecord = new Record(doubleSoHValue, now, Flag.VALID);
@@ -629,6 +655,106 @@ public final class SimpleDemoApp {
         updateDbTimer.scheduleAtFixedRate(task, (long) interval * 1000, (long) interval * 1000);
 
     }
+	
+	private void initCsvLoggerTimer() {
+		logger.info("Initializing CSV Logger Timer (60s interval)");
+		csvLoggerTimer = new Timer("CSV Data Logger");
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				if (isFirstInitAllVariables && stringNumber > 0) {
+					saveDataToCsv();
+				}
+			}
+		};
+		csvLoggerTimer.scheduleAtFixedRate(task, 60000, 60000);
+	}
+
+	private void saveDataToCsv() {
+		ZonedDateTime now = ZonedDateTime.now(LOCAL_ZONE);
+		String datePart = now.format(FILENAME_FORMATTER);
+		File dir = new File(CSV_LOG_DIR);
+		if (!dir.exists()) {
+			if (!dir.mkdirs()) {
+				logger.error("Could not create CSV log directory: {}. Permission denied or path invalid.", dir.getAbsolutePath());
+				return;
+			}
+		}
+
+		String timestamp = now.format(TIMESTAMP_FORMATTER);
+
+		for (int i = 0; i < stringNumber; i++) {
+			int strId = stringIds[i];
+			String filename = datePart + "_str" + strId + ".csv";
+			File file = new File(dir, filename);
+			boolean isNewFile = !file.exists();
+
+			try (PrintWriter writer = new PrintWriter(new FileWriter(file, true))) {
+				if (isNewFile) {
+					StringBuilder header = new StringBuilder("Timestamp,StringID,Vol,Curr,SoC,SoH,AvgT,AvgR,MaxV_ID,MaxV_Val,MinV_ID,MinV_Val,MaxT_ID,MaxT_Val,MinT_ID,MinT_Val,MaxR_ID,MaxR_Val,MinR_ID,MinR_Val");
+					for (int j = 1; j <= maxCellNumber; j++) {
+						header.append(",cell").append(j).append("_V");
+						header.append(",cell").append(j).append("_T");
+						header.append(",cell").append(j).append("_R");
+						header.append(",cell").append(j).append("_SoC");
+						header.append(",cell").append(j).append("_SoH");
+					}
+					writer.println(header.toString());
+				}
+
+				StringBuilder row = new StringBuilder();
+				row.append(timestamp).append(",");
+				row.append("str").append(strId).append(",");
+				
+				// String level data
+				double strVol = Helper.calculateStringVoltage(stringNumber, cellNumber, powerCells)[i];
+				double strSoc = Helper.calculateStringSOC(stringNumber, cellNumber, powerCells)[i];
+				double strSoh = Helper.calculateStringSOH(stringNumber, cellNumber, powerCells)[i];
+				double avgTemp = Helper.getAverageTemperatureBattery(i, cellNumbers, powerCells);
+				double avgRst = Helper.getAverageResistanceBattery(i, cellNumbers, powerCells);
+				double strCurr = powerCells[i][0].getCurrent(); // String current is same for all cells
+				
+				row.append(DF.format(strVol)).append(",");
+				row.append(DF.format(strCurr)).append(",");
+				row.append(DF.format(strSoc)).append(",");
+				row.append(DF.format(strSoh)).append(",");
+				row.append(DF.format(avgTemp)).append(",");
+				row.append(DF.format(avgRst)).append(",");
+				
+				// Max/Min stats
+				Helper.Result maxV = Helper.getMaxVoltageBattery(i, cellNumbers, powerCells);
+				Helper.Result minV = Helper.getMinVoltageBattery(i, cellNumbers, powerCells);
+				Helper.Result maxT = Helper.getMaxTemperatureBattery(i, cellNumbers, powerCells);
+				Helper.Result minT = Helper.getMinTemperatureBattery(i, cellNumbers, powerCells);
+				Helper.Result maxR = Helper.getMaxResistanceBattery(i, cellNumbers, powerCells);
+				Helper.Result minR = Helper.getMinResistanceBattery(i, cellNumbers, powerCells);
+				
+				row.append(maxV.index).append(",").append(DF.format(maxV.value)).append(",");
+				row.append(minV.index).append(",").append(DF.format(minV.value)).append(",");
+				row.append(maxT.index).append(",").append(DF.format(maxT.value)).append(",");
+				row.append(minT.index).append(",").append(DF.format(minT.value)).append(",");
+				row.append(maxR.index).append(",").append(DF.format(maxR.value)).append(",");
+				row.append(minR.index).append(",").append(DF.format(minR.value)).append(",");
+
+				// Cell data
+				for (int j = 0; j < cellNumbers[i]; j++) {
+					PowerCell cell = powerCells[i][j];
+					row.append(DF.format(cell.getVoltage())).append(",");
+					row.append(DF.format(cell.getTemp())).append(",");
+					row.append(DF.format(cell.getResistance())).append(",");
+					row.append(DF.format(cell.getSoc())).append(",");
+					row.append(DF.format(cell.getSoh()));
+					if (j < cellNumbers[i] - 1) {
+						row.append(",");
+					}
+				}
+				writer.println(row.toString());
+			} catch (IOException e) {
+				logger.error("Error writing to CSV for string {}: {}", strId, e.getMessage());
+			}
+		}
+	}
+
 	private void initUpdateTimer() {
         updateTimer = new Timer("Modbus Update");
 		// logger.info("------------------ INit update TImer------------------");

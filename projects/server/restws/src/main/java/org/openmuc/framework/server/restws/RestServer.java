@@ -72,6 +72,7 @@ public final class RestServer {
     private final DeviceResourceServlet devRServlet = new DeviceResourceServlet();
     private final DeviceResourceServlet_v2 devRServlet_v2 = new DeviceResourceServlet_v2();
     private final NetworkRestServlet netRServlet = new NetworkRestServlet();
+    private final WifiRestServlet wifiRServlet = new WifiRestServlet();
     private final DriverResourceServlet drvRServlet = new DriverResourceServlet();
     private final ConnectServlet connectServlet = new ConnectServlet();
     private final UserServlet userServlet = new UserServlet();
@@ -79,6 +80,7 @@ public final class RestServer {
     private final SoHScheduleResourceServlet sohScheduleServlet = new SoHScheduleResourceServlet();
     private final BatteryStringResourceServlet batteryStringResourceServlet = new BatteryStringResourceServlet();
     // private final ControlsServlet controlsServlet = new ControlsServlet();
+    private ResetToDefaultServlet resetToDefaultServlet;
 
     @Reference
     private DataSourceFactory dataSourceFactory;
@@ -119,7 +121,7 @@ public final class RestServer {
                 try {
                     // System.out.println("\n[" + LocalDateTime.now() + "] Timer task running to
                     // update SoH Schedule");
-                    LocalDateTime now = LocalDateTime.now();
+                    LocalDateTime now = LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
                     List<SoHSchedule> qualifiedSchedules = sohScheduleRepoImpl
                             .findByStartDatetimeBeforeAndStateAndStatus(now, DischargeState.PENDING, Status.ACTIVE);
 
@@ -143,7 +145,7 @@ public final class RestServer {
                         }
 
                         schedule.setState(DischargeState.RUNNING);
-                        schedule.setUpdateDatetime(LocalDateTime.now());
+                        schedule.setUpdateDatetime(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
                         sohScheduleRepoImpl.save(schedule);
                         // System.out.println(" Schedule state updated to RUNNING");
 
@@ -184,7 +186,9 @@ public final class RestServer {
         properties.setProperty("user", "openmuc_user");
         DataSource ds = dataSourceFactory.createDataSource(properties);
         //
-        ExportLatestValuesCsvServlet exportLatestValuesCsvServlet = new ExportLatestValuesCsvServlet(ds);
+        ExportLatestValuesCsvServlet exportLatestValuesCsvServlet = new ExportLatestValuesCsvServlet(ds, dataAccessService, configService);
+        ExportCsvRangeServlet exportCsvRangeServlet = new ExportCsvRangeServlet();
+        resetToDefaultServlet = new ResetToDefaultServlet(ds, configService);
         SecurityHandler securityHandler = new SecurityHandler(context.getBundleContext().getBundle(),
                 authenticationService);
 
@@ -192,12 +196,17 @@ public final class RestServer {
         httpService.registerServlet(Const.ALIAS_DEVICES, devRServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_DEVICES_V2, devRServlet_v2, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_NETWORK, netRServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_WIFI, wifiRServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_DRIVERS, drvRServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_USERS, userServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_CONNECT, connectServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_LATEST_VALUE, latestValueServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_SOH_SCHEDULE, sohScheduleServlet, null, securityHandler);
         httpService.registerServlet(Const.ALIAS_CSV_EXPORT, exportLatestValuesCsvServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_EXPORT_CSV_RANGE, exportCsvRangeServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_RESET, resetToDefaultServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_REBOOT, new RebootServlet(), null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_START_KBD, new StartKbdServlet(), null, securityHandler);
         httpService.registerServlet(Const.ALIAS_STRING, batteryStringResourceServlet, null, securityHandler);
         // httpService.registerServlet(Const.ALIAS_CONTROLS, controlsServlet, null,
         // securityHandler);
@@ -216,7 +225,13 @@ public final class RestServer {
         httpService.unregister(Const.ALIAS_LATEST_VALUE);
         httpService.unregister(Const.ALIAS_DEVICES_V2);
         httpService.unregister(Const.ALIAS_NETWORK);
+        httpService.unregister(Const.ALIAS_WIFI);
         httpService.unregister(Const.ALIAS_SOH_SCHEDULE);
+        httpService.unregister(Const.ALIAS_CSV_EXPORT);
+        httpService.unregister(Const.ALIAS_EXPORT_CSV_RANGE);
+        httpService.unregister(Const.ALIAS_RESET);
+        httpService.unregister(Const.ALIAS_REBOOT);
+        httpService.unregister(Const.ALIAS_START_KBD);
         // httpService.unregister(Const.ALIAS_CONTROLS);
 
         updateTimer.cancel();

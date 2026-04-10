@@ -58,4 +58,88 @@
       </mat-card-actions>
     </mat-card>
   </div>
+
+  <!-- WiFi Configuration Section -->
+  <div class="wifi-section">
+    <mat-card class="wifi-card">
+      <mat-card-header>
+        <mat-icon>wifi</mat-icon>
+        <div class="title">WiFi Configuration</div>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Scan for available WiFi networks and connect to them.</p>
+        
+        <div class="scan-button-container">
+          <button mat-flat-button color="primary" (click)="scanWifiNetworks()" [disabled]="isScanning">
+            <mat-icon>search</mat-icon>
+            {{ isScanning ? 'Scanning...' : 'Scan WiFi Networks' }}
+          </button>
+        </div>
+
+        <div *ngIf="isScanning" class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Scanning for WiFi networks...</p>
+        </div>
+
+        <div *ngIf="!isScanning && wifiNetworks.length > 0" class="wifi-table-container">
+          <table mat-table [dataSource]="wifiNetworks" class="wifi-table">
+            <!-- SSID Column -->
+            <ng-container matColumnDef="ssid">
+              <th mat-header-cell *matHeaderCellDef>Network Name</th>
+              <td mat-cell *matCellDef="let network">
+                <div class="ssid-cell">
+                  <mat-icon *ngIf="network.inUse" class="connected-icon">check_circle</mat-icon>
+                  <span [class.connected-text]="network.inUse">{{ network.ssid }}</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Signal Column -->
+            <ng-container matColumnDef="signal">
+              <th mat-header-cell *matHeaderCellDef>Signal</th>
+              <td mat-cell *matCellDef="let network">
+                <div class="signal-cell">
+                  <mat-icon [color]="getSignalColor(network.signal)">
+                    {{ getSignalIcon(network.signal) }}
+                  </mat-icon>
+                  <span>{{ network.signal }}%</span>
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Security Column -->
+            <ng-container matColumnDef="security">
+              <th mat-header-cell *matHeaderCellDef>Security</th>
+              <td mat-cell *matCellDef="let network">
+                <mat-icon *ngIf="network.security" class="security-icon">lock</mat-icon>
+                <span>{{ network.security || 'Open' }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let network">
+                <button 
+                  mat-stroked-button 
+                  color="primary" 
+                  (click)="connectToNetwork(network)"
+                  [disabled]="network.inUse">
+                  {{ network.inUse ? 'Connected' : 'Connect' }}
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+        </div>
+
+        <div *ngIf="!isScanning && wifiNetworks.length === 0" class="no-networks">
+          <mat-icon>wifi_off</mat-icon>
+          <p>No WiFi networks found. Click "Scan WiFi Networks" to search.</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 </div>

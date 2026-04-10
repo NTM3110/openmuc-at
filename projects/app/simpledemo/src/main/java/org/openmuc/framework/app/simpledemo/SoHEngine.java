@@ -3,8 +3,6 @@ package org.openmuc.framework.app.simpledemo;
 public class SoHEngine {
 	private static final double C_NOMINAL_AH = 100.0; // Ah
     private static final double C_NOMINAL_AS = C_NOMINAL_AH * 3600;
-    private static final double R_NEW = 0.0034;
-    private static final double R_EOL = R_NEW *1.75;
 
 	
 	public static class Status {
@@ -29,8 +27,10 @@ public class SoHEngine {
     	}
     	return new Status(isStart, isEnd, usedQ / C_NOMINAL_AS);
     }
-    public static double updatedSoHRegular(double resistance) {
-		if(resistance == 0 ) return 1;
-    	return ((R_EOL- resistance) / (R_EOL-R_NEW));
+    public static double updatedSoHRegular(double resistance, double rNew) {
+        double currentRNew = (rNew > 0) ? rNew : 1450.0;
+        double rEol = currentRNew * 1.75;
+		if(resistance == 0  || (resistance - currentRNew) <= 0) return 1;    	
+		return ((rEol - resistance) / (rEol - currentRNew));
     }
 }

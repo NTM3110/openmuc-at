@@ -34,6 +34,7 @@ public class Const {
     public static final String ALIAS_DEVICES = "/rest/devices";
     public static final String ALIAS_DEVICES_V2 = "/rest/devices_v2";
     public static final String ALIAS_NETWORK = "/rest/network";
+    public static final String ALIAS_WIFI = "/rest/wifi";
     public static final String ALIAS_DRIVERS = "/rest/drivers";
     public static final String ALIAS_USERS = "/rest/users";
     public static final String ALIAS_CONTROLS = "/rest/controlls";
@@ -41,7 +42,11 @@ public class Const {
     public static final String ALIAS_LATEST_VALUE = "/rest/latest-value";
     public static final String ALIAS_SOH_SCHEDULE = "/rest/soh-schedule";
     public static final String ALIAS_CSV_EXPORT = "/rest/csv_export";
+    public static final String ALIAS_EXPORT_CSV_RANGE = "/rest/export_csv_range";
     public static final String ALIAS_STRING = "/rest/string";
+    public static final String ALIAS_RESET = "/rest/reset";
+    public static final String ALIAS_REBOOT = "/rest/reboot";
+    public static final String ALIAS_START_KBD = "/rest/start_kbd";
 
     public static final String RUNNING = "running";
     public static final String STATE = "state";

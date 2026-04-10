@@ -14,6 +14,7 @@ interface LatestStringDetailDto {
     cNominal?: number;
     vCutoff?: number;
     vFloat?: number;
+    rNew?: number;
     serialPortId?: string;
 }
 
@@ -230,6 +231,7 @@ async function fetchStringDetailFromOpenMUC(stringIndex: number): Promise<Latest
         `str${stringIndex}_cell_model`,
         `str${stringIndex}_Cnominal`,
         `str${stringIndex}_Vnominal`,
+        `str${stringIndex}_R_new`,
     ];
 
     const results = await Promise.all(channels.map(async (channel) => {
@@ -252,6 +254,7 @@ async function fetchStringDetailFromOpenMUC(stringIndex: number): Promise<Latest
             else if (channel.includes('Cnominal')) dto.cNominal = Number(value);
             else if (channel.includes('Vcutoff')) dto.vCutoff = Number(value);
             else if (channel.includes('Vfloat')) dto.vFloat = Number(value);
+            else if (channel.includes('R_new')) dto.rNew = Number(value);
             else if (channel.includes('serial_port_id')) dto.serialPortId = String(value);
         }
     });
@@ -293,6 +296,7 @@ function mapLatestValueDtoToBatteryString(
         ratedCapacity: normalize(dto.cNominal, existing?.ratedCapacity),
         cutoffVoltage: normalize(dto.vCutoff, existing?.cutoffVoltage),
         floatVoltage: normalize(dto.vFloat, existing?.floatVoltage),
+        rNew: (dto.rNew !== undefined && dto.rNew !== null) ? Number(dto.rNew) : (existing?.rNew ?? 1450),
         serialPortId: dto.serialPortId ?? existing?.serialPortId ?? ''
     };
 }
@@ -383,6 +387,7 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
         ratedCapacity: formData.ratedCapacity,
         cutoffVoltage: formData.cutoffVoltage,
         floatVoltage: formData.floatVoltage,
+        rNew: formData.rNew,
         serialPortId: formData.serialPortId,
         portConfig: {
             port: portConfig.port,
@@ -409,6 +414,7 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
         apiPutChannel(`str${s}_Cnominal`, formData.ratedCapacity),
         apiPutChannel(`str${s}_Vcutoff`, formData.cutoffVoltage),
         apiPutChannel(`str${s}_Vfloat`, formData.floatVoltage),
+        apiPutChannel(`str${s}_R_new`, formData.rNew ?? 1450),
         apiPutChannel(`str${s}_serial_port_id`, formData.serialPortId)
     ];
 

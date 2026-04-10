@@ -1,6 +1,7 @@
 <script lang="ts">
     import { showToast } from "$lib/services/toast.store";
     import { changePassword } from "$lib/services/auth.store";
+    import { kbd } from "$lib/actions/kbd";
 
     let isOldHidden = $state(true);
     let isNewHidden = $state(true);
@@ -116,6 +117,7 @@
                             bind:value={formData.oldPassword}
                             placeholder="Enter your current password"
                             class:error={errors.oldPassword}
+                            use:kbd
                         />
                         <button
                             type="button"
@@ -140,6 +142,7 @@
                             bind:value={formData.newPassword}
                             placeholder="Enter your new password"
                             class:error={errors.newPassword}
+                            use:kbd
                         />
                         <button
                             type="button"
@@ -164,6 +167,7 @@
                             bind:value={formData.confirmPassword}
                             placeholder="Confirm your new password"
                             class:error={errors.confirmPassword || errors.form}
+                            use:kbd
                         />
                         <button
                             type="button"

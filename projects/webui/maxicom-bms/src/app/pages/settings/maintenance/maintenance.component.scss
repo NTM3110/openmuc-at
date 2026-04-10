@@ -60,3 +60,112 @@ mat-card-actions {
   display: flex;
   gap: 8px;
 }
+
+/* WiFi Configuration Section */
+.wifi-section {
+  margin-top: 24px;
+}
+
+.wifi-card {
+  mat-card-content {
+    padding-top: 16px;
+  }
+}
+
+.scan-button-container {
+  margin: 16px 0;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  gap: 16px;
+
+  p {
+    margin: 0;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.wifi-table-container {
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.wifi-table {
+  width: 100%;
+  
+  th {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.87);
+  }
+
+  td, th {
+    padding: 12px 16px;
+  }
+}
+
+.ssid-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .connected-icon {
+    color: #4caf50;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .connected-text {
+    font-weight: 600;
+    color: #4caf50;
+  }
+}
+
+.signal-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.security-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-right: 4px;
+  vertical-align: middle;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.no-networks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.54);
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  p {
+    margin: 0;
+    max-width: 400px;
+  }
+}

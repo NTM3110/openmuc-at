@@ -8,6 +8,7 @@
 
     import { getSiteName, setSiteName } from "$lib/services/site";
     import { showToast } from "$lib/services/toast.store";
+    import { kbd } from "$lib/actions/kbd";
 
     /* ================= Site name ================= */
     let siteName = "My Monitoring Site";
@@ -127,6 +128,7 @@
                 <input
                     bind:value={siteNameDraft}
                     disabled={savingSiteName}
+                    use:kbd
                 />
                 <button
                     class="icon-btn ok"
@@ -214,8 +216,8 @@
                             <td><span class={statusClass(item.stringVol)}></span>{item.stringVol}</td>
                             <td><span class={statusClass(item.current)}></span>{item.current}</td>
                             <td><span class={statusClass(item.ambient)}></span>{item.ambient}</td>
-                            <td>{item.soC ?? "N/A"}</td>
-                            <td>{item.soH ?? "N/A"}</td>
+                            <td>{item.soC != null ? item.soC.toFixed(3) : "N/A"}</td>
+                            <td>{item.soH != null ? item.soH.toFixed(3) : "N/A"}</td>
                             <td>{formatTime(item.updateTime)}</td>
                         </tr>
                     {/each}

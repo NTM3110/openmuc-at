@@ -3,6 +3,7 @@
     import { getNetworkConfigs, saveNetworkConfig } from "$lib/services/communication";
     import type { NetworkConfig } from "$lib/interfaces/communication.interface";
     import { showToast } from "$lib/services/toast.store";
+    import { kbd } from "$lib/actions/kbd";
 
     let configs: NetworkConfig[] = [];
     let isLoading = true;
@@ -47,7 +48,7 @@
 
     {#if isLoading}
         <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status" />
+            <div class="spinner-border text-primary" role="status"></div>
         </div>
     {:else if configs.length === 0}
         <div class="alert alert-info">
@@ -66,59 +67,69 @@
                             <!-- DHCP toggle -->
                             <div class="form-check form-switch mb-3">
                                 <input
+                                    id="dhcp-switch-{config.id}"
                                     class="form-check-input"
                                     type="checkbox"
                                     checked={isDhcp(config)}
                                     on:change={(e) =>
                                         config.mode = e.currentTarget.checked ? "DHCP" : "STATIC"
                                     }
+                                    use:kbd
                                 />
-                                <label class="form-check-label">
+                                <label class="form-check-label" for="dhcp-switch-{config.id}">
                                     Auto (DHCP)
                                 </label>
                             </div>
 
-                            <!-- IP -->
-                            <div class="mb-3">
-                                <label class="form-label">IP Address</label>
-                                <input
-                                    class="form-control"
-                                    bind:value={config.ipAddress}
-                                    disabled={isDhcp(config)}
-                                    placeholder="192.168.1.10"
-                                />
-                            </div>
-
-                            <!-- Subnet -->
-                            <div class="mb-3">
-                                <label class="form-label">Subnet Mask</label>
-                                <input
-                                    class="form-control"
-                                    bind:value={config.subnetMask}
-                                    disabled={isDhcp(config)}
-                                    placeholder="255.255.255.0"
-                                />
+                            <!-- IP & Subnet -->
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label text-truncate w-100" for="ip-address-{config.id}">IP Address</label>
+                                    <input
+                                        id="ip-address-{config.id}"
+                                        class="form-control"
+                                        bind:value={config.ipAddress}
+                                        disabled={isDhcp(config)}
+                                        placeholder="192.168.1.10"
+                                        use:kbd
+                                    />
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label text-truncate w-100" for="subnet-mask-{config.id}">Subnet Mask</label>
+                                    <input
+                                        id="subnet-mask-{config.id}"
+                                        class="form-control"
+                                        bind:value={config.subnetMask}
+                                        disabled={isDhcp(config)}
+                                        placeholder="255.255.255.0"
+                                        use:kbd
+                                    />
+                                </div>
                             </div>
 
                             <!-- Gateway -->
                             <div class="mb-3">
-                                <label class="form-label">Gateway</label>
+                                <label class="form-label" for="gateway-{config.id}">Gateway</label>
                                 <input
+                                    id="gateway-{config.id}"
                                     class="form-control"
                                     bind:value={config.gateway}
                                     disabled={isDhcp(config)}
                                     placeholder="192.168.1.1"
+                                    use:kbd
                                 />
                             </div>
 
                             <!-- DNS -->
                             <div class="mb-3">
-                                <label class="form-label">DNS</label>
+                                <label class="form-label" for="dns-{config.id}">DNS</label>
                                 <input
+                                    id="dns-{config.id}"
                                     class="form-control"
                                     bind:value={config.dns}
                                     disabled={isDhcp(config)}
                                     placeholder="8.8.8.8,1.1.1.1"
+                                    use:kbd
                                 />
                                 <div class="form-text">
                                     Separate multiple DNS servers with commas
@@ -133,7 +144,7 @@
                                 on:click={() => save(config)}
                             >
                                 {#if savingId === config.id}
-                                    <span class="spinner-border spinner-border-sm me-2" />
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
                                     Saving…
                                 {:else}
                                     Save

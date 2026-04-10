@@ -38,7 +38,7 @@ public class ASyncServiceImpl implements ASyncService {
             boolean shouldContinue = true;
             try{
                 while (shouldContinue) {
-                    System.out.println("JUST DUMP messagesa\n");
+                    // System.out.println("JUST DUMP messagesa\n");
                     System.out.println("Calculating SoH for SoH Schedule ID: " + id + ", String ID: " + strId);
                     SoHSchedule sohSchedule = sohScheduleRepoImpl.findByIdAndStateInAndStatus(id, Arrays.asList(RUNNING,STOPPED),ACTIVE);
                     System.out.println("SoH Schedule found here: " + sohSchedule);
@@ -48,63 +48,67 @@ public class ASyncServiceImpl implements ASyncService {
                         shouldContinue = false;
                         break;
                     }
-                    if(sohSchedule.getState().equals(DischargeState.STOPPED)){
-                        System.out.println("SoH Schedule with ID: " + id + " has been STOPP. Ending calculation.");
-                        stopThreadSuccess(sohSchedule);
+                    if (sohSchedule.getState().equals(DischargeState.STOPPED)) {
+                        System.out.println("SoH Schedule with ID: " + id + " has been STOPPED. Finalizing as SUCCESS.");
+                        try {
+                            stopThreadSuccess(sohSchedule);
+                            System.out.println("SoH Schedule with ID: " + id + " finalized as SUCCESS.");
+                        } catch (Exception stopEx) {
+                            System.out.println("ERROR finalizing schedule " + id + " as SUCCESS: " + stopEx);
+                            stopEx.printStackTrace();
+                        }
                         shouldContinue = false;
                         break;
-                    
                     }
+
                     LatestValue CnominalValue = LatestValueRepoImpl.findLatestValueByChannelId(strId + "_Cnominal");
-                    if(CnominalValue == null){
+                    if (CnominalValue == null) {
                         System.out.println("Cnominal value not found for String ID: " + strId);
                         stopThreadFail(sohSchedule);
                         shouldContinue = false;
                         break;
                     }
-                    if(Objects.isNull(CnominalValue.getValueDouble())){
+                    if (Objects.isNull(CnominalValue.getValueDouble())) {
                         System.out.println("Cnominal value is null for String ID: " + strId);
                         stopThreadFail(sohSchedule);
                         shouldContinue = false;
                         break;
-                        // return;
                     }
                     double cNominal = CnominalValue.getValueDouble();
-                    System.out.println("Cnominal for String ID " + strId + " is: " + cNominal);
 
                     Double socValueAfter = entityRepoImpl.getSocValue(sohSchedule.getStrId());
-                    if(Objects.isNull(socValueAfter)){
+                    if (Objects.isNull(socValueAfter)) {
                         System.out.println("SoC value is null for String ID: " + strId);
                         stopThreadFail(sohSchedule);
                         shouldContinue = false;
                         break;
-                        // return;
                     }
-                    
+
                     double cNominalAs = cNominal * 3600;
                     double usedQ  = sohSchedule.getUsedQ();
                     double current = entityRepoImpl.getCurrentValue(sohSchedule.getStrId());
                     double temperature = entityRepoImpl.getTemperatureValue(sohSchedule.getStrId());
                     usedQ += current * INTERVAL * TemperatureFactor.getFactor(temperature);
                     double soh;
-                    if(sohSchedule.getSocBefore() - socValueAfter == 0){
+                    if (sohSchedule.getSocBefore() - socValueAfter == 0) {
                         soh = 100d;
-                    } else{
+                    } else {
                         soh = Math.abs(usedQ / (sohSchedule.getSocBefore() - socValueAfter) / cNominalAs * 10000);
                     }
-                    if(soh > 100){
+                    if (soh > 100) {
                         soh = 100d;
                     }
                     sohSchedule.setSoh(soh);
                     sohSchedule.setUsedQ(usedQ);
-                    sohSchedule.setSocAfter(socValueAfter); 
-                    sohSchedule.setUpdateDatetime(LocalDateTime.now());
+                    sohSchedule.setSocAfter(socValueAfter);
+                    sohSchedule.setUpdateDatetime(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
                     sohScheduleRepoImpl.save(sohSchedule);
 
                     Thread.sleep(INTERVAL * 1000);
                 }
-            }catch(Exception e){
-                System.out.println("Error in calculateSoh: "+ e);
+            } catch (Exception e) {
+                System.out.println("Error in calculateSoh: " + e);
+                e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
         }).thenApply(v -> "Task completed");
@@ -112,7 +116,7 @@ public class ASyncServiceImpl implements ASyncService {
 
     private void stopThreadSuccess(SoHSchedule sohSchedule){
         sohSchedule.setState(DischargeState.SUCCESS);
-        sohSchedule.setEndDatetime(LocalDateTime.now());
+        sohSchedule.setEndDatetime(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
         sohScheduleRepoImpl.save(sohSchedule);
         // Thread.currentThread().interrupt();
         // return CompletableFuture.completedFuture("Task completed successfully");
@@ -120,7 +124,7 @@ public class ASyncServiceImpl implements ASyncService {
 
     private void stopThreadFail(SoHSchedule sohSchedule){
         sohSchedule.setState(DischargeState.FAILED);
-        sohSchedule.setEndDatetime(LocalDateTime.now());
+        sohSchedule.setEndDatetime(LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
         sohScheduleRepoImpl.save(sohSchedule);
         // Thread.currentThread().interrupt();
         // return CompletableFuture.completedFuture("Task completed failed");

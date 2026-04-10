@@ -3,6 +3,7 @@
     import { goto } from "$app/navigation";
     import { onMount } from "svelte";
     import Logo from "$lib/components/Logo.svelte";
+    import { kbd } from "$lib/actions/kbd";
 
     let username = $state("");
     let password = $state("");
@@ -57,6 +58,7 @@
                             bind:value={username}
                             autocomplete="username"
                             placeholder="Enter username"
+                            use:kbd
                         />
                         <i class="bi bi-person input-icon"></i>
                     </div>
@@ -71,6 +73,7 @@
                             bind:value={password}
                             autocomplete="current-password"
                             placeholder="Enter password"
+                            use:kbd
                         />
                         <button
                             type="button"

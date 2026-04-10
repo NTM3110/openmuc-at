@@ -2,6 +2,7 @@
     import { createEventDispatcher, onMount } from "svelte";
     import type { StringFormData, BatteryString } from "$lib/interfaces/string.interface";
     import { configuredPorts } from "$lib/services/communication";
+    import { kbd } from "$lib/actions/kbd";
 
     export let stringConfig: BatteryString | null = null;
     export let isOpen: boolean = false;
@@ -16,6 +17,7 @@
         ratedCapacity: 0,
         cutoffVoltage: 0,
         floatVoltage: 0,
+        rNew: 1450,
         serialPortId: ""
     };
 
@@ -32,6 +34,7 @@
                 ratedCapacity: stringConfig.ratedCapacity,
                 cutoffVoltage: stringConfig.cutoffVoltage,
                 floatVoltage: stringConfig.floatVoltage,
+                rNew: stringConfig.rNew,
                 serialPortId: stringConfig.serialPortId
             };
         } else {
@@ -49,6 +52,7 @@
             ratedCapacity: 0,
             cutoffVoltage: 0,
             floatVoltage: 0,
+            rNew: 1450,
             serialPortId: $configuredPorts.length > 0 ? $configuredPorts[0].id : ""
         };
     }
@@ -64,48 +68,54 @@
 
 {#if isOpen}
     <div class="modal-backdrop" onclick={close} role="button" tabindex="0" onkeydown={(e) => e.key === 'Escape' && close()}>
-        <div class="modal-content" onclick={(e) => e.stopPropagation()} role="document" tabindex="0" onkeydown={(e) => e.key === 'Escape' && close()}>
+        <div class="modal-content" onclick={(e) => e.stopPropagation()}>
             <div class="modal-header">
                 <h2>{isEditMode ? "Edit String" : "Add String"}</h2>
-                <button class="close-button" onclick={close}>
+                <button class="close-button" onclick={close} aria-label="Close">
                     <i class="bi bi-x-lg"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="stringName">String Name</label>
-                    <input type="text" id="stringName" bind:value={formData.stringName} placeholder="e.g. String 1" />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="stringName">String Name</label>
+                        <input type="text" id="stringName" bind:value={formData.stringName} placeholder="e.g. String 1" use:kbd />
+                    </div>
+                    <div class="form-group">
+                        <label for="rNew">R_NEW (uOhm)</label>
+                        <input type="number" id="rNew" bind:value={formData.rNew} min="0" use:kbd />
+                    </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cellQty">Cell Qty</label>
-                        <input type="number" id="cellQty" bind:value={formData.cellQty} min="1" />
+                        <input type="number" id="cellQty" bind:value={formData.cellQty} min="1" use:kbd />
                     </div>
                     <div class="form-group">
                         <label for="cellBrand">Cell Brand</label>
-                        <input type="text" id="cellBrand" bind:value={formData.cellBrand} />
+                        <input type="text" id="cellBrand" bind:value={formData.cellBrand} use:kbd />
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cellModel">Cell Model</label>
-                        <input type="text" id="cellModel" bind:value={formData.cellModel} />
+                        <input type="text" id="cellModel" bind:value={formData.cellModel} use:kbd />
                     </div>
                     <div class="form-group">
                         <label for="ratedCapacity">Rated Capacity (Ah)</label>
-                        <input type="number" id="ratedCapacity" bind:value={formData.ratedCapacity} step="0.1" />
+                        <input type="number" id="ratedCapacity" bind:value={formData.ratedCapacity} step="0.1" use:kbd />
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="cutoffVoltage">Cutoff Voltage (V)</label>
-                        <input type="number" id="cutoffVoltage" bind:value={formData.cutoffVoltage} step="0.01" />
+                        <input type="number" id="cutoffVoltage" bind:value={formData.cutoffVoltage} step="0.01" use:kbd />
                     </div>
                     <div class="form-group">
                         <label for="floatVoltage">Float Voltage (V)</label>
-                        <input type="number" id="floatVoltage" bind:value={formData.floatVoltage} step="0.01" />
+                        <input type="number" id="floatVoltage" bind:value={formData.floatVoltage} step="0.01" use:kbd />
                     </div>
                 </div>
                 <div class="form-row">
@@ -147,8 +157,9 @@
         border-radius: 12px;
         width: 90%;
         max-width: 600px;
-        max-height: 90vh;
-        overflow-y: auto;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         animation: slideUp 0.3s ease-out;
     }
@@ -159,6 +170,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-shrink: 0;
     }
 
     .modal-header h2 {
@@ -187,6 +199,8 @@
         display: flex;
         flex-direction: column;
         gap: 16px;
+        overflow-y: auto;
+        flex-grow: 1;
     }
 
     .form-group {
@@ -226,6 +240,7 @@
         display: flex;
         justify-content: flex-end;
         gap: 12px;
+        flex-shrink: 0;
     }
 
     button {

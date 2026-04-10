@@ -94,6 +94,7 @@
       <module name="openmuc.openmuc-webui-simpledemovisualisation.main" options="-Xlint:unchecked -Xlint:deprecation" />
       <module name="openmuc.openmuc-webui-spi.main" options="-Xlint:unchecked -Xlint:deprecation" />
       <module name="openmuc.openmuc-webui-userconfigurator.main" options="-Xlint:unchecked -Xlint:deprecation" />
+      <module name="org.openmuc.framework.openmuc-at.openmuc-webui-maxicom-bms.main" options="-Xlint:unchecked -Xlint:deprecation" />
     </option>
   </component>
 </project>

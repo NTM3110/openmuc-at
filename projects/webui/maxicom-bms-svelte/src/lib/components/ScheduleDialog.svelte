@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { createSchedule } from "$lib/services/schedule";
+  import { kbd } from "$lib/actions/kbd";
 
   export let stringId: string;
   export let open = false;
@@ -22,7 +23,7 @@
 
   function reset() {
     startTime = "";
-    ratedCurrent = "";
+    ratedCurrent = null;
     error = null;
     isSubmitting = false;
   }
@@ -64,7 +65,7 @@
 
 {#if open}
   <div class="modal-backdrop">
-    <div class="schedule-modal">
+    <div class="schedule-modal" onclick={(e) => e.stopPropagation()}>
       <div class="modal-header">
         <h5>Schedule Discharge</h5>
         <button class="close-btn" onclick={() => close()}>×</button>
@@ -72,8 +73,9 @@
 
       <div class="modal-body">
         <div class="form-group">
-          <label>Start Time</label>
+          <label for="start-time-input">Start Time</label>
           <input
+            id="start-time-input"
             type="datetime-local"
             bind:value={startTime}
             class="form-control"
@@ -81,14 +83,18 @@
         </div>
 
         <div class="form-group">
-          <label>Rated Current (A)</label>
-          <input
-            type="number"
-            step="0.1"
-            bind:value={ratedCurrent}
-            class="form-control"
-            placeholder="Optional"
-          />
+          <label for="rated-current-input">Rated Current (A)</label>
+          <div class="input-group">
+            <input
+              id="rated-current-input"
+              type="number"
+              step="0.1"
+              bind:value={ratedCurrent}
+              class="form-control"
+              placeholder="Optional"
+              use:kbd
+            />
+          </div>
         </div>
 
         {#if error}
@@ -127,23 +133,18 @@
     z-index: 1050;
   }
 
-  .modal {
-    background: #fff;
-    border-radius: 6px;
-    width: 420px;
-    max-width: calc(100% - 2rem);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  }
   .schedule-modal {
     background: #fff;
     border-radius: 6px;
     width: 420px;
     max-width: calc(100% - 2rem);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     position: relative;
     z-index: 1060;
-    }
-
+  }
 
   .modal-header,
   .modal-footer {
@@ -155,10 +156,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
   }
 
   .modal-body {
     padding: 1rem;
+    overflow-y: auto;
+    flex-grow: 1;
   }
 
   .modal-footer {
@@ -167,6 +171,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 0.5rem;
+    flex-shrink: 0;
   }
 
   .form-group {

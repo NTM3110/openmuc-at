@@ -13,6 +13,7 @@
     import { Chart, registerables } from "chart.js";
     import type { ChartConfiguration } from "chart.js";
     import ScheduleDialog from "$lib/components/ScheduleDialog.svelte";
+    import CsvExportDialog from "$lib/components/CsvExportDialog.svelte";
     import type { Schedule } from "$lib/services/schedule";
     import { loadSchedules, stopSchedule } from "$lib/services/schedule";
 
@@ -21,6 +22,7 @@
     const stringId = $derived($page.params.stringId ?? "");
 
     let showScheduleDialog = $state(false);
+    let showCsvExportDialog = $state(false);
 
     let schedules: Schedule[] = $state([]);
     let schedulesLoading = $state(false);
@@ -159,7 +161,11 @@
     let lastCellLength = 0;
 
     $effect(() => {
-        if (cells.length === 0) return;
+        if (cells.length === 0) {
+            clearInterval(renderInterval);
+            lastCellLength = 0;
+            return;
+        }
 
         // Only restart progressive render if cell count changes
         if (cells.length !== lastCellLength) {
@@ -175,8 +181,6 @@
                 }
             }, 100);
         }
-
-        return () => clearInterval(renderInterval);
     });
 
 
@@ -262,7 +266,7 @@
     function startPendingWatcher() {
         if (pendingWatcherTimer) return;
 
-        pendingWatcherTimer = setInterval(refreshSchedulesIfChanged, 5000);
+        pendingWatcherTimer = setInterval(refreshSchedulesIfChanged, 15000);
     }
 
     function stopPendingWatcher() {
@@ -355,7 +359,7 @@
                     },
                     {
                         data: [],
-                        label: "Resistance (µΩ)",
+                        label: "Resistance (uOhm)",
                         yAxisID: "y-axis-r",
                         borderColor: "#FF9800",
                         backgroundColor: "rgba(255, 152, 0, 0.1)",
@@ -375,7 +379,7 @@
                     },
                     "y-axis-r": {
                         ...chartOptions.scales?.["y-axis-r"],
-                        title: { display: true, text: "Resistance (µΩ)" },
+                        title: { display: true, text: "Resistance (uOhm)" },
                     },
                 },
             },
@@ -509,36 +513,49 @@
             : "soc_soh";
     }
 
-    function exportData() {
+    function openCsvExportDialog() {
+        showCsvExportDialog = true;
+    }
+
+    async function handleCsvExport(event: CustomEvent<{ start: string; end: string }>) {
         if (!batteryString) return;
-
-        const filteredCells = cells.map(c => {
-            if (activeTab === "vol-rst") {
-                return { id: c.ID, voltage: c.Vol, resistance: c.Rst };
+        const { start, end } = event.detail;
+        const stringId = batteryString.stringIndex;
+        
+        const url = `/rest/export_csv_range?stringId=${stringId}&start=${start}&end=${end}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                const errorText = await response.text();
+                alert(`Export failed: ${errorText || response.statusText}`);
+                return;
             }
-            if (activeTab === "temp-ir") {
-                return { id: c.ID, temperature: c.Temp, ir: c.IR };
+
+            const blob = await response.blob();
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            
+            // Try to get filename from content-disposition header
+            const contentDisposition = response.headers.get('Content-Disposition');
+            let filename = `export_str${stringId}_${start}_to_${end}.zip`;
+            if (contentDisposition && contentDisposition.includes('filename=')) {
+                const match = contentDisposition.match(/filename="?([^"]+)"?/);
+                if (match && match[1]) {
+                    filename = match[1];
+                }
             }
-            return { id: c.ID, soc: c.SoC, soh: c.SoH };
-        });
-
-        const payload = {
-            string: batteryString.stringIndex,
-            tab: getActiveTabLabel(),
-            summary,
-            cells: filteredCells,
-        };
-
-        const blob = new Blob(
-            [JSON.stringify(payload, null, 2)],
-            { type: "application/json" }
-        );
-
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `string-${batteryString.stringIndex}-${getActiveTabLabel()}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
+            
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error('Export error:', error);
+            alert('An unexpected error occurred during export.');
+        }
     }
 
     function beforePrint() {
@@ -616,7 +633,7 @@
                     <div>
                         <div class="k-label">STRING</div>
                         <div class="k-value">
-                            String {batteryString.stringIndex}
+                            {batteryString.stringName}
                         </div>
                     </div>
 
@@ -652,7 +669,7 @@
                         </button>
                         <button
                             class="btn btn-outline-secondary btn-sm"
-                            onclick={exportData}
+                            onclick={openCsvExportDialog}
                         >
                             <i class="bi bi-download me-1"></i>
                             Export
@@ -695,20 +712,20 @@
                                     <th>Min Temp ID</th>
                                     <th>Min Temp Val (°C)</th>
                                     <th>Max Rst ID</th>
-                                    <th>Max Rst Val (µΩ)</th>
+                                    <th>Max Rst Val (uOhm)</th>
                                     <th>Min Rst ID</th>
-                                    <th>Min Rst Val (µΩ)</th>
+                                    <th>Min Rst Val (uOhm)</th>
                                     <th>Avg Vol (V)</th>
                                     <th>Avg Temp (°C)</th>
-                                    <th>Avg Rst (µΩ)</th>
+                                    <th>Avg Rst (uOhm)</th>
                                 </tr>
                             </thead>
                             <tbody class="k-table-values">
                                 <tr>
                                     <td>{summary.totalVoltage?.toFixed(3) ?? "N/A"}</td>
                                     <td>{summary.stringCurrent?.toFixed(3) ?? "N/A"}</td>
-                                    <td>{summary.stringSoC?.toFixed(0) ?? "N/A"}</td>
-                                    <td>{summary.stringSoH?.toFixed(0) ?? "N/A"}</td>
+                                    <td>{summary.stringSoC?.toFixed(3) ?? "N/A"}</td>
+                                    <td>{summary.stringSoH?.toFixed(3) ?? "N/A"}</td>
                                     <td>{summary.maxVolId ?? "N/A"}</td>
                                     <td>{summary.maxVoltageValue?.toFixed(3) ?? "N/A"}</td>
                                     <td>{summary.minVolId ?? "N/A"}</td>
@@ -781,7 +798,7 @@
                             {:else if schedules.length === 0}
                                 <tr>
                                     <td colspan="6" class="text-center py-3 text-muted">
-                                        No discharge history available
+                                        There is no discharge history yet.
                                     </td>
                                 </tr>
                             {:else}
@@ -804,11 +821,7 @@
                                         <td class="col-time">{formatDate(s.endTime)}</td>
                                         <td class="col-current">{formatNumber(s.ratedCurrent, 1)}</td>
                                         <td class="col-soh">
-                                            {#if s.status === "finished"}
-                                                {formatNumber(s.soh, 1)}
-                                            {:else}
-                                                —
-                                            {/if}
+                                            {s.soh ? s.soh.toFixed(3) : "-"}
                                         </td>
 
                                         <td class="col-actions text-end">
@@ -906,8 +919,8 @@
                                             <td>{cell.Temp?.toFixed(1) ?? "-"}</td>
                                             <td>{cell.IR ?? "-"}</td>
                                         {:else}
-                                            <td>{cell.SoC?.toFixed(1) ?? "-"}</td>
-                                            <td>{cell.SoH?.toFixed(1) ?? "-"}</td>
+                                            <td>{cell.SoC?.toFixed(3) ?? "-"}</td>
+                                            <td>{cell.SoH?.toFixed(3) ?? "-"}</td>
                                         {/if}
                                     </tr>
                                 {/each}
@@ -961,6 +974,11 @@
                 showScheduleDialog = false;
                 await refreshSchedules();
             }}
+        />
+
+        <CsvExportDialog
+            bind:open={showCsvExportDialog}
+            on:export={handleCsvExport}
         />
     {/if}
     </div>

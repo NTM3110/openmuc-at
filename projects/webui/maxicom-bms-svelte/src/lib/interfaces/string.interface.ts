@@ -8,6 +8,7 @@ export interface BatteryString {
     ratedCapacity: number; // Cnominal
     cutoffVoltage: number; // Vcutoff
     floatVoltage: number;
+    rNew: number;
     serialPortId: string; // Port ID (e.g., 'serial0')
 }
 

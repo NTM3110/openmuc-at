@@ -59,7 +59,7 @@ interface OpenMucDevicesResponse {
 }
 
 type RecordMap = Map<string, OpenMucRecord['record']>;
-const POLLING_INTERVAL = 12000;
+const POLLING_INTERVAL = 15000;
 
 const DEVICES_API_URL = '/rest/devices';
 const CHANNELS_API_URL = '/rest/channels';

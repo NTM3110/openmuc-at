@@ -37,7 +37,7 @@ public final class BatteryStringPayloadBuilder {
 
             // cellProps (same fields FE spreads in)
             JsonObject cellProps = new JsonObject();
-            cellProps.addProperty("samplingInterval", 12000);
+            cellProps.addProperty("samplingInterval", 15000);
             cellProps.addProperty("samplingGroup", sg);
             cellProps.addProperty("samplingTimeOffset", off);
             cellProps.addProperty("loggingInterval", 60000);
@@ -101,7 +101,7 @@ public final class BatteryStringPayloadBuilder {
         configs.addProperty("description", "String " + s + " Modbus RTU");
         configs.addProperty("deviceAddress", portConfig.get("port").getAsString());
         configs.addProperty("settings", settings);
-        configs.addProperty("samplingTimeout", 12000);
+        configs.addProperty("samplingTimeout", 15000);
         configs.addProperty("connectRetryInterval", 1000);
         configs.addProperty("disabled", false);
 
@@ -166,7 +166,7 @@ public final class BatteryStringPayloadBuilder {
         serverMappings.add(sm);
         ch.add("serverMappings", serverMappings);
 
-        ch.addProperty("samplingInterval", 12000);
+        ch.addProperty("samplingInterval", 15000);
         if(!Objects.equals(samplingGroup, ""))
             ch.addProperty("samplingGroup", samplingGroup);
         ch.addProperty("samplingTimeOffset", samplingTimeOffset);
@@ -196,10 +196,11 @@ public final class BatteryStringPayloadBuilder {
         channels.add(overview("str" + s + "_cell_model", "STRING", "Cell Model", null, 64));
         channels.add(overview("str" + s + "_Vcutoff", "DOUBLE", "V cutoff", "V", null));
         channels.add(overview("str" + s + "_Vfloat", "DOUBLE", "V float", "V", null));
+        channels.add(overview("str" + s + "_R_new", "DOUBLE", "R new", "uOhm", null));
         channels.add(overview("str" + s + "_serial_port_id", "STRING", "Serial port id", "ID", 64));
 
         // Add logging to all overview channels (FE does this)
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 9; i++) {
             addLogging.accept(channels.get(i).getAsJsonObject(), 0);
         }
 

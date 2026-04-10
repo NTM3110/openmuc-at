@@ -78,7 +78,7 @@ public class Helper {
 	
 	public static Result getMinVoltageBattery(int stringIndex, int[] cellNumbers, PowerCell[][] powerCells) {
 		int minVoltageIndex = -1;
-		double minVoltage = 100.0;
+		double minVoltage = 1000.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
 			if(powerCells[stringIndex][i].getVoltage() <= 0)
 				continue;
@@ -139,7 +139,7 @@ public class Helper {
 	
 	public static Result getMinResistanceBattery(int stringIndex, int[] cellNumbers, PowerCell[][] powerCells) {
 		int minResistanceIndex = -1;
-		double minResistance = 100.0;
+		double minResistance = 10000.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
 			if(powerCells[stringIndex][i].getResistance() < minResistance) {
 				minResistanceIndex = i+1;
@@ -178,12 +178,15 @@ public class Helper {
 	
 	public static Result getMinTemperatureBattery(int stringIndex, int[] cellNumbers, PowerCell[][] powerCells) {
 		int minTempIndex = -1;
-		double minTemp = 100.0;
+		double minTemp = 1000.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
-			if(powerCells[stringIndex][i].getResistance() < minTemp) {
+			if(powerCells[stringIndex][i].getTemp() < minTemp) {
+				// logger.warn("Cell {} in String {} has invalid temperature reading: {}", i+1, stringIndex+1, powerCells[stringIndex][i].getTemp());
 				minTempIndex = i+1;
 				minTemp = powerCells[stringIndex][i].getTemp();
 			}
+			// 	logger.warn("Cell {} in String {} has valid temperature reading: {}", i+1, stringIndex+1, powerCells[stringIndex][i].getTemp());
+			// }
 		}
 		return new Result(minTempIndex, minTemp);
 	}

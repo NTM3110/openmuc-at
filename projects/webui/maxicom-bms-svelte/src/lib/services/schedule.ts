@@ -92,7 +92,7 @@ function mapBackendStatus(v: string | number | null | undefined): ScheduleStatus
   }
 }
 
-function dtoToSchedule(dto: ScheduleDTO, ratedCurrent = 0): Schedule {
+function dtoToSchedule(dto: ScheduleDTO): Schedule {
   const soh =
     dto.soh == null ? null : dto.soh <= 1 ? dto.soh * 100 : dto.soh;
 
@@ -104,7 +104,7 @@ function dtoToSchedule(dto: ScheduleDTO, ratedCurrent = 0): Schedule {
     stringId: dto.strId,
     startTime: parseBackendDate(dto.startTime) ?? Date.now(),
     endTime: parseBackendDate(dto.endTime),
-    ratedCurrent,
+    ratedCurrent: dto.current ?? 0,
     realTimeCurrent: dto.current,
     soh,
     status: mapBackendStatus(backendState),
@@ -120,7 +120,8 @@ export async function loadSchedules(stringId: string): Promise<Schedule[]> {
 
   if (!json.success) return [];
 
-  const list = json.data
+  const data = json.data || [];
+  const list = data
     .filter((d) => d.strId === stringId)
     .map((dto) => dtoToSchedule(dto))
     .sort((a, b) => b.startTime - a.startTime);
