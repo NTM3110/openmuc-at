@@ -355,6 +355,11 @@ public class ToJson {
         data.addProperty("cnominal",stringDetailDTO.getCNominal());
         data.addProperty("vcutoff",stringDetailDTO.getVCutoff());
         data.addProperty("vfloat", stringDetailDTO.getVFloat());
+        data.addProperty("rNew", stringDetailDTO.getRNew());
+        data.addProperty("highResistanceThreshold", stringDetailDTO.getHighResistanceThreshold());
+        data.addProperty("highTemperatureThreshold", stringDetailDTO.getHighTemperatureThreshold());
+        data.addProperty("lowVoltageThreshold", stringDetailDTO.getLowVoltageThreshold());
+        data.addProperty("highVoltageThreshold", stringDetailDTO.getHighVoltageThreshold());
         data.addProperty("serialPortId", stringDetailDTO.getSerialPortId());
         return data;
     }

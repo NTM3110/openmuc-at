@@ -16,6 +16,7 @@
     import CsvExportDialog from "$lib/components/CsvExportDialog.svelte";
     import type { Schedule } from "$lib/services/schedule";
     import { loadSchedules, stopSchedule } from "$lib/services/schedule";
+    import { getCellAlarmReasons, getPrimaryAlarmLabel } from "$lib/services/alarm";
 
     Chart.register(...registerables);
 
@@ -83,6 +84,10 @@
     let activeTab = $state("vol-rst");
     let visibleCellCount = $state(20);
     let renderInterval: any;
+
+    function cellAlarmReasons(cell: CellData): string[] {
+        return batteryString ? getCellAlarmReasons(cell, batteryString) : [];
+    }
 
     /**
      * Effects
@@ -909,8 +914,19 @@
 
                             <tbody>
                                 {#each group as cell}
-                                    <tr>
-                                        <td class="cell-id">{cell.ID}</td>
+                                    {@const alarmReasons = cellAlarmReasons(cell)}
+                                    {@const alarmLabel = getPrimaryAlarmLabel(alarmReasons)}
+                                    <tr class:cell-alarm-row={alarmReasons.length > 0} title={alarmReasons.join(", ")}>
+                                        <td class="cell-id">
+                                            {#if alarmReasons.length > 0}
+                                                <span
+                                                    class="cell-alarm-led"
+                                                    aria-label={`Cell alarm ${alarmLabel}`}
+                                                ></span>
+                                                <span class="cell-alarm-label">{alarmLabel}</span>
+                                            {/if}
+                                            {cell.ID}
+                                        </td>
 
                                         {#if activeTab === "vol-rst"}
                                             <td>{cell.Vol?.toFixed(3) ?? "-"}</td>
@@ -969,7 +985,6 @@
         <ScheduleDialog
             bind:open={showScheduleDialog}
             stringId={`str${batteryString.stringIndex}`}
-            on:close={() => (showScheduleDialog = false)}
             on:created={async () => {
                 showScheduleDialog = false;
                 await refreshSchedules();
@@ -1316,10 +1331,48 @@ CELL DATA – 3 CARD LAYOUT
     border-top: 1px solid rgba(0,0,0,0.06);
 }
 
+.cell-alarm-led {
+    display: inline-flex;
+    width: 10px;
+    height: 10px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+    vertical-align: middle;
+    animation: alarmBlink 1s ease-in-out infinite;
+}
+
+.cell-alarm-label {
+    display: inline-flex;
+    min-width: 24px;
+    margin-right: 8px;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.cell-mini-table tbody tr.cell-alarm-row td {
+    color: #b91c1c;
+    background: rgba(254, 226, 226, 0.65);
+    animation: alarmRowBlink 1s ease-in-out infinite;
+}
+
 /* ID emphasis */
 .cell-id {
     font-weight: 600;
     color: #1e40af;
+}
+
+@keyframes alarmBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.18; }
+}
+
+@keyframes alarmRowBlink {
+    0%, 100% { background: rgba(254, 226, 226, 0.8); }
+    50% { background: rgba(254, 226, 226, 0.25); }
 }
 
 
@@ -1371,7 +1424,9 @@ RESPONSIVE
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .running-badge-blink {
+        .running-badge-blink,
+        .cell-alarm-led,
+        .cell-mini-table tbody tr.cell-alarm-row td {
             animation: none;
         }
     }

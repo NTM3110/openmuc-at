@@ -39,7 +39,7 @@ public class Helper {
 			}
 			
 			// logger.info("String {} -----------> Total :{}, Cell count: {}", i, str_SOC[i], validCellCount);
-			str_SOC[i] = str_SOC[i] / validCellCount;
+			str_SOC[i] = validCellCount > 0 ? str_SOC[i] / validCellCount : 0;
 			validCellCount = 0;
 		}
 		return str_SOC;
@@ -58,7 +58,7 @@ public class Helper {
 				}						
 			}
 			// logger.info("String {} -----------> Total :{}, Cell count: {}", i, str_SOH[i], validCellCount);
-			str_SOH[i] = str_SOH[i] / validCellCount;
+			str_SOH[i] = validCellCount > 0 ? str_SOH[i] / validCellCount : 0;
 			validCellCount = 0;
 		}
 		return str_SOH;
@@ -99,11 +99,11 @@ public class Helper {
 			averageVoltage += powerCells[stringIndex][i].getVoltage();
 			validCellCount++;
 		}
-		averageVoltage /= validCellCount;
 		if(validCellCount == 0) {
 			// logger.warn("No valid cell count in getAverageResis")
 			return 0;
 		}
+		averageVoltage /= validCellCount;
 		return averageVoltage;
 	}
 	
@@ -111,6 +111,8 @@ public class Helper {
 		int maxResistanceIndex = -1;
 		double maxResistance = -1.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
+			if(powerCells[stringIndex][i].getResistance() <= 0)
+				continue;
 			if(powerCells[stringIndex][i].getResistance() > maxResistance) {
 				maxResistanceIndex = i+1;
 				maxResistance = powerCells[stringIndex][i].getResistance();
@@ -129,11 +131,11 @@ public class Helper {
 			averageResistance += powerCells[stringIndex][i].getResistance();
 			validCellCount++;
 		}
-		averageResistance /= validCellCount;
 		if(validCellCount == 0) {
 			// logger.warn("No valid cell count in getAverageResis")
 			return 0;
 		}
+		averageResistance /= validCellCount;
 		return averageResistance;
 	}
 	
@@ -141,6 +143,8 @@ public class Helper {
 		int minResistanceIndex = -1;
 		double minResistance = 10000.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
+			if(powerCells[stringIndex][i].getResistance() <= 0)
+				continue;
 			if(powerCells[stringIndex][i].getResistance() < minResistance) {
 				minResistanceIndex = i+1;
 				minResistance = powerCells[stringIndex][i].getResistance();
@@ -153,6 +157,8 @@ public class Helper {
 		int maxTempIndex = -1;
 		double maxTemp = -1.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
+			if(powerCells[stringIndex][i].getTemp() <= 0)
+				continue;
 			if(powerCells[stringIndex][i].getTemp() > maxTemp) {
 				maxTempIndex = i+1;
 				maxTemp = powerCells[stringIndex][i].getTemp();
@@ -172,6 +178,9 @@ public class Helper {
 				averageTemp += powerCells[stringIndex][i].getTemp();
 				validCellCount++;
 		}
+		if(validCellCount == 0) {
+			return 0;
+		}
 		averageTemp /= validCellCount;
 		return averageTemp;
 	}
@@ -180,6 +189,8 @@ public class Helper {
 		int minTempIndex = -1;
 		double minTemp = 1000.0;
 		for(int i = 0; i < cellNumbers[stringIndex]; i++) {
+			if(powerCells[stringIndex][i].getTemp() <= 0)
+				continue;
 			if(powerCells[stringIndex][i].getTemp() < minTemp) {
 				// logger.warn("Cell {} in String {} has invalid temperature reading: {}", i+1, stringIndex+1, powerCells[stringIndex][i].getTemp());
 				minTempIndex = i+1;

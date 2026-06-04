@@ -15,6 +15,10 @@ interface LatestStringDetailDto {
     vCutoff?: number;
     vFloat?: number;
     rNew?: number;
+    highResistanceThreshold?: number;
+    highTemperatureThreshold?: number;
+    lowVoltageThreshold?: number;
+    highVoltageThreshold?: number;
     serialPortId?: string;
 }
 
@@ -230,8 +234,14 @@ async function fetchStringDetailFromOpenMUC(stringIndex: number): Promise<Latest
         `str${stringIndex}_cell_brand`,
         `str${stringIndex}_cell_model`,
         `str${stringIndex}_Cnominal`,
-        `str${stringIndex}_Vnominal`,
+        `str${stringIndex}_Vcutoff`,
+        `str${stringIndex}_Vfloat`,
         `str${stringIndex}_R_new`,
+        `str${stringIndex}_alarm_high_rst`,
+        `str${stringIndex}_alarm_high_temp`,
+        `str${stringIndex}_alarm_low_voltage`,
+        `str${stringIndex}_alarm_high_voltage`,
+        `str${stringIndex}_serial_port_id`,
     ];
 
     const results = await Promise.all(channels.map(async (channel) => {
@@ -255,6 +265,10 @@ async function fetchStringDetailFromOpenMUC(stringIndex: number): Promise<Latest
             else if (channel.includes('Vcutoff')) dto.vCutoff = Number(value);
             else if (channel.includes('Vfloat')) dto.vFloat = Number(value);
             else if (channel.includes('R_new')) dto.rNew = Number(value);
+            else if (channel.includes('alarm_high_rst')) dto.highResistanceThreshold = Number(value);
+            else if (channel.includes('alarm_high_temp')) dto.highTemperatureThreshold = Number(value);
+            else if (channel.includes('alarm_low_voltage')) dto.lowVoltageThreshold = Number(value);
+            else if (channel.includes('alarm_high_voltage')) dto.highVoltageThreshold = Number(value);
             else if (channel.includes('serial_port_id')) dto.serialPortId = String(value);
         }
     });
@@ -285,6 +299,9 @@ function mapLatestValueDtoToBatteryString(
         const num = Number(value);
         return Number.isFinite(num) ? num : (fallback ?? 0);
     };
+    const rNew = (dto.rNew !== undefined && dto.rNew !== null)
+        ? Number(dto.rNew)
+        : (existing?.rNew ?? 1450);
 
     return {
         id: existing?.id || uuidv4(),
@@ -296,7 +313,14 @@ function mapLatestValueDtoToBatteryString(
         ratedCapacity: normalize(dto.cNominal, existing?.ratedCapacity),
         cutoffVoltage: normalize(dto.vCutoff, existing?.cutoffVoltage),
         floatVoltage: normalize(dto.vFloat, existing?.floatVoltage),
-        rNew: (dto.rNew !== undefined && dto.rNew !== null) ? Number(dto.rNew) : (existing?.rNew ?? 1450),
+        rNew,
+        highResistanceThreshold: normalize(
+            dto.highResistanceThreshold,
+            existing?.highResistanceThreshold ?? Math.round(rNew * 2.3)
+        ),
+        highTemperatureThreshold: normalize(dto.highTemperatureThreshold, existing?.highTemperatureThreshold),
+        lowVoltageThreshold: normalize(dto.lowVoltageThreshold, existing?.lowVoltageThreshold),
+        highVoltageThreshold: normalize(dto.highVoltageThreshold, existing?.highVoltageThreshold),
         serialPortId: dto.serialPortId ?? existing?.serialPortId ?? ''
     };
 }
@@ -388,6 +412,10 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
         cutoffVoltage: formData.cutoffVoltage,
         floatVoltage: formData.floatVoltage,
         rNew: formData.rNew,
+        highResistanceThreshold: formData.highResistanceThreshold,
+        highTemperatureThreshold: formData.highTemperatureThreshold,
+        lowVoltageThreshold: formData.lowVoltageThreshold,
+        highVoltageThreshold: formData.highVoltageThreshold,
         serialPortId: formData.serialPortId,
         portConfig: {
             port: portConfig.port,
@@ -398,11 +426,14 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
         }
     };
 
-    await fetch(`${BASE_URL}/string`, {
+    const createResponse = await fetch(`${BASE_URL}/string`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reqBody)
     });
+    if (!createResponse.ok) {
+        throw new Error(`Failed to save string configuration (${createResponse.status})`);
+    }
 
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -415,6 +446,10 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
         apiPutChannel(`str${s}_Vcutoff`, formData.cutoffVoltage),
         apiPutChannel(`str${s}_Vfloat`, formData.floatVoltage),
         apiPutChannel(`str${s}_R_new`, formData.rNew ?? 1450),
+        apiPutChannel(`str${s}_alarm_high_rst`, formData.highResistanceThreshold),
+        apiPutChannel(`str${s}_alarm_high_temp`, formData.highTemperatureThreshold),
+        apiPutChannel(`str${s}_alarm_low_voltage`, formData.lowVoltageThreshold),
+        apiPutChannel(`str${s}_alarm_high_voltage`, formData.highVoltageThreshold),
         apiPutChannel(`str${s}_serial_port_id`, formData.serialPortId)
     ];
 
@@ -423,11 +458,14 @@ async function createStringApi(s: number, formData: StringFormData, portConfig: 
 
 async function apiPutChannel(channelId: string, value: string | number | boolean) {
     const payload = { record: { flag: 'VALID', value } };
-    await fetch(`${BASE_URL}/channels/${channelId}`, {
+    const response = await fetch(`${BASE_URL}/channels/${channelId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
     });
+    if (!response.ok) {
+        throw new Error(`Failed to write channel ${channelId} (${response.status})`);
+    }
 }
 
 export async function deleteString(id: string) {

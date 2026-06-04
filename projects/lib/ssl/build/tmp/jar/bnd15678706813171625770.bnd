@@ -1,0 +1,4 @@
+Bundle-Name=OpenMUC Library - SSL Manager
+Bundle-SymbolicName=org.openmuc.framework.openmuc-lib-ssl
+Bundle-Vendor=Fraunhofer ISE
+Export-Package=org.openmuc.framework.lib.ssl

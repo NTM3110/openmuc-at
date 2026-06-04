@@ -7,7 +7,11 @@ const config = {
 			pages: 'dist',
 			assets: 'dist',
 			fallback: 'index.html'
-		})
+		}),
+		output: {
+			// Avoid ESM/dynamic-import bootstrap for the older browser used on site.
+			bundleStrategy: 'inline'
+		}
 	}
 };
 

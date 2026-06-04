@@ -10,6 +10,11 @@ public class StringDetailDTO {
     Double cNominal;
     Double vCutoff;
     Double vFloat;
+    Double rNew;
+    Double highResistanceThreshold;
+    Double highTemperatureThreshold;
+    Double lowVoltageThreshold;
+    Double highVoltageThreshold;
     String serialPortId;
 
     // Getters and Setters
@@ -49,6 +54,16 @@ public class StringDetailDTO {
     }
     public Double getVFloat() { return vFloat; }
     public void setVFloat(Double vFloat) { this.vFloat = vFloat; }
+    public Double getRNew() { return rNew; }
+    public void setRNew(Double rNew) { this.rNew = rNew; }
+    public Double getHighResistanceThreshold() { return highResistanceThreshold; }
+    public void setHighResistanceThreshold(Double highResistanceThreshold) { this.highResistanceThreshold = highResistanceThreshold; }
+    public Double getHighTemperatureThreshold() { return highTemperatureThreshold; }
+    public void setHighTemperatureThreshold(Double highTemperatureThreshold) { this.highTemperatureThreshold = highTemperatureThreshold; }
+    public Double getLowVoltageThreshold() { return lowVoltageThreshold; }
+    public void setLowVoltageThreshold(Double lowVoltageThreshold) { this.lowVoltageThreshold = lowVoltageThreshold; }
+    public Double getHighVoltageThreshold() { return highVoltageThreshold; }
+    public void setHighVoltageThreshold(Double highVoltageThreshold) { this.highVoltageThreshold = highVoltageThreshold; }
     public String getSerialPortId() { return serialPortId; }
     public void setSerialPortId(String serialPortId) { this.serialPortId = serialPortId;}
 }

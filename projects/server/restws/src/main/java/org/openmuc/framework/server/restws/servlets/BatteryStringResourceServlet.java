@@ -15,6 +15,7 @@ import org.openmuc.framework.dataaccess.DataAccessService;
 import org.openmuc.framework.lib.rest1.Const;
 import org.openmuc.framework.lib.rest1.FromJson;
 import org.openmuc.framework.lib.rest1.service.impl.BatteryStringPayloadBuilder;
+import org.openmuc.framework.lib.rest1.sql.LatestValueRepoImpl;
 import org.openmuc.framework.lib.rest1.service.impl.BatteryStringPayloadBuilderDemo;
 import org.openmuc.framework.lib.rest1.exceptions.MissingJsonObjectException;
 import org.openmuc.framework.lib.rest1.exceptions.RestConfigIsNotCorrectException;
@@ -27,6 +28,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class BatteryStringResourceServlet extends GenericServlet {
 
@@ -92,6 +95,12 @@ public class BatteryStringResourceServlet extends GenericServlet {
             return;
         }
 
+        if (!persistAlarmThresholds(s, req)) {
+            ServletLib.sendHTTPErrorAndLogErr(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, logger,
+                    "Could not persist alarm thresholds in latest_values.");
+            return;
+        }
+
 //        boolean ok3 = writeOverviewValues(s, cells, req, response);
 //        if(!ok3) {
 //            json.addString("status", "NOT ok");
@@ -105,6 +114,16 @@ public class BatteryStringResourceServlet extends GenericServlet {
         json.addString("status", "ok");
         json.addString("stringIndex", Integer.toString(s));
         sendJson(json, response);
+    }
+
+    private boolean persistAlarmThresholds(int stringIndex, JsonObject request) {
+        String prefix = "str" + stringIndex + "_alarm_";
+        Map<String, Double> thresholds = new LinkedHashMap<>();
+        thresholds.put(prefix + "high_rst", getAsDoubleOr(request, "highResistanceThreshold", 0.0));
+        thresholds.put(prefix + "high_temp", getAsDoubleOr(request, "highTemperatureThreshold", 0.0));
+        thresholds.put(prefix + "low_voltage", getAsDoubleOr(request, "lowVoltageThreshold", 0.0));
+        thresholds.put(prefix + "high_voltage", getAsDoubleOr(request, "highVoltageThreshold", 0.0));
+        return LatestValueRepoImpl.upsertDoubleValues(thresholds);
     }
 
     private boolean writeOverviewValues(int s, int cells, JsonObject req, HttpServletResponse response) {

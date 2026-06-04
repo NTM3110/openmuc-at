@@ -1,0 +1,170 @@
+May 07, 2026 1:50:25 PM org.jline.utils.Log logr
+WARNING: Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
+____________________________
+Welcome to Apache Felix Gogo
+
+g! 26.05.07 13:50:26.087 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - [36mjetty-11.0.22; built: 2024-06-27T16:27:26.756Z; git: e711d4c7040cb1e61aa68cb248fa7280b734a3bb; jvm 21.0.9+7-LTS-338
+[0;39m26.05.07 13:50:26.179 [FelixStartLevel] INFO  o.e.j.s.s.DefaultSessionIdManager - [36mSession workerName=node0
+[0;39m26.05.07 13:50:26.207 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - [36mStarted o.e.j.s.ServletContextHandler@30c3a68c{/,null,AVAILABLE}
+[0;39m26.05.07 13:50:26.251 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - [36mStarted Server@6b1e6fd0{STARTING}[11.0.22,sto=0] @2484ms
+[0;39m26.05.07 13:50:26.368 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - [36mStarted ServerConnector@49b29fe8{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+[0;39m26.05.07 13:50:26.405 [FelixStartLevel] INFO  o.e.jetty.util.ssl.SslContextFactory - [36mx509=X509@638710(openmuc,h=[openmuc],a=[],w=[]) for Server@6bce7b17[provider=null,keyStore=file:///C:/Users/shou/Documents/ATEnergy/BMS/maximuc/framework/conf/https-certificate.jks,trustStore=null]
+[0;39m26.05.07 13:50:26.517 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - [36mStarted ServerConnector@228bb388{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+[0;39m26.05.07 13:50:26.520 [FelixStartLevel] INFO  org.apache.felix.http - [36mStarted Jetty 11.0.22 at port(s) HTTP:8888 HTTPS:8889 on context path / [minThreads=8,maxThreads=200,acceptors=1,selectors=6]
+[0;39m26.05.07 13:50:26.624 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mActivating Data Manager with config conf\channels.xml
+[0;39m26.05.07 13:50:26.660 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - [33mNo driver bundle available for configured driver: 'virtual'.
+[0;39m26.05.07 13:50:26.663 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - [33mNo driver bundle available for configured driver: 'virtual'.
+[0;39m26.05.07 13:50:26.663 [FelixStartLevel] WARN  o.o.f.core.datamanager.Device - [33mNo driver bundle available for configured driver: 'virtual'.
+[0;39m26.05.07 13:50:26.666 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - [36mActivating Demo App
+[0;39m26.05.07 13:50:26.666 [FelixStartLevel] INFO  o.o.f.app.simpledemo.SimpleDemoApp - [36mDemo App started running...
+[0;39mERROR : bundle org.openmuc.framework.openmuc-app-simpledemo:0.20.0 (12)[org.openmuc.framework.app.simpledemo.SimpleDemoApp(0)] : The activate method has thrown an exception
+java.lang.NullPointerException: Cannot invoke "org.openmuc.framework.dataaccess.Channel.getSettings()" because "this.chPowerPhotovoltaics" is null
+	at org.openmuc.framework.app.simpledemo.SimpleDemoApp.init(SimpleDemoApp.java:99)
+	at org.openmuc.framework.app.simpledemo.SimpleDemoApp.activate(SimpleDemoApp.java:76)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.apache.felix.scr.impl.inject.methods.BaseMethod.invokeMethod(BaseMethod.java:245)
+	at org.apache.felix.scr.impl.inject.methods.BaseMethod.access$500(BaseMethod.java:41)
+	at org.apache.felix.scr.impl.inject.methods.BaseMethod$Resolved.invoke(BaseMethod.java:687)
+	at org.apache.felix.scr.impl.inject.methods.BaseMethod.invoke(BaseMethod.java:531)
+	at org.apache.felix.scr.impl.inject.methods.ActivateMethod.invoke(ActivateMethod.java:317)
+	at org.apache.felix.scr.impl.inject.methods.ActivateMethod.invoke(ActivateMethod.java:307)
+	at org.apache.felix.scr.impl.manager.SingleComponentManager.createImplementationObject(SingleComponentManager.java:354)
+	at org.apache.felix.scr.impl.manager.SingleComponentManager.createComponent(SingleComponentManager.java:115)
+	at org.apache.felix.scr.impl.manager.SingleComponentManager.getService(SingleComponentManager.java:1002)
+	at org.apache.felix.scr.impl.manager.SingleComponentManager.getServiceInternal(SingleComponentManager.java:975)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager.activateInternal(AbstractComponentManager.java:785)
+	at org.apache.felix.scr.impl.manager.DependencyManager$SingleStaticCustomizer.addedService(DependencyManager.java:1274)
+	at org.apache.felix.scr.impl.manager.DependencyManager$SingleStaticCustomizer.addedService(DependencyManager.java:1225)
+	at org.apache.felix.scr.impl.manager.ServiceTracker$Tracked.customizerAdded(ServiceTracker.java:1232)
+	at org.apache.felix.scr.impl.manager.ServiceTracker$Tracked.customizerAdded(ServiceTracker.java:1152)
+	at org.apache.felix.scr.impl.manager.ServiceTracker$AbstractTracked.trackAdding(ServiceTracker.java:959)
+	at org.apache.felix.scr.impl.manager.ServiceTracker$AbstractTracked.track(ServiceTracker.java:895)
+	at org.apache.felix.scr.impl.manager.ServiceTracker$Tracked.serviceChanged(ServiceTracker.java:1184)
+	at org.apache.felix.scr.impl.BundleComponentActivator$ListenerInfo.serviceChanged(BundleComponentActivator.java:116)
+	at org.apache.felix.framework.EventDispatcher.invokeServiceListenerCallback(EventDispatcher.java:990)
+	at org.apache.felix.framework.EventDispatcher.fireEventImmediately(EventDispatcher.java:838)
+	at org.apache.felix.framework.EventDispatcher.fireServiceEvent(EventDispatcher.java:545)
+	at org.apache.felix.framework.Felix.fireServiceEvent(Felix.java:4863)
+	at org.apache.felix.framework.Felix.registerService(Felix.java:3834)
+	at org.apache.felix.framework.BundleContextImpl.registerService(BundleContextImpl.java:328)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager$3.register(AbstractComponentManager.java:929)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager$3.register(AbstractComponentManager.java:915)
+	at org.apache.felix.scr.impl.manager.RegistrationManager.changeRegistration(RegistrationManager.java:133)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager.registerService(AbstractComponentManager.java:984)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager.activateInternal(AbstractComponentManager.java:752)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager.enableInternal(AbstractComponentManager.java:674)
+	at org.apache.felix.scr.impl.manager.AbstractComponentManager.enable(AbstractComponentManager.java:437)
+	at org.apache.felix.scr.impl.manager.ConfigurableComponentHolder.enableComponents(ConfigurableComponentHolder.java:671)
+	at org.apache.felix.scr.impl.BundleComponentActivator.initialEnable(BundleComponentActivator.java:310)
+	at org.apache.felix.scr.impl.Activator.loadComponents(Activator.java:592)
+	at org.apache.felix.scr.impl.Activator.access$200(Activator.java:73)
+	at org.apache.felix.scr.impl.Activator$ScrExtension.start(Activator.java:459)
+	at org.apache.felix.scr.impl.AbstractExtender.createExtension(AbstractExtender.java:196)
+	at org.apache.felix.scr.impl.AbstractExtender.modifiedBundle(AbstractExtender.java:169)
+	at org.apache.felix.scr.impl.AbstractExtender.addingBundle(AbstractExtender.java:139)
+	at org.apache.felix.scr.impl.AbstractExtender.addingBundle(AbstractExtender.java:49)
+	at org.osgi.util.tracker.BundleTracker$Tracked.customizerAdding(BundleTracker.java:475)
+	at org.osgi.util.tracker.BundleTracker$Tracked.customizerAdding(BundleTracker.java:420)
+	at org.osgi.util.tracker.AbstractTracked.trackAdding(AbstractTracked.java:256)
+	at org.osgi.util.tracker.AbstractTracked.trackInitial(AbstractTracked.java:183)
+	at org.osgi.util.tracker.BundleTracker.open(BundleTracker.java:159)
+	at org.apache.felix.scr.impl.AbstractExtender.startTracking(AbstractExtender.java:100)
+	at org.apache.felix.scr.impl.AbstractExtender.doStart(AbstractExtender.java:92)
+	at org.apache.felix.scr.impl.Activator.doStart(Activator.java:230)
+	at org.apache.felix.scr.impl.AbstractExtender.start(AbstractExtender.java:72)
+	at org.apache.felix.scr.impl.Activator.restart(Activator.java:197)
+	at org.apache.felix.scr.impl.config.ScrConfigurationImpl.configure(ScrConfigurationImpl.java:234)
+	at org.apache.felix.scr.impl.config.ScrConfigurationImpl.start(ScrConfigurationImpl.java:126)
+	at org.apache.felix.scr.impl.Activator.start(Activator.java:127)
+	at org.apache.felix.framework.util.SecureAction.startActivator(SecureAction.java:849)
+	at org.apache.felix.framework.Felix.activateBundle(Felix.java:2429)
+	at org.apache.felix.framework.Felix.startBundle(Felix.java:2335)
+	at org.apache.felix.framework.Felix.setActiveStartLevel(Felix.java:1566)
+	at org.apache.felix.framework.FrameworkStartLevelImpl.run(FrameworkStartLevelImpl.java:297)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+
+26.05.07 13:50:26.673 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36mActivating MQTT Logger
+[0;39m26.05.07 13:50:26.680 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33musername= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.680 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33mpassword= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.681 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33mlastWillTopic= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.681 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33mlastWillPayload= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.681 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33mfirstWillTopic= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.681 [FelixStartLevel] WARN  o.o.f.l.o.c.PropertyFileValidator - [33mfirstWillPayload= is not set org.openmuc.framework.datalogger.mqtt.MqttLogger
+[0;39m26.05.07 13:50:26.785 [FelixStartLevel] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mMqttSettings for MqttConnection 
+
+[0;39m26.05.07 13:50:26.939 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - [36mData logger registered: mqttlogger
+[0;39m26.05.07 13:50:26.944 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - [36mActivating SQL Logger
+[0;39m26.05.07 13:50:26.947 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - [36mData logger registered: sqllogger
+[0;39m26.05.07 13:50:26.966 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - [36mDriver registered: modbus
+[0;39m26.05.07 13:50:26.969 [OpenMUC Data Manager] INFO  o.o.f.core.datamanager.DataManager - [36mDriver registered: mqtt
+[0;39m26.05.07 13:50:27.004 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36morg.openmuc.framework.lib.parser.custom.CustomParserServiceImpl changed, updating Parser
+[0;39m26.05.07 13:50:27.004 [FelixStartLevel] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mput parserID custom to PARSERS
+[0;39m26.05.07 13:50:27.010 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36morg.openmuc.framework.lib.parser.openmuc.OpenmucParserServiceImpl changed, updating Parser
+[0;39m26.05.07 13:50:27.010 [FelixStartLevel] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mput parserID openmuc to PARSERS
+[0;39m26.05.07 13:50:27.022 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - [36mActivating Modbus Server
+[0;39m26.05.07 13:50:27.030 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mRegistered Server: modbus.
+[0;39m26.05.07 13:50:27.052 [FelixStartLevel] WARN  o.o.webui.maxicombms.MaxicomBmsWebUi - [33mActivating MaxicomBmsWebUi-Svelte
+[0;39m26.05.07 13:50:27.105 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - [36mActivating REST Server
+[0;39m26.05.07 13:50:29.368 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - [36msql driver
+[0;39m26.05.07 13:50:29.370 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] INFO  o.o.f.datalogger.sql.DbConnector - [36mURL is: jdbc:h2:retry:file:./data/h2/h2;AUTO_SERVER=TRUE;MODE=MYSQL
+[0;39m26.05.07 13:50:29.624 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] WARN  o.o.f.datalogger.sql.MetaBuilder - [33mThere are no channels for meta table
+[0;39m26.05.07 13:50:29.636 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] ERROR o.o.f.datalogger.sql.DbAccess - [31mError executing SQL: 
+INSERT INTO openmuc_meta (time,channelid,channelAdress,loggingInterval,loggingTimeOffset,unit,valueType,scalingFactor,valueOffset,listening,loggingEvent,samplingInterval,samplingTimeOffset,SamplingGroup,disabled,description) VALUE;
+[0;39m26.05.07 13:50:29.636 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] ERROR o.o.f.datalogger.sql.DbAccess - [31mSQLState:     42001
+[0;39m26.05.07 13:50:29.637 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.sql.SqlLoggerService)] ERROR o.o.f.datalogger.sql.DbAccess - [31mVendorError:  42,001
+[0;39m26.05.07 13:50:29.637 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.mqtt.MqttLogger)] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mConfiguration changed - new configuration 
+port=1883
+host=localhost
+ssl=false
+username=
+password=*****
+parser=openmuc
+webSocket=false
+connectionRetryInterval=10
+connectionAliveInterval=10
+persistenceDirectory=data/logger/mqtt
+multiple=false
+maxFileCount=2
+maxFileSize=5000
+maxBufferSize=1000
+recoveryChunkSize=0
+recoveryDelay=0
+lastWillTopic=
+lastWillPayload=
+lastWillAlways=false
+firstWillTopic=
+firstWillPayload=
+[0;39m26.05.07 13:50:29.637 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.mqtt.MqttLogger)] INFO  o.o.framework.lib.mqtt.MqttWriter - [36mshutting down 
+[0;39m26.05.07 13:50:29.637 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.mqtt.MqttLogger)] INFO  o.o.framework.lib.mqtt.MqttWriter - [36m[mqttlogger] Saving buffers.
+[0;39m26.05.07 13:50:29.639 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.mqtt.MqttLogger)] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mMqttSettings for MqttConnection 
+
+[0;39m26.05.07 13:50:29.641 [CM Configuration Updater (Update: pid=org.openmuc.framework.datalogger.mqtt.MqttLogger)] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mConnecting to MQTT Broker
+[0;39m26.05.07 13:50:29.902 [com.hivemq.client.mqtt-1-1] WARN  o.o.framework.lib.mqtt.MqttWriter - [33m[mqttlogger] Reconnect failed: broker 'localhost'. Source: 'CLIENT'. Cause: 'io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:1883'. Connection lost at: 2026-05-07 13:50:29, duration 01:00:00
+[0;39m26.05.07 13:50:37.915 [com.hivemq.client.mqtt-1-1] WARN  o.o.framework.lib.mqtt.MqttWriter - [33m[mqttlogger] Reconnect failed: broker 'localhost'. Source: 'CLIENT'. Cause: 'io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: localhost/127.0.0.1:1883'. Connection lost at: 2026-05-07 13:50:29, duration 01:00:08
+[0;39m
+g! 26.05.07 13:50:42.985 [FelixStartLevel] INFO  o.o.f.server.restws.RestServer - [36mDeactivating REST Server
+[0;39mgosh: stopping framework
+26.05.07 13:50:42.992 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mUnregistering driver: mqtt.
+[0;39m26.05.07 13:50:42.993 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mDriver unregistered: mqtt
+[0;39m26.05.07 13:50:42.994 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36morg.openmuc.framework.lib.parser.openmuc.OpenmucParserServiceImpl unregistering, removing Parser
+[0;39m26.05.07 13:50:42.995 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mUnregistering driver: modbus.
+[0;39m26.05.07 13:50:42.995 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mDriver unregistered: modbus
+[0;39m26.05.07 13:50:42.997 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mDeactivating Data Manager
+[0;39m26.05.07 13:50:42.997 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mUnregistering data logger: mqttlogger.
+[0;39m26.05.07 13:50:42.997 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mData logger deregistered: mqttlogger
+[0;39m26.05.07 13:50:42.997 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mUnregistering data logger: sqllogger.
+[0;39m26.05.07 13:50:42.997 [FelixStartLevel] INFO  o.o.f.core.datamanager.DataManager - [36mData logger deregistered: sqllogger
+[0;39m26.05.07 13:50:42.998 [FelixStartLevel] INFO  o.o.f.server.modbus.ModbusComponent - [36mDeactivating Modbus Server
+[0;39m26.05.07 13:50:42.999 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36morg.openmuc.framework.lib.parser.custom.CustomParserServiceImpl unregistering, removing Parser
+[0;39m26.05.07 13:50:43.002 [FelixStartLevel] INFO  o.o.f.d.sql.SqlLoggerService - [36mDeactivating SQL Logger
+[0;39m26.05.07 13:50:43.211 [FelixStartLevel] INFO  o.o.f.d.mqtt.MqttLoggerComponent - [36mDeactivating MQTT logger
+[0;39m26.05.07 13:50:43.211 [FelixStartLevel] INFO  o.o.framework.lib.mqtt.MqttWriter - [36mshutting down 
+[0;39m26.05.07 13:50:43.211 [FelixStartLevel] INFO  o.o.framework.lib.mqtt.MqttWriter - [36m[mqttlogger] Saving buffers.
+[0;39m26.05.07 13:50:43.211 [FelixStartLevel] INFO  o.o.f.datalogger.mqtt.MqttLogger - [36mclosing MQTT connection
+[0;39m26.05.07 13:50:43.215 [FelixStartLevel] INFO  org.eclipse.jetty.server.Server - [36mStopped Server@6b1e6fd0{STOPPING}[11.0.22,sto=0]
+[0;39m26.05.07 13:50:43.222 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - [36mStopped ServerConnector@49b29fe8{HTTP/1.1, (http/1.1)}{0.0.0.0:8888}
+[0;39m26.05.07 13:50:43.224 [FelixStartLevel] INFO  o.e.jetty.server.AbstractConnector - [36mStopped ServerConnector@228bb388{SSL, (ssl, http/1.1)}{0.0.0.0:8889}
+[0;39m26.05.07 13:50:43.227 [FelixStartLevel] INFO  o.e.j.server.handler.ContextHandler - [36mStopped o.e.j.s.ServletContextHandler@30c3a68c{/,null,STOPPED}
+[0;39m26.05.07 13:50:43.229 [FelixStartLevel] INFO  org.apache.felix.http - [36mStopped Jetty
+[0;39m

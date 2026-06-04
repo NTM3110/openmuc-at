@@ -74,4 +74,23 @@ public class LatestValuesDao {
             logger.error("[latest_values] updateBoolean failed for " + channelId + ": " + e);
         }
     }
+
+    public static Double findDouble(String channelId) {
+        String sql = "SELECT value_double FROM latest_values WHERE channelid = ? AND value_type = 'D'";
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, channelId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    double value = rs.getDouble("value_double");
+                    return rs.wasNull() ? null : value;
+                }
+            }
+        } catch (SQLException e) {
+            logger.warn("[latest_values] findDouble failed for " + channelId + ": " + e);
+        }
+        return null;
+    }
 }

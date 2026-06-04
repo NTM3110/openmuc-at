@@ -73,18 +73,24 @@ public class ModbusRTUConnection extends ModbusConnection {
 
     private final SerialConnection connection;
     private ModbusSerialTransaction transaction;
+    private final int timeoutMs;
+
+    @Override
+    protected boolean isReadIOExceptionRecoverable() {
+        return true;
+    }
 
     public ModbusRTUConnection(String deviceAddress, String[] settings, int timoutMs)
             throws ModbusConfigurationException {
 
         super();
+        this.timeoutMs = timoutMs;
 
         SerialParameters params = setParameters(deviceAddress, settings);
         connection = new SerialConnection(params);
 
         try {
             connect();
-            // connection.setReceiveTimeout(timoutMs);
             transaction = new ModbusSerialTransaction(connection);
             transaction.setSerialConnection(connection);
             setTransaction(transaction);
@@ -101,6 +107,7 @@ public class ModbusRTUConnection extends ModbusConnection {
         if (!connection.isOpen()) {
             try {
                 connection.open();
+                connection.setTimeout(timeoutMs);
             } catch (Exception e) {
                 throw new ConnectionException(e);
             }
@@ -292,7 +299,7 @@ public class ModbusRTUConnection extends ModbusConnection {
         }
         // reads whole samplingGroup at once
         else {
-            readChannelGroupHighLevel(containers, containerListHandle, samplingGroup);
+            return readChannelGroupHighLevel(containers, containerListHandle, samplingGroup);
         }
 
         return null;

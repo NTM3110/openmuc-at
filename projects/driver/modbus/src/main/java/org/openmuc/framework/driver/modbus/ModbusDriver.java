@@ -70,7 +70,7 @@ public final class ModbusDriver implements DriverService {
         final String TCP_SETTINGS = "  TCP[:timeout=<timoutInMs>] (e.g. TCP or TCP:timeout=3000)";
         final String UDP_SETTINGS = "  UDP[:timeout=<timoutInMs>] (e.g. UDP or UDP:timeout=3000)";
         final String RTUTCP_SETTINGS = "  RTUTCP[:timeout=<timoutInMs>] ";
-        final String RTU_SETTINGS = "  RTU:<ENCODING>:<BAUDRATE>:<DATABITS>:<PARITY>:<STOPBITS>:<ECHO>:<FLOWCONTROL_IN>:<FLOWCONTEOL_OUT>[:timeout=<timoutInMs>]";
+        final String RTU_SETTINGS = "  RTU:<ENCODING>:<BAUDRATE>:<DATABITS>:<PARITY>:<STOPBITS>:<ECHO>:<FLOWCONTROL_IN>:<FLOWCONTEOL_OUT>[:timeout=<timoutInMs>][:unitBackoff=<backoffInMs>]";
         final String DEVICE_SETTINGS = "Device settings depend on selected type: \n" + TCP_SETTINGS + "\n"
                 + UDP_SETTINGS + "\n" + RTUTCP_SETTINGS + "\n" + RTU_SETTINGS;
 
@@ -98,11 +98,13 @@ public final class ModbusDriver implements DriverService {
             String mode = settingsArray[0];
 
             int timeoutMs = getTimeoutFromSettings(settingsArray);
+            int unitBackoffMs = getUnitBackoffFromSettings(settingsArray);
 
             if (mode.equalsIgnoreCase("RTU")) {
                 try {
                     logger.info("New Modbus Connection on device: {}",deviceAddress);
                     connection = new ModbusRTUConnection(deviceAddress, settingsArray, timeoutMs);
+                    connection.setRecoverableReadBackoffMs(unitBackoffMs);
                 } catch (ModbusConfigurationException e) {
                     logger.error("Unable to create ModbusRTUConnection", e);
                     throw new ConnectionException();
@@ -160,6 +162,34 @@ public final class ModbusDriver implements DriverService {
         }
 
         return timeoutMs;
+    }
+
+    private int getUnitBackoffFromSettings(String[] settingsArray) {
+        int unitBackoffMs = 5000;
+
+        try {
+            for (String setting : settingsArray) {
+                if (setting.startsWith("unitBackoff")) {
+                    String[] backoffParam = setting.split("=");
+                    unitBackoffMs = validateUnitBackoff(backoffParam);
+                }
+            }
+        } catch (Exception e) {
+            logger.warn("Unable to parse unit backoff from settings. Using default unit backoff of " + unitBackoffMs
+                    + " ms.");
+        }
+
+        return unitBackoffMs;
+    }
+
+    private int validateUnitBackoff(String[] backoffParam) {
+        int unitBackoffMs = Integer.valueOf(backoffParam[1]).intValue();
+
+        if (unitBackoffMs < 0) {
+            throw new IllegalArgumentException("Invalid unit backoff is smaller than 0.");
+        }
+
+        return unitBackoffMs;
     }
 
     @Override

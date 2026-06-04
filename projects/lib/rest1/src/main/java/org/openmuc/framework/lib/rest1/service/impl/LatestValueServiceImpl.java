@@ -61,6 +61,11 @@ public class LatestValueServiceImpl implements LatestValueService{
         stringDetailDTO.setCNominal(Double.parseDouble(stringValueMap.get(prefixKey + "_Cnominal")));
         stringDetailDTO.setVCutoff(Double.parseDouble(stringValueMap.get(prefixKey + "_Vcutoff")));
         stringDetailDTO.setVFloat((Double.parseDouble(stringValueMap.get(prefixKey + "_Vfloat"))));
+        stringDetailDTO.setRNew(getOptionalDouble(stringValueMap, prefixKey + "_R_new"));
+        stringDetailDTO.setHighResistanceThreshold(getOptionalDouble(stringValueMap, prefixKey + "_alarm_high_rst"));
+        stringDetailDTO.setHighTemperatureThreshold(getOptionalDouble(stringValueMap, prefixKey + "_alarm_high_temp"));
+        stringDetailDTO.setLowVoltageThreshold(getOptionalDouble(stringValueMap, prefixKey + "_alarm_low_voltage"));
+        stringDetailDTO.setHighVoltageThreshold(getOptionalDouble(stringValueMap, prefixKey + "_alarm_high_voltage"));
         stringDetailDTO.setSerialPortId(stringValueMap.get(prefixKey + "_serial_port_id"));
         return stringDetailDTO;
     } 
@@ -105,5 +110,10 @@ public class LatestValueServiceImpl implements LatestValueService{
         }
 
         return valuesMap;
+    }
+
+    private Double getOptionalDouble(Map<String, String> values, String key) {
+        String value = values.get(key);
+        return value == null ? null : Double.parseDouble(value);
     }
 }

@@ -42,7 +42,7 @@ public class EntityRepoImpl {
                 ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                return rs.getDouble("value") / 10.0;
+                return rs.getDouble("value");
             }
         } catch (SQLException e) {
             logger.error("Error fetching current value for entity ID: {}", strId, e);
@@ -68,7 +68,7 @@ public class EntityRepoImpl {
                 ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                return rs.getDouble("value");
+                return rs.getDouble("value") / 100.0;
             }
         } catch (SQLException e) {
             logger.error("Error fetching string SoC value for entity ID: {}", strId, e);
@@ -94,7 +94,7 @@ public class EntityRepoImpl {
                 ResultSet rs = ps.executeQuery()) {
 
             if (rs.next()) {
-                return rs.getDouble("value") / 10.0;
+                return rs.getDouble("value");
             }
         } catch (SQLException e) {
             logger.error("Error fetching ambient T value for entity ID: {}", strId, e);

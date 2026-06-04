@@ -38,6 +38,12 @@ class Settings extends GenericSettings {
     static final String STOP_BITS = "stopbits";
     static final String PARITY = "parity";
     static final String ECHO = "echo";
+    static final String RS485_MODE = "rs485Mode";
+    static final String RS485_TX_ENABLE_ACTIVE_HIGH = "rs485TxEnableActiveHigh";
+    static final String RS485_ENABLE_TERMINATION = "rs485EnableTermination";
+    static final String RS485_RX_DURING_TX = "rs485RxDuringTx";
+    static final String RS485_DELAY_BEFORE_TX_MICROSECONDS = "rs485DelayBeforeTxMicroseconds";
+    static final String RS485_DELAY_AFTER_TX_MICROSECONDS = "rs485DelayAfterTxMicroseconds";
 
     Settings() {
         super();
@@ -60,5 +66,14 @@ class Settings extends GenericSettings {
         properties.put(STOP_BITS, new ServiceProperty(STOP_BITS, "", "1", false));
         properties.put(PARITY, new ServiceProperty(PARITY, "", "0", false));
         properties.put(ECHO, new ServiceProperty(ECHO, "", "false", false));
+        properties.put(RS485_MODE, new ServiceProperty(RS485_MODE, "", "false", false));
+        properties.put(RS485_TX_ENABLE_ACTIVE_HIGH,
+                new ServiceProperty(RS485_TX_ENABLE_ACTIVE_HIGH, "", "true", false));
+        properties.put(RS485_ENABLE_TERMINATION, new ServiceProperty(RS485_ENABLE_TERMINATION, "", "false", false));
+        properties.put(RS485_RX_DURING_TX, new ServiceProperty(RS485_RX_DURING_TX, "", "false", false));
+        properties.put(RS485_DELAY_BEFORE_TX_MICROSECONDS,
+                new ServiceProperty(RS485_DELAY_BEFORE_TX_MICROSECONDS, "", "1000", false));
+        properties.put(RS485_DELAY_AFTER_TX_MICROSECONDS,
+                new ServiceProperty(RS485_DELAY_AFTER_TX_MICROSECONDS, "", "1000", false));
     }
 }

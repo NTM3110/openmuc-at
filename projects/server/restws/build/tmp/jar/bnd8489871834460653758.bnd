@@ -1,0 +1,5 @@
+Bundle-ClassPath=.,lib/j2mod-3.2.1.jar,lib/jSerialComm-2.10.4.jar
+Bundle-Name=OpenMUC Server - RESTful Web Service
+Bundle-SymbolicName=org.openmuc.framework.openmuc-server-restws
+Bundle-Vendor=Fraunhofer ISE
+Import-Package=\!android.*,\!com.fazecast.jSerialComm.android*,\!com.ghgande.j2mod*,\!com.fazecast.jSerialComm,*;version\=0

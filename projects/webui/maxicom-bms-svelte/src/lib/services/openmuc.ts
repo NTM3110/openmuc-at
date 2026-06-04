@@ -105,20 +105,34 @@ function getTimestamp(map: RecordMap, key: string): number | null {
 function getAsVolts(map: RecordMap, key: string): number | null {
     const val = getValue(map, key);
     if (typeof val === 'number') {
-        return key.includes('_cell') ? val / 1000 : val;
+        return isMillivoltChannel(key) ? val / 1000 : val;
     }
     return null;
 }
 
+function isMillivoltChannel(key: string): boolean {
+    return key.includes('_cell') ||
+        key.endsWith('_average_vol') ||
+        key.endsWith('_max_voltage_value') ||
+        key.endsWith('_min_voltage_value');
+}
+
 function getAsAmps(map: RecordMap, key: string): number | null {
     const val = getValue(map, key);
-    return typeof val === 'number' ? val / 10 : null;
+    return typeof val === 'number' ? decodeCurrentTenths(val) / 10 : null;
+}
+
+function decodeCurrentTenths(value: number): number {
+    const rawWord = Math.trunc(value) & 0xffff;
+    // The meter encodes direction in bit 15; the remaining bits carry 0.1 A units.
+    const magnitude = rawWord & 0x7fff;
+    return (rawWord & 0x8000) !== 0 ? -magnitude : magnitude;
 }
 
 function getAsCelsius(map: RecordMap, key: string): number | null {
     const val = getValue(map, key);
     if (typeof val === 'number') {
-        return key.includes('_cell') ? val / 10 : val;
+        return key.endsWith('_ambient_T') ? val : val / 10;
     }
     return null;
 }
@@ -126,6 +140,11 @@ function getAsCelsius(map: RecordMap, key: string): number | null {
 function getAsRaw(map: RecordMap, key: string): number | null {
     const val = getValue(map, key);
     return typeof val === 'number' ? val : null;
+}
+
+function getAsSocSoh(map: RecordMap, key: string): number | null {
+    const val = getValue(map, key);
+    return typeof val === 'number' ? val / 100 : null;
 }
 
 function getAsString(map: RecordMap, key: string): string | null {
@@ -164,8 +183,8 @@ export function getSummaryData(baseStringName: string): Observable<StringSummary
                 minRstValue: getValue(virtual, `${baseStringName}_min_rst_value`),
                 maxTempValue: getAsCelsius(virtual, `${baseStringName}_max_temp_value`),
                 minTempValue: getAsCelsius(virtual, `${baseStringName}_min_temp_value`),
-                stringSoC: getAsRaw(virtual, `${baseStringName}_string_SOC`),
-                stringSoH: getAsRaw(virtual, `${baseStringName}_string_SOH`),
+                stringSoC: getAsSocSoh(virtual, `${baseStringName}_string_SOC`),
+                stringSoH: getAsSocSoh(virtual, `${baseStringName}_string_SOH`),
             };
         }),
         shareReplay(1)
@@ -180,18 +199,20 @@ export function getCellsData(baseStringName: string, cellQty: number): Observabl
         map(({ virtual, modbus }) => {
             const cells: CellData[] = [];
             const totalIRaw = getAsRaw(modbus, `${baseStringName}_total_I`);
+            const totalITenths = totalIRaw !== null ? decodeCurrentTenths(totalIRaw) : null;
 
             for (let i = 1; i <= cellQty; i++) {
                 const rstRaw = getAsRaw(modbus, `${baseStringName}_cell${i}_R`);
-                const irCalculated = (rstRaw !== null && totalIRaw !== null) ? (rstRaw * totalIRaw) / 100000 : null;
+                const irCalculated = (rstRaw !== null && totalITenths !== null) ?
+                    (rstRaw * totalITenths) / 100000 : null;
 
                 cells.push({
                     ID: i,
                     Vol: getAsVolts(modbus, `${baseStringName}_cell${i}_V`),
                     Temp: getAsCelsius(modbus, `${baseStringName}_cell${i}_T`),
                     Rst: rstRaw,
-                    SoC: getAsRaw(virtual, `${baseStringName}_cell${i}_SOC`),
-                    SoH: getAsRaw(virtual, `${baseStringName}_cell${i}_SOH`),
+                    SoC: getAsSocSoh(virtual, `${baseStringName}_cell${i}_SOC`),
+                    SoH: getAsSocSoh(virtual, `${baseStringName}_cell${i}_SOH`),
                     IR: irCalculated,
                 });
             }
@@ -218,8 +239,13 @@ export function getDashboardStatus(): Observable<DashboardItem[]> {
                         const current = getAsAmps(modbusMap, `${baseId}_total_I`);
                         const avgTemp = getAsCelsius(virtualMap, `${baseId}_average_temp`);
                         const cellQty = getAsRaw(virtualMap, `${baseId}_cell_qty`);
-                        const soC = getAsRaw(virtualMap, `${baseId}_string_SOC`);
-                        const soH = getAsRaw(virtualMap, `${baseId}_string_SOH`);
+                        const soC = getAsSocSoh(virtualMap, `${baseId}_string_SOC`);
+                        const soH = getAsSocSoh(virtualMap, `${baseId}_string_SOH`);
+                        const maxVoltageValue = getAsVolts(virtualMap, `${baseId}_max_voltage_value`);
+                        const minVoltageValue = getAsVolts(virtualMap, `${baseId}_min_voltage_value`);
+                        const maxRstValue = getValue(virtualMap, `${baseId}_max_rst_value`);
+                        const maxTempValue = getAsCelsius(virtualMap, `${baseId}_max_temp_value`);
+                        const stringAlarmRaw = getAsRaw(virtualMap, `${baseId}_string_alarm`);
 
                         const cellVolStatus = (avgVol !== null && avgVol > 0) || (cellQty !== null && cellQty > 0) ? 'On' : 'Off';
                         const cellRstStatus = (avgRst !== null && avgRst > 0) ? 'On' : 'Off';
@@ -236,6 +262,14 @@ export function getDashboardStatus(): Observable<DashboardItem[]> {
                             stringVol: stringVolStatus,
                             current: currentStatus,
                             ambient: ambientStatus,
+                            totalCells: cellQty,
+                            maxVoltageValue,
+                            minVoltageValue,
+                            maxRstValue,
+                            maxTempValue,
+                            alarm: false,
+                            stringAlarm: stringAlarmRaw !== null ? stringAlarmRaw > 0 : null,
+                            alarmReasons: [],
                             soC: soC,
                             soH: soH,
                             updateTime: getTimestamp(virtualMap, `${baseId}_string_vol`) ?

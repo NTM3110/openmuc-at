@@ -1,0 +1,4 @@
+Bundle-Name=OpenMUC Library - OSGi
+Bundle-SymbolicName=org.openmuc.framework.openmuc-lib-osgi
+Bundle-Vendor=Fraunhofer ISE
+Export-Package=org.openmuc.framework.lib.*

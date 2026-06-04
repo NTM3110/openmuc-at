@@ -1,0 +1,5 @@
+Bundle-ClassPath=.,lib/jmbus-3.3.0.jar
+Bundle-Name=OpenMUC Driver - M-Bus
+Bundle-SymbolicName=org.openmuc.framework.openmuc-driver-mbus
+Bundle-Vendor=Fraunhofer ISE
+Import-Package=\!org.openmuc.jmbus*,gnu.io,*;version\=0

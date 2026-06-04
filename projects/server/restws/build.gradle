@@ -8,6 +8,8 @@ dependencies {
     implementation project(':openmuc-lib-rest1')
     implementation project(':openmuc-datalogger-sql')
     implementation group: "commons-codec", name: "commons-codec", version: commonsCodecVersion
+    implementation group: 'com.ghgande', name: 'j2mod', version: j2modVersion
+    embed group: 'com.ghgande', name: 'j2mod', version: j2modVersion
 
     implementation group: 'org.apache.felix', name: 'org.apache.felix.http.servlet-api', version: apacheFelixServletVersion
 
@@ -18,7 +20,21 @@ dependencies {
 }
 
 jar {
-    bnd('Bundle-Name': projectName)
+    bnd(
+        'Bundle-Name': projectName,
+        'Bundle-ClassPath':
+            ".,lib/j2mod-${j2modVersion}.jar,lib/jSerialComm-2.10.4.jar",
+        'Import-Package':
+            '!android.*,' +
+            '!com.fazecast.jSerialComm.android*,' +
+            '!com.ghgande.j2mod*,' +
+            '!com.fazecast.jSerialComm,' +
+            '*' + jarDefaultImportPackageVersion
+    )
+
+    into('lib') {
+        from configurations.embed
+    }
 }
 
 publishing {

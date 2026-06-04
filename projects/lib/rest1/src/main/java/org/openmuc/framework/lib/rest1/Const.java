@@ -47,6 +47,9 @@ public class Const {
     public static final String ALIAS_RESET = "/rest/reset";
     public static final String ALIAS_REBOOT = "/rest/reboot";
     public static final String ALIAS_START_KBD = "/rest/start_kbd";
+    public static final String ALIAS_IR_TEST = "/rest/ir-test";
+    public static final String ALIAS_TC_CALIBRATION = "/rest/tc-calibration";
+    public static final String ALIAS_GPIO_ALARM = "/rest/gpio-alarm";
 
     public static final String RUNNING = "running";
     public static final String STATE = "state";

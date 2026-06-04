@@ -13,6 +13,10 @@ export default defineConfig({
 	},
 	base: './',                 // VERY IMPORTANT
 	build: {
+		// The installed monitoring browser is based on pre-Chromium Edge.
+		target: 'edge18',
+		// Inline the icon fonts because SvelteKit inlines CSS in legacy bundle mode.
+		assetsInlineLimit: 250000,
 		outDir: 'dist',
 		emptyOutDir: true
 	}

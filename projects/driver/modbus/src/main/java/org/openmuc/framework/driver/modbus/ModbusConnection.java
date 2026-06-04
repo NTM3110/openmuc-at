@@ -21,8 +21,10 @@
 package org.openmuc.framework.driver.modbus;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import org.openmuc.framework.data.Flag;
 import org.openmuc.framework.data.Record;
@@ -67,10 +69,13 @@ public abstract class ModbusConnection implements Connection {
     private ModbusTransaction transaction;
     // List do manage Channel Objects to avoid to check the syntax of each channel address for every read or write
     private final Hashtable<String, ModbusChannel> modbusChannels;
+    private final Map<Integer, Long> recoverableReadBackoffUntilByUnitId;
 
     private int requestTransactionId;
     private final int MAX_RETRIES_FOR_JAMOD = 0;
     private final int MAX_RETRIES_FOR_DRIVER = 3;
+    private static final int DEFAULT_RECOVERABLE_READ_BACKOFF_MS = 5000;
+    private int recoverableReadBackoffMs;
 
     public abstract void connect() throws ConnectionException;
 
@@ -78,6 +83,12 @@ public abstract class ModbusConnection implements Connection {
 
         transaction = null;
         modbusChannels = new Hashtable<>();
+        recoverableReadBackoffUntilByUnitId = new HashMap<>();
+        recoverableReadBackoffMs = DEFAULT_RECOVERABLE_READ_BACKOFF_MS;
+    }
+
+    public void setRecoverableReadBackoffMs(int recoverableReadBackoffMs) {
+        this.recoverableReadBackoffMs = Math.max(0, recoverableReadBackoffMs);
     }
 
     public synchronized void setTransaction(ModbusTransaction transaction) {
@@ -146,15 +157,33 @@ public abstract class ModbusConnection implements Connection {
             channelGroup = new ModbusChannelGroup(samplingGroup, channelList);
         }
 
+        if (isRecoverableReadInBackoff(channelGroup)) {
+            logger.debug("Skipping samplingGroup:{} unitId:{} during recoverable read backoff.", samplingGroup,
+                    channelGroup.getUnitId());
+            setChannelsWithErrorFlag(containers);
+            return channelGroup;
+        }
+
         // read all channels of the group
         try {
             readChannelGroup(channelGroup, containers);
+            clearRecoverableReadBackoff(channelGroup);
 
         } catch (ModbusIOException e) {
-            logger.error("ModbusIOException while reading samplingGroup:" + samplingGroup, e);
-            disconnect();
-            
-            throw new ConnectionException(e);
+            if (isReadIOExceptionRecoverable()) {
+                setRecoverableReadBackoff(channelGroup);
+                logger.warn("ModbusIOException while reading samplingGroup:{} unitId:{}. Backing off this unit, resetting connection, marking this group unavailable, and continuing.",
+                        samplingGroup, channelGroup.getUnitId(), e);
+                disconnect();
+                connect();
+                setChannelsWithErrorFlag(containers);
+            }
+            else {
+                logger.error("ModbusIOException while reading samplingGroup:" + samplingGroup, e);
+                disconnect();
+
+                throw new ConnectionException(e);
+            }
         } catch (ModbusException e) {
             logger.error("Unable to read ChannelGroup " + samplingGroup, e);
 
@@ -163,6 +192,39 @@ public abstract class ModbusConnection implements Connection {
             setChannelsWithErrorFlag(containers);
         }
         return channelGroup;
+    }
+
+    protected boolean isReadIOExceptionRecoverable() {
+        return false;
+    }
+
+    protected long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
+
+    private boolean isRecoverableReadInBackoff(ModbusChannelGroup channelGroup) {
+        if (!isReadIOExceptionRecoverable() || recoverableReadBackoffMs == 0) {
+            return false;
+        }
+        Long backoffUntil = recoverableReadBackoffUntilByUnitId.get(channelGroup.getUnitId());
+        if (backoffUntil == null) {
+            return false;
+        }
+        if (backoffUntil <= currentTimeMillis()) {
+            recoverableReadBackoffUntilByUnitId.remove(channelGroup.getUnitId());
+            return false;
+        }
+        return true;
+    }
+
+    private void setRecoverableReadBackoff(ModbusChannelGroup channelGroup) {
+        if (recoverableReadBackoffMs > 0) {
+            recoverableReadBackoffUntilByUnitId.put(channelGroup.getUnitId(), currentTimeMillis() + recoverableReadBackoffMs);
+        }
+    }
+
+    private void clearRecoverableReadBackoff(ModbusChannelGroup channelGroup) {
+        recoverableReadBackoffUntilByUnitId.remove(channelGroup.getUnitId());
     }
 
     private void readChannelGroup(ModbusChannelGroup channelGroup, List<ChannelRecordContainer> containers)

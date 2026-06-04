@@ -8,6 +8,12 @@
     export let isOpen: boolean = false;
 
     const dispatch = createEventDispatcher();
+    const DEFAULT_R_NEW = 1450;
+    const DEFAULT_HIGH_RESISTANCE_RATIO = 2.3;
+
+    function defaultHighResistance(rNew: number): number {
+        return Math.round(rNew * DEFAULT_HIGH_RESISTANCE_RATIO);
+    }
 
     let formData: StringFormData = {
         stringName: "",
@@ -17,11 +23,16 @@
         ratedCapacity: 0,
         cutoffVoltage: 0,
         floatVoltage: 0,
-        rNew: 1450,
+        rNew: DEFAULT_R_NEW,
+        highResistanceThreshold: defaultHighResistance(DEFAULT_R_NEW),
+        highTemperatureThreshold: 0,
+        lowVoltageThreshold: 0,
+        highVoltageThreshold: 0,
         serialPortId: ""
     };
 
     let isEditMode = false;
+    let hasInvalidVoltageRange = false;
 
     $: if (isOpen) {
         if (stringConfig) {
@@ -35,6 +46,10 @@
                 cutoffVoltage: stringConfig.cutoffVoltage,
                 floatVoltage: stringConfig.floatVoltage,
                 rNew: stringConfig.rNew,
+                highResistanceThreshold: stringConfig.highResistanceThreshold ?? defaultHighResistance(stringConfig.rNew),
+                highTemperatureThreshold: stringConfig.highTemperatureThreshold ?? 0,
+                lowVoltageThreshold: stringConfig.lowVoltageThreshold ?? 0,
+                highVoltageThreshold: stringConfig.highVoltageThreshold ?? 0,
                 serialPortId: stringConfig.serialPortId
             };
         } else {
@@ -52,7 +67,11 @@
             ratedCapacity: 0,
             cutoffVoltage: 0,
             floatVoltage: 0,
-            rNew: 1450,
+            rNew: DEFAULT_R_NEW,
+            highResistanceThreshold: defaultHighResistance(DEFAULT_R_NEW),
+            highTemperatureThreshold: 0,
+            lowVoltageThreshold: 0,
+            highVoltageThreshold: 0,
             serialPortId: $configuredPorts.length > 0 ? $configuredPorts[0].id : ""
         };
     }
@@ -62,8 +81,20 @@
     }
 
     function save() {
+        if (
+            formData.lowVoltageThreshold > 0 &&
+            formData.highVoltageThreshold > 0 &&
+            formData.lowVoltageThreshold >= formData.highVoltageThreshold
+        ) {
+            return;
+        }
         dispatch("save", { ...formData });
     }
+
+    $: hasInvalidVoltageRange =
+        formData.lowVoltageThreshold > 0 &&
+        formData.highVoltageThreshold > 0 &&
+        formData.lowVoltageThreshold >= formData.highVoltageThreshold;
 </script>
 
 {#if isOpen}
@@ -128,10 +159,38 @@
                         </select>
                     </div>
                 </div>
+
+                <section class="alarm-settings" aria-labelledby="alarm-settings-title">
+                    <div class="section-header">
+                        <h3 id="alarm-settings-title">Alarm Settings</h3>
+                        <span>0 = disable</span>
+                    </div>
+                    <div class="threshold-grid">
+                        <div class="form-group">
+                            <label for="highResistanceThreshold">IR High (uOhm)</label>
+                            <input type="number" id="highResistanceThreshold" bind:value={formData.highResistanceThreshold} min="0" step="1" use:kbd />
+                        </div>
+                        <div class="form-group">
+                            <label for="highTemperatureThreshold">T High (C)</label>
+                            <input type="number" id="highTemperatureThreshold" bind:value={formData.highTemperatureThreshold} min="0" step="0.1" use:kbd />
+                        </div>
+                        <div class="form-group">
+                            <label for="lowVoltageThreshold">V Low (V)</label>
+                            <input type="number" id="lowVoltageThreshold" bind:value={formData.lowVoltageThreshold} min="0" step="0.001" use:kbd />
+                        </div>
+                        <div class="form-group">
+                            <label for="highVoltageThreshold">V High (V)</label>
+                            <input type="number" id="highVoltageThreshold" bind:value={formData.highVoltageThreshold} min="0" step="0.001" use:kbd />
+                        </div>
+                    </div>
+                    {#if hasInvalidVoltageRange}
+                        <p class="validation-error">Low voltage threshold must be below the high voltage threshold.</p>
+                    {/if}
+                </section>
             </div>
             <div class="modal-footer">
                 <button class="btn-secondary" onclick={close}>Cancel</button>
-                <button class="btn-primary" onclick={save}>Save</button>
+                <button class="btn-primary" onclick={save} disabled={hasInvalidVoltageRange}>Save</button>
             </div>
         </div>
     </div>
@@ -215,6 +274,49 @@
         gap: 16px;
     }
 
+    .alarm-settings {
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 16px;
+        background: #f9fafb;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding-bottom: 4px;
+    }
+
+    .section-header h3 {
+        font-size: 1rem;
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .section-header span {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .threshold-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 16px;
+    }
+
+    .alarm-settings .validation-error {
+        margin: 0;
+        font-size: 0.8rem;
+        color: #dc2626;
+        font-weight: 500;
+    }
+
     label {
         font-size: 0.875rem;
         font-weight: 500;
@@ -271,6 +373,11 @@
         background-color: #013bb5;
     }
 
+    .btn-primary:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+    }
+
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -279,5 +386,13 @@
     @keyframes slideUp {
         from { transform: translateY(20px); opacity: 0; }
         to { transform: translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+        .form-row,
+        .threshold-grid {
+            grid-template-columns: 1fr;
+            flex-direction: column;
+        }
     }
 </style>

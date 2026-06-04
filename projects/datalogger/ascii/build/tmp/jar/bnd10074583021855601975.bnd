@@ -1,0 +1,3 @@
+Bundle-Name=OpenMUC Data Logger - ASCII
+Bundle-SymbolicName=org.openmuc.framework.openmuc-datalogger-ascii
+Bundle-Vendor=Fraunhofer ISE

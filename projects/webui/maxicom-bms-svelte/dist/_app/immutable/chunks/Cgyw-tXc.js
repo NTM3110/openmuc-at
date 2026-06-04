@@ -1,1 +1,0 @@
-import{y as e}from"./BGy29HmV.js";const a=e([]);function u(s,o="info"){const t=Math.random().toString(36).substring(2),i={id:t,message:s,type:o};a.update(n=>[...n,i]),setTimeout(()=>{r(t)},3e3)}function r(s){a.update(o=>o.filter(t=>t.id!==s))}export{r as d,u as s,a as t};

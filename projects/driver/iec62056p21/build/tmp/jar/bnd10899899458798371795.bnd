@@ -1,0 +1,5 @@
+Bundle-ClassPath=.,lib/j62056-2.2.0.jar
+Bundle-Name=OpenMUC Driver - IEC 62056-21
+Bundle-SymbolicName=org.openmuc.framework.openmuc-driver-iec62056p21
+Bundle-Vendor=Fraunhofer ISE
+Import-Package=\!org.openmuc.j62056*,org.openmuc.jrxtx,*;version\=0

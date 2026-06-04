@@ -1,0 +1,5 @@
+Bundle-ClassPath=.,lib/jsml-1.1.2.jar
+Bundle-Name=OpenMUC Driver - eHZ
+Bundle-SymbolicName=org.openmuc.framework.openmuc-driver-ehz
+Bundle-Vendor=Fraunhofer ISE
+Import-Package=\!org.openmuc.jsml*,*;version\=0

@@ -7,6 +7,13 @@ import java.util.Objects;
 
 public final class BatteryStringPayloadBuilder {
 
+    private static final int CELL_SAMPLING_INTERVAL_MS = 75000;
+    private static final int CELL_POLL_STEP_MS = 600;
+    private static final int MODBUS_RTU_TIMEOUT_MS = 500;
+    private static final int MODBUS_RTU_UNIT_BACKOFF_MS = 5000;
+    private static final int CONNECT_RETRY_INTERVAL_MS = 1000;
+    private static final int SAMPLING_TIMEOUT_MIN_MS = 1000;
+
     private BatteryStringPayloadBuilder() {}
 
     private static String buildModbusSettings(JsonObject portConfig) {
@@ -16,8 +23,18 @@ public final class BatteryStringPayloadBuilder {
         int dataBits = portConfig.get("dataBits").getAsInt();
         String parity = portConfig.get("parity").getAsString();
         String stopBits = portConfig.get("stopBits").getAsString();
+        int timeoutMs = getInt(portConfig, "timeout", MODBUS_RTU_TIMEOUT_MS);
+        int unitBackoffMs = getInt(portConfig, "unitBackoff", MODBUS_RTU_UNIT_BACKOFF_MS);
         return "RTU:SERIAL_ENCODING_RTU:" + baudRate + ":DATABITS_" + dataBits +
-                ":" + parity + ":STOPBITS_" + stopBits + ":ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE";
+                ":" + parity + ":STOPBITS_" + stopBits + ":ECHO_FALSE:FLOWCONTROL_NONE:FLOWCONTROL_NONE" +
+                ":timeout=" + timeoutMs + ":unitBackoff=" + unitBackoffMs;
+    }
+
+    private static int getInt(JsonObject config, String key, int defaultValue) {
+        if (config.has(key) && !config.get(key).isJsonNull()) {
+            return config.get(key).getAsInt();
+        }
+        return defaultValue;
     }
 
     // =========================
@@ -25,10 +42,12 @@ public final class BatteryStringPayloadBuilder {
     // =========================
     public static JsonObject buildModbusPayload(int s, int cells, JsonObject portConfig) {
         String settings = buildModbusSettings(portConfig);
+        int timeoutMs = getInt(portConfig, "timeout", MODBUS_RTU_TIMEOUT_MS);
+        int samplingTimeoutMs = getInt(portConfig, "samplingTimeout", Math.max(SAMPLING_TIMEOUT_MIN_MS, timeoutMs * 2));
+        int connectRetryIntervalMs = getInt(portConfig, "connectRetryInterval", CONNECT_RETRY_INTERVAL_MS);
         JsonArray channels = new JsonArray();
 
-        // offsetFor(slave, stepMs=100) => (slave-1)*stepMs
-        java.util.function.IntUnaryOperator offsetFor = (slave) -> (slave - 1) * 100;
+        java.util.function.IntUnaryOperator offsetFor = (slave) -> (slave - 1) * CELL_POLL_STEP_MS;
 
         for (int c = 1; c <= cells; c++) {
             String base = "str" + s + "_cell" + c;
@@ -37,7 +56,7 @@ public final class BatteryStringPayloadBuilder {
 
             // cellProps (same fields FE spreads in)
             JsonObject cellProps = new JsonObject();
-            cellProps.addProperty("samplingInterval", 15000);
+            cellProps.addProperty("samplingInterval", CELL_SAMPLING_INTERVAL_MS);
             cellProps.addProperty("samplingGroup", sg);
             cellProps.addProperty("samplingTimeOffset", off);
             cellProps.addProperty("loggingInterval", 60000);
@@ -49,8 +68,8 @@ public final class BatteryStringPayloadBuilder {
                     base + "_R",
                     "Cell (R) (" + base + ")",
                     c + ":HOLDING_REGISTERS:3:INT16",
-                    "INTEGER",
-                    "INPUT_REGISTERS:" + (1000 + (s - 1) * 10000 + (c - 1) * 2) + ":INTEGER",
+                    "SHORT",
+                    "INPUT_REGISTERS:" + (1000 + (s - 1) * 10000 + (c - 1)) + ":SHORT",
                     cellProps
             ));
 
@@ -59,8 +78,8 @@ public final class BatteryStringPayloadBuilder {
                     base + "_V",
                     "Cell (V) (" + base + ")",
                     c + ":HOLDING_REGISTERS:1:INT16",
-                    "INTEGER",
-                    "INPUT_REGISTERS:" + (1300 + (s - 1) * 10000 + (c - 1) * 2) + ":INTEGER",
+                    "SHORT",
+                    "INPUT_REGISTERS:" + (1300 + (s - 1) * 10000 + (c - 1)) + ":SHORT",
                     cellProps
             ));
 
@@ -69,8 +88,8 @@ public final class BatteryStringPayloadBuilder {
                     base + "_T",
                     "Cell (T) (" + base + ")",
                     c + ":HOLDING_REGISTERS:2:INT16",
-                    "INTEGER",
-                    "INPUT_REGISTERS:" + (1600 + (s - 1) * 10000 + (c - 1) * 2) + ":INTEGER",
+                    "SHORT",
+                    "INPUT_REGISTERS:" + (1600 + (s - 1) * 10000 + (c - 1)) + ":SHORT",
                     cellProps
             ));
         }
@@ -80,8 +99,8 @@ public final class BatteryStringPayloadBuilder {
                 "str" + s + "_total_I",
                 "String " + s + " (I)",
                 "206:HOLDING_REGISTERS:3:INT16",
-                "INTEGER",
-                "INPUT_REGISTERS:" + (3000 + (s - 1) * 10000) + ":INTEGER",
+                "SHORT",
+                "INPUT_REGISTERS:" + (3000 + (s - 1) * 10000) + ":SHORT",
                 "str" + s + "_sg_pack",
                 offsetFor.applyAsInt(113) // same as FE
         ));
@@ -90,8 +109,8 @@ public final class BatteryStringPayloadBuilder {
                 "str" + s + "_ambient_T",
                 "String " + s + " (T ambient)",
                 "206:HOLDING_REGISTERS:4:INT16",
-                "INTEGER",
-                "INPUT_REGISTERS:" + (3100 + (s - 1) * 10000) + ":INTEGER",
+                "SHORT",
+                "INPUT_REGISTERS:" + (3100 + (s - 1) * 10000) + ":SHORT",
                 "str" + s + "_sg_pack",
                 offsetFor.applyAsInt(113) // same as FE
         ));
@@ -101,8 +120,8 @@ public final class BatteryStringPayloadBuilder {
         configs.addProperty("description", "String " + s + " Modbus RTU");
         configs.addProperty("deviceAddress", portConfig.get("port").getAsString());
         configs.addProperty("settings", settings);
-        configs.addProperty("samplingTimeout", 15000);
-        configs.addProperty("connectRetryInterval", 1000);
+        configs.addProperty("samplingTimeout", samplingTimeoutMs);
+        configs.addProperty("connectRetryInterval", connectRetryIntervalMs);
         configs.addProperty("disabled", false);
 
         JsonObject payload = new JsonObject();
@@ -166,7 +185,7 @@ public final class BatteryStringPayloadBuilder {
         serverMappings.add(sm);
         ch.add("serverMappings", serverMappings);
 
-        ch.addProperty("samplingInterval", 15000);
+        ch.addProperty("samplingInterval", CELL_SAMPLING_INTERVAL_MS);
         if(!Objects.equals(samplingGroup, ""))
             ch.addProperty("samplingGroup", samplingGroup);
         ch.addProperty("samplingTimeOffset", samplingTimeOffset);
@@ -197,10 +216,14 @@ public final class BatteryStringPayloadBuilder {
         channels.add(overview("str" + s + "_Vcutoff", "DOUBLE", "V cutoff", "V", null));
         channels.add(overview("str" + s + "_Vfloat", "DOUBLE", "V float", "V", null));
         channels.add(overview("str" + s + "_R_new", "DOUBLE", "R new", "uOhm", null));
+        channels.add(overview("str" + s + "_alarm_high_rst", "DOUBLE", "Alarm high internal resistance", "uOhm", null));
+        channels.add(overview("str" + s + "_alarm_high_temp", "DOUBLE", "Alarm high temperature", "C", null));
+        channels.add(overview("str" + s + "_alarm_low_voltage", "DOUBLE", "Alarm low cell voltage", "V", null));
+        channels.add(overview("str" + s + "_alarm_high_voltage", "DOUBLE", "Alarm high cell voltage", "V", null));
         channels.add(overview("str" + s + "_serial_port_id", "STRING", "Serial port id", "ID", 64));
 
         // Add logging to all overview channels (FE does this)
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < channels.size(); i++) {
             addLogging.accept(channels.get(i).getAsJsonObject(), 0);
         }
 
@@ -225,6 +248,7 @@ public final class BatteryStringPayloadBuilder {
                 {"str" + s + "_min_temp_value", "DOUBLE", "Min Cell Temperature", "C", 4700},
                 {"str" + s + "_max_rst_value", "DOUBLE", "Max Cell Internal Resistance", "miliOhm", 4800},
                 {"str" + s + "_min_rst_value", "DOUBLE", "Min Cell Internal Resistance", "miliOhm", 4900},
+                {"str" + s + "_string_alarm", "SHORT", "String Alarm", null, 5000},
         };
 
         for (Object[] row : stats) {
@@ -244,11 +268,11 @@ public final class BatteryStringPayloadBuilder {
             item.addProperty("loggingInterval", 60000);
             item.addProperty("loggingSettings", "mqttlogger:topic=v1/gateway/telemetry");
 
-            String valueTypeStr = "DOUBLE".equals(valueType) ? "FLOAT" : "INTEGER";
+            int serverRegister = reg + (s - 1) * 10000;
             JsonArray serverMappings = new JsonArray();
             JsonObject sm = new JsonObject();
             sm.addProperty("id", "modbus");
-            sm.addProperty("serverAddress", "INPUT_REGISTERS:" + (reg + (s - 1) * 10000) + ":" + valueTypeStr);
+            sm.addProperty("serverAddress", "INPUT_REGISTERS:" + serverRegister + ":SHORT");
             serverMappings.add(sm);
             item.add("serverMappings", serverMappings);
 
@@ -264,7 +288,7 @@ public final class BatteryStringPayloadBuilder {
                     "DOUBLE",
                     "State of Charge",
                     "%",
-                    "INPUT_REGISTERS:" + (1900 + (s - 1) * 10000 + (c - 1) * 2) + ":INTEGER"
+                    "INPUT_REGISTERS:" + (1900 + (s - 1) * 10000 + (c - 1)) + ":SHORT"
             ));
 
             channels.add(cellSocSoh(
@@ -272,7 +296,7 @@ public final class BatteryStringPayloadBuilder {
                     "DOUBLE",
                     "State of Health",
                     "%",
-                    "INPUT_REGISTERS:" + (2200 + (s - 1) * 10000 + (c - 1) * 2) + ":INTEGER"
+                    "INPUT_REGISTERS:" + (2200 + (s - 1) * 10000 + (c - 1)) + ":SHORT"
             ));
         }
 

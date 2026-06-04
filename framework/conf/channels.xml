@@ -1,60 +1,60 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
-    <driver id="virtual">
-        <device id="serial_port">
-            <description>Virtual Serial Ports</description>
-            <disabled>false</disabled>
-            <channel id="dev_serial_comm_number">
-                <description>Virtual Serial Port Number</description>
-                <valueType>INTEGER</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-            <channel id="dev_serial_comm_0">
-                <description>Virtual Serial Port 0</description>
-                <valueType length="128">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-            <channel id="dev_serial_comm_1">
-                <description>Virtual Serial Port 1</description>
-                <valueType length="128">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-            <channel id="dev_serial_comm_2">
-                <description>Virtual Serial Port 2</description>
-                <valueType length="128">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-        </device>
-        <device id="virtual_site">
-            <description>Site Name</description>
-            <disabled>false</disabled>
-            <channel id="site_name_1">
-                <description>Site Name</description>
-                <valueType length="64">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-        </device>
-        <device id="account_manager">
-            <description>Account Management</description>
-            <disabled>false</disabled>
-            <channel id="account_1_username">
-                <description>Account 1 Username</description>
-                <valueType length="128">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-            <channel id="account_1_password">
-                <description>Account 1 Password</description>
-                <valueType length="128">STRING</valueType>
-                <samplingInterval>2m</samplingInterval>
-                <disabled>false</disabled>
-            </channel>
-        </device>
-    </driver>
-    <driver id="modbus"/>
+  <driver id="virtual">
+    <device id="serial_port">
+      <description>Virtual Serial Ports</description>
+      <disabled>false</disabled>
+      <channel id="dev_serial_comm_number">
+        <description>Virtual Serial Port Number</description>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="dev_serial_comm_0">
+        <description>Virtual Serial Port 0</description>
+        <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="dev_serial_comm_1">
+        <description>Virtual Serial Port 1</description>
+        <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="dev_serial_comm_2">
+        <description>Virtual Serial Port 2</description>
+        <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="virtual_site">
+      <description>Site Name</description>
+      <disabled>false</disabled>
+      <channel id="site_name_1">
+        <description>Site Name</description>
+        <valueType length="64">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+    <device id="account_manager">
+      <description>Account Management</description>
+      <disabled>false</disabled>
+      <channel id="account_1_username">
+        <description>Account 1 Username</description>
+        <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="account_1_password">
+        <description>Account 1 Password</description>
+        <valueType length="128">STRING</valueType>
+        <samplingInterval>2m</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+  </driver>
+  <driver id="modbus"/>
 </configuration>

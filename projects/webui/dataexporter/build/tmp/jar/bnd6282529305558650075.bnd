@@ -1,0 +1,3 @@
+Bundle-Name=OpenMUC WebUI - Data Exporter
+Bundle-SymbolicName=org.openmuc.framework.openmuc-webui-dataexporter
+Bundle-Vendor=Fraunhofer ISE

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.driver.modbus.test.DriverTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-06-03T07:53:07.902Z" hostname="DESKTOP-SGFC2SA" time="0.023">
+  <properties/>
+  <testcase name="printDriverInfo()" classname="org.openmuc.framework.driver.modbus.test.DriverTest" time="0.023"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

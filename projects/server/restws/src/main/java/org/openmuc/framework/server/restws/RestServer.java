@@ -79,6 +79,10 @@ public final class RestServer {
     private final LatestValueResourceServlet latestValueServlet = new LatestValueResourceServlet();
     private final SoHScheduleResourceServlet sohScheduleServlet = new SoHScheduleResourceServlet();
     private final BatteryStringResourceServlet batteryStringResourceServlet = new BatteryStringResourceServlet();
+    private final IrTestServlet irTestServlet = new IrTestServlet();
+    private final TcCalibrationServlet tcCalibrationServlet = new TcCalibrationServlet();
+    private final GpioAlarmService gpioAlarmService = new GpioAlarmService();
+    private final GpioAlarmServlet gpioAlarmServlet = new GpioAlarmServlet(gpioAlarmService);
     // private final ControlsServlet controlsServlet = new ControlsServlet();
     private ResetToDefaultServlet resetToDefaultServlet;
 
@@ -158,6 +162,11 @@ public final class RestServer {
                     System.err.println("Error in timer task: " + e.getMessage());
                     e.printStackTrace();
                 }
+                try {
+                    gpioAlarmService.updateOutputs(dataAccessService);
+                } catch (Exception e) {
+                    logger.warn("GPIO alarm update failed: {}", e.toString());
+                }
             }
         };
 
@@ -208,6 +217,9 @@ public final class RestServer {
         httpService.registerServlet(Const.ALIAS_REBOOT, new RebootServlet(), null, securityHandler);
         httpService.registerServlet(Const.ALIAS_START_KBD, new StartKbdServlet(), null, securityHandler);
         httpService.registerServlet(Const.ALIAS_STRING, batteryStringResourceServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_IR_TEST, irTestServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_TC_CALIBRATION, tcCalibrationServlet, null, securityHandler);
+        httpService.registerServlet(Const.ALIAS_GPIO_ALARM, gpioAlarmServlet, null, securityHandler);
         // httpService.registerServlet(Const.ALIAS_CONTROLS, controlsServlet, null,
         // securityHandler);
         initUpdateTimer();
@@ -232,6 +244,9 @@ public final class RestServer {
         httpService.unregister(Const.ALIAS_RESET);
         httpService.unregister(Const.ALIAS_REBOOT);
         httpService.unregister(Const.ALIAS_START_KBD);
+        httpService.unregister(Const.ALIAS_IR_TEST);
+        httpService.unregister(Const.ALIAS_TC_CALIBRATION);
+        httpService.unregister(Const.ALIAS_GPIO_ALARM);
         // httpService.unregister(Const.ALIAS_CONTROLS);
 
         updateTimer.cancel();

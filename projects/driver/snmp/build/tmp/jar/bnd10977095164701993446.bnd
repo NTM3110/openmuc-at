@@ -1,0 +1,5 @@
+Bundle-ClassPath=.,lib/snmp4j-2.8.18.jar
+Bundle-Name=OpenMUC Driver - SNMP
+Bundle-SymbolicName=org.openmuc.framework.openmuc-driver-snmp
+Bundle-Vendor=Fraunhofer ISE
+Import-Package=\!org.snmp4j*,javax.crypto,javax.crypto.spec,javax.net.ssl,*;version\=0

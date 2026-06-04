@@ -136,14 +136,21 @@ export class OpenmucService {
     // Dữ liệu từ _virtual (avg, max, min, string_vol) đã là float, không cần chia
     // Dữ liệu từ _modbus (cell V) là int (ví dụ 2099), cần chia 1000
     if (typeof val === 'number') {
-      return key.includes('_cell') ? val / 1000 : val;
+      return this.isMillivoltChannel(key) ? val / 1000 : val;
     }
     return null;
   }
 
+  private isMillivoltChannel(key: string): boolean {
+    return key.includes('_cell') ||
+      key.endsWith('_average_vol') ||
+      key.endsWith('_max_voltage_value') ||
+      key.endsWith('_min_voltage_value');
+  }
+
   private getAsAmps(map: RecordMap, key: string): number | null {
     const val = this.getValue(map, key); // str*_total_I (ví dụ 4998)
-    return typeof val === 'number' ? val / 10 : null; // -> 4.998
+    return typeof val === 'number' ? val / 10 : null;
   }
 
   private getAsCelsius(map: RecordMap, key: string): number | null {
@@ -151,7 +158,7 @@ export class OpenmucService {
     // Dữ liệu từ _virtual (avg, max, min) đã là float, không cần chia
     // Dữ liệu từ _modbus (cell T) là int (ví dụ 2781), cần chia 100
     if (typeof val === 'number') {
-      return key.includes('_cell') ? val / 10 : val; // -> 27.81
+      return key.endsWith('_ambient_T') ? val : val / 10;
     }
     return null;
   }
@@ -159,6 +166,11 @@ export class OpenmucService {
   private getAsRaw(map: RecordMap, key: string): number | null {
     const val = this.getValue(map, key);
     return typeof val === 'number' ? val : null;
+  }
+
+  private getAsSocSoh(map: RecordMap, key: string): number | null {
+    const val = this.getValue(map, key);
+    return typeof val === 'number' ? val / 100 : null;
   }
 
   private getAsString(map: RecordMap, key: string): string | null {
@@ -209,8 +221,8 @@ export class OpenmucService {
           maxTempValue: this.getAsCelsius(virtual, `${baseStringName}_max_temp_value`),
           minTempValue: this.getAsCelsius(virtual, `${baseStringName}_min_temp_value`),
 
-          stringSoC: this.getAsRaw(virtual, `${baseStringName}_string_SOC`),
-          stringSoH: this.getAsRaw(virtual, `${baseStringName}_string_SOH`),
+          stringSoC: this.getAsSocSoh(virtual, `${baseStringName}_string_SOC`),
+          stringSoH: this.getAsSocSoh(virtual, `${baseStringName}_string_SOH`),
         };
         return summary;
       }),
@@ -249,8 +261,8 @@ export class OpenmucService {
             Rst: rstRaw, // Lấy giá trị Rst thô (41, 46, 50...)
 
             // Từ _virtual (thường là %)
-            SoC: this.getAsRaw(virtual, `${baseStringName}_cell${i}_SOC`),
-            SoH: this.getAsRaw(virtual, `${baseStringName}_cell${i}_SOH`),
+            SoC: this.getAsSocSoh(virtual, `${baseStringName}_cell${i}_SOC`),
+            SoH: this.getAsSocSoh(virtual, `${baseStringName}_cell${i}_SOH`),
 
             // Giá trị tính toán
             IR: irCalculated,
@@ -289,8 +301,8 @@ export class OpenmucService {
               const current = this.getAsAmps(modbusMap, `${baseId}_total_I`);
               const avgTemp = this.getAsCelsius(virtualMap, `${baseId}_average_temp`);
               const cellQty = this.getAsRaw(virtualMap, `${baseId}_cell_qty`);
-              const soC = this.getAsRaw(virtualMap, `${baseId}_string_SOC`);
-              const soH = this.getAsRaw(virtualMap, `${baseId}_string_SOH`);
+              const soC = this.getAsSocSoh(virtualMap, `${baseId}_string_SOC`);
+              const soH = this.getAsSocSoh(virtualMap, `${baseId}_string_SOH`);
 
               // Logic: Có data và hợp lệ (> 0 cho số) thì On, ngược lại Off
               const cellVolStatus = (avgVol !== null && avgVol > 0) || (cellQty !== null && cellQty > 0) ? 'On' : 'Off';

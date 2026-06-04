@@ -7,6 +7,7 @@ import org.openmuc.framework.lib.rest1.domain.model.LatestValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class LatestValueRepoImpl {
     private final static String url = "jdbc:postgresql://localhost:5432/openmuc";
@@ -86,6 +87,55 @@ public class LatestValueRepoImpl {
             ps.executeUpdate();
         } catch (SQLException e) {
             logger.warn("[latest_values] deleteAllByChannelIdStartingWith failed for prefix " + prefix + ": " + e);
+        }
+    }
+
+    public static boolean upsertDoubleValues(Map<String, Double> values) {
+        String sql = "INSERT INTO latest_values "
+                + "(channelid, value_type, value_double, value_string, value_boolean, updated_at) "
+                + "VALUES (?, 'D', ?, NULL, NULL, now()) "
+                + "ON CONFLICT (channelid) DO UPDATE SET "
+                + "value_type = EXCLUDED.value_type, "
+                + "value_double = EXCLUDED.value_double, "
+                + "value_string = EXCLUDED.value_string, "
+                + "value_boolean = EXCLUDED.value_boolean, "
+                + "updated_at = EXCLUDED.updated_at";
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
+            for (Map.Entry<String, Double> entry : values.entrySet()) {
+                ps.setString(1, entry.getKey());
+                ps.setDouble(2, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            logger.warn("[latest_values] upsertDoubleValues failed: " + e);
+            return false;
+        }
+    }
+
+    public static boolean upsertDoubleValue(String channelId, double value) {
+        String sql = "INSERT INTO latest_values "
+                + "(channelid, value_type, value_double, value_string, value_boolean, updated_at) "
+                + "VALUES (?, 'D', ?, NULL, NULL, now()) "
+                + "ON CONFLICT (channelid) DO UPDATE SET "
+                + "value_type = EXCLUDED.value_type, "
+                + "value_double = EXCLUDED.value_double, "
+                + "value_string = EXCLUDED.value_string, "
+                + "value_boolean = EXCLUDED.value_boolean, "
+                + "updated_at = EXCLUDED.updated_at";
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, channelId);
+            ps.setDouble(2, value);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            logger.warn("[latest_values] upsertDoubleValue failed for " + channelId + ": " + e);
+            return false;
         }
     }
 }

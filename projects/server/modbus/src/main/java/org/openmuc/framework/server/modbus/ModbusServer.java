@@ -79,11 +79,8 @@ public class ModbusServer implements ServerService, ManagedService {
                 slave = ModbusSlaveFactory.createUDPSlave(InetAddress.getByName(address), port);
                 break;
             case "serial":
-                ModbusSlaveFactory.createSerialSlave(new SerialParameters(property.getString(Settings.SERIAL_PORT_NAME),
-                        property.getInt(Settings.BAUDRATE), property.getInt(Settings.FLOW_CONTROL_IN),
-                        property.getInt(Settings.FLOW_CONTROL_OUT), property.getInt(Settings.DATA_BITS),
-                        property.getInt(Settings.STOP_BITS), property.getInt(Settings.PARITY),
-                        property.getBoolean(Settings.ECHO)));
+                slave = ModbusSlaveFactory.createSerialSlave(createSerialParameters());
+                break;
             case "rtutcp":
                 isRtuTcp = true;
             case "tcp":
@@ -96,11 +93,27 @@ public class ModbusServer implements ServerService, ManagedService {
             slave.addProcessImage(property.getInt(Settings.UNITID), spi);
             slave.open();
         } catch (ModbusException e) {
-            throw new IOException(e.getMessage());
+            throw new IOException(e);
         } catch (UnknownHostException e) {
             logger.error("Unknown host: {}", address);
-            throw new IOException(e.getMessage());
+            throw new IOException(e);
         }
+    }
+
+    private SerialParameters createSerialParameters() {
+        SerialParameters params = new SerialParameters(property.getString(Settings.SERIAL_PORT_NAME),
+                property.getInt(Settings.BAUDRATE), property.getInt(Settings.FLOW_CONTROL_IN),
+                property.getInt(Settings.FLOW_CONTROL_OUT), property.getInt(Settings.DATA_BITS),
+                property.getInt(Settings.STOP_BITS), property.getInt(Settings.PARITY),
+                property.getBoolean(Settings.ECHO));
+        params.setRs485Mode(property.getBoolean(Settings.RS485_MODE));
+        params.setRs485TxEnableActiveHigh(property.getBoolean(Settings.RS485_TX_ENABLE_ACTIVE_HIGH));
+        params.setRs485EnableTermination(property.getBoolean(Settings.RS485_ENABLE_TERMINATION));
+        params.setRs485RxDuringTx(property.getBoolean(Settings.RS485_RX_DURING_TX));
+        params.setRs485DelayBeforeTxMicroseconds(property.getInt(Settings.RS485_DELAY_BEFORE_TX_MICROSECONDS));
+        params.setRs485DelayAfterTxMicroseconds(property.getInt(Settings.RS485_DELAY_AFTER_TX_MICROSECONDS));
+        logger.info("Starting serial Modbus server with {}", params);
+        return params;
     }
 
     private void logServerSettings() {
@@ -130,7 +143,7 @@ public class ModbusServer implements ServerService, ManagedService {
         try {
             startServer(spi);
         } catch (IOException e) {
-            logger.error("Error starting server.");
+            logger.error("Error starting server.", e);
             throw new RuntimeException(e);
         }
     }

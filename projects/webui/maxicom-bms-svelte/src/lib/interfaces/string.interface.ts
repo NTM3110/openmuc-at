@@ -9,6 +9,10 @@ export interface BatteryString {
     cutoffVoltage: number; // Vcutoff
     floatVoltage: number;
     rNew: number;
+    highResistanceThreshold: number; // uOhm; 0 disables the alarm
+    highTemperatureThreshold: number; // degC; 0 disables the alarm
+    lowVoltageThreshold: number; // V; 0 disables the alarm
+    highVoltageThreshold: number; // V; 0 disables the alarm
     serialPortId: string; // Port ID (e.g., 'serial0')
 }
 

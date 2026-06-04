@@ -1,0 +1,6 @@
+Bundle-ClassPath=.,lib/org.osgi.service.jdbc-1.1.0.jar
+Bundle-Name=OpenMUC App - Simple Demo
+Bundle-SymbolicName=org.openmuc.framework.openmuc-app-simpledemo
+Bundle-Vendor=Fraunhofer ISE
+Export-Package=org.osgi.service.jdbc
+Import-Package=org.postgresql,javax.sql,org.h2.tools,org.openmuc.framework.*,org.osgi.*,org.slf4j,\!org.osgi.service.jdbc,;version\=0

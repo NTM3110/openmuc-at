@@ -1,0 +1,3 @@
+Bundle-Name=OpenMUC WebUI - Channel Configurator
+Bundle-SymbolicName=org.openmuc.framework.openmuc-webui-channelconfigurator
+Bundle-Vendor=Fraunhofer ISE

@@ -13,6 +13,7 @@ import org.openmuc.framework.data.StringValue;
 import org.openmuc.framework.data.DoubleValue;
 import org.openmuc.framework.data.Flag;
 import org.openmuc.framework.data.IntValue;
+import org.openmuc.framework.data.ShortValue;
 import org.openmuc.framework.dataaccess.Channel;
 import org.openmuc.framework.dataaccess.DataAccessService;
 import org.openmuc.framework.dataaccess.DataLoggerNotAvailableException;
@@ -54,9 +55,17 @@ public final class SimpleDemoApp {
         "str%d_Vcutoff",
 		"str%d_Vfloat",
         "str%d_R_new",
+		"str%d_alarm_high_rst",
+		"str%d_alarm_high_temp",
+		"str%d_alarm_low_voltage",
+		"str%d_alarm_high_voltage",
         "str%d_serial_port_id"
 );
 	private static final int DATA_OPTION_NUM = 6;
+	private static final double SOC_SOH_CHANNEL_SCALE = 100.0;
+	private static final double VOLTAGE_CHANNEL_SCALE = 1000.0;
+	private static final double TEMPERATURE_CHANNEL_SCALE = 10.0;
+	private static final double RESISTANCE_CHANNEL_SCALE = 1.0;
 	private static final DecimalFormatSymbols DFS = DecimalFormatSymbols.getInstance(Locale.US);
 	private static final DecimalFormat DF = new DecimalFormat("#0.000", DFS);
 
@@ -92,6 +101,25 @@ public final class SimpleDemoApp {
 	// maps internal index (0..stringNumber_1-1) to actual "strX" number
 	private int[] stringIds = new int[0];
 
+	private Record getLatestRecord(String channelId) {
+		Channel channel = dataAccessService.getChannel(channelId);
+		if (channel == null) {
+			logger.warn("Channel {} does not exist yet, skipping this cycle.", channelId);
+			return null;
+		}
+		return channel.getLatestRecord();
+	}
+
+	private boolean setLatestRecord(String channelId, Record record) {
+		Channel channel = dataAccessService.getChannel(channelId);
+		if (channel == null) {
+			logger.warn("Channel {} does not exist yet, skipping this cycle.", channelId);
+			return false;
+		}
+		channel.setLatestRecord(record);
+		return true;
+	}
+
 	@Reference
 	private DataAccessService dataAccessService;
 
@@ -106,10 +134,14 @@ public final class SimpleDemoApp {
 	@Deactivate
 	private void deactivate() {
 		// logger.info("Deactivating {}", APP_NAME);
-		updateTimer.cancel();
-		updateTimer.purge();
-        updateDbTimer.cancel();
-        updateDbTimer.purge();
+		if (updateTimer != null) {
+			updateTimer.cancel();
+			updateTimer.purge();
+		}
+        if (updateDbTimer != null) {
+            updateDbTimer.cancel();
+            updateDbTimer.purge();
+        }
 		if (csvLoggerTimer != null) {
 			csvLoggerTimer.cancel();
 			csvLoggerTimer.purge();
@@ -210,15 +242,17 @@ public final class SimpleDemoApp {
 		for (int i = 0; i < stringNumber; i++) {
 			int strId = stringIds[i];
 			try{
-				Record VcutoffRecord = dataAccessService.getChannel("str" + strId + "_Vcutoff").getLatestRecord();
-				if(VcutoffRecord == null){
+				String vCutoffChannelName = "str" + strId + "_Vcutoff";
+				Record VcutoffRecord = getLatestRecord(vCutoffChannelName);
+				if(VcutoffRecord == null || VcutoffRecord.getValue() == null){
 					logger.warn("There is no record of channel str%d_Vcutoff", strId);
 					return 0;
 				}
 				double vCutoff = VcutoffRecord.getValue().asDouble();
 
-				Record VfloatRecord = dataAccessService.getChannel("str" + strId + "_Vfloat").getLatestRecord();
-                if(VfloatRecord == null){
+				String vFloatChannelName = "str" + strId + "_Vfloat";
+				Record VfloatRecord = getLatestRecord(vFloatChannelName);
+                if(VfloatRecord == null || VfloatRecord.getValue() == null){
                     logger.warn("There is no record of channel str%d_Vfloat", strId);
                     return 0;
                 }
@@ -230,7 +264,11 @@ public final class SimpleDemoApp {
 				}
 				String CnominalChannelName = "str" + strId + "_Cnominal";
 				double Cnominal = -1.0;
-				Record CnominalRecord = dataAccessService.getChannel(CnominalChannelName).getLatestRecord();
+				Record CnominalRecord = getLatestRecord(CnominalChannelName);
+				if (CnominalRecord == null || CnominalRecord.getValue() == null) {
+					logger.warn("There is no record of channel {}", CnominalChannelName);
+					return 0;
+				}
 				Cnominal = CnominalRecord.getValue().asDouble();
 				if (Cnominal < 0) {
 					// logger.warn("Cnominal is not set properly yet for string {}. Skipping set SoC
@@ -305,6 +343,17 @@ public final class SimpleDemoApp {
 		// logger.info("SetLatestSoH ----> currentSoH: {}", currentSoH*100);
 	}
 
+	private boolean hasValidValue(Record record) {
+		return record != null && record.getFlag() == Flag.VALID && record.getValue() != null;
+	}
+
+	private double decodeCurrentAmps(double rawValue) {
+		int rawWord = ((int) rawValue) & 0xFFFF;
+		// The current sensor uses bit 15 for direction and bits 0-14 for 0.1 A magnitude.
+		double magnitudeAmps = (rawWord & 0x7FFF) / 10.0;
+		return (rawWord & 0x8000) != 0 ? -magnitudeAmps : magnitudeAmps;
+	}
+
 	private void calculateSoCSoH() {
 		for (int i = 0; i < stringNumber; i++) {
 			for (int j = 0; j < cellNumbers[i]; j++) {
@@ -319,24 +368,28 @@ public final class SimpleDemoApp {
 					channels = initiateChannel();
 					continue;
 				}
-				if(channels[si][sj][3].getLatestRecord().getValue() == null ||
-					channels[si][sj][1].getLatestRecord().getValue() == null ||
-					channels[si][sj][2].getLatestRecord().getValue() == null ||
-					channels[si][sj][0].getLatestRecord().getValue() == null) {
+				if(channels[si][sj][4] == null || channels[si][sj][5] == null) {
+					channels = initiateChannel();
+					continue;
+				}
+				Record currentRecord = channels[si][sj][3].getLatestRecord();
+				Record voltageRecord = channels[si][sj][1].getLatestRecord();
+				Record tempRecord = channels[si][sj][2].getLatestRecord();
+				Record resistanceRecord = channels[si][sj][0].getLatestRecord();
+				if(!hasValidValue(voltageRecord) || !hasValidValue(tempRecord) || !hasValidValue(resistanceRecord)) {
 					// logger.warn("----------------- MODBUS: There is no value yet with this channel at string {} cell {} --------------", si+1, sj+1);
+					clearCellMeasurements(powerCells[si][sj]);
 					continue;
 				}
 				
-				double current = channels[si][sj][3].getLatestRecord().getValue().asDouble() / 10;
+				double current = hasValidValue(currentRecord) ?
+						decodeCurrentAmps(currentRecord.getValue().asDouble()) : 0;
 				// logger.info("Value of of {}: -----> {}",channels[si][sj][3].getId(), current);
-				double voltage = channels[si][sj][1].getLatestRecord().getValue().asDouble() / 1000;
-				double temp = channels[si][sj][2].getLatestRecord().getValue().asDouble() / 10;
+				double voltage = voltageRecord.getValue().asDouble() / 1000;
+				double temp = tempRecord.getValue().asDouble() / 10;
 				// logger.info("OLD value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getVoltage());
 				// logger.info("NEW value of voltage of string {}_cell{}: -----> {}",si+1, sj+1, voltage);
-				if((voltage - powerCells[si][sj].getVoltage()) > 0) {
-					current *= -1;
-				}
-				double resistance = channels[si][sj][0].getLatestRecord().getValue().asDouble();
+				double resistance = resistanceRecord.getValue().asDouble();
 				// logger.info("Value of of {}: -----> {}",channels[si][sj][0].getId(), resistance);
 
 				powerCells[si][sj].setCurrent(current);
@@ -354,7 +407,9 @@ public final class SimpleDemoApp {
 						rNew = rNewChannel.getLatestRecord().getValue().asDouble();
 						if (rNew <= 0) rNew = 1450.0;
 					}
-				} catch (Exception e) {}
+				} catch (Exception e) {
+					logger.debug("Could not read R_new for string {}: {}", stringIds[si], e.toString());
+				}
 
 				setLatestSoC(powerCells[si][sj], 1, isInitSoC0[si][sj], si);
 				if(isInitSoC0[si][sj] == false) {
@@ -362,13 +417,12 @@ public final class SimpleDemoApp {
 				}
 				long now = System.currentTimeMillis();
 				// logger.info("SoC of string {}_cell{}: -----> {}",si+1, sj+1, powerCells[si][sj].getSoc());
-				DoubleValue doubleSoCValue = new DoubleValue(Double.parseDouble(DF.format(powerCells[si][sj].getSoc())));
+				DoubleValue doubleSoCValue = new DoubleValue(scaleSocSohForChannel(powerCells[si][sj].getSoc()));
 				Record socRecord = new Record(doubleSoCValue, now, Flag.VALID);
 				channels[si][sj][4].setLatestRecord(socRecord);
 
                 setLatestSoH(powerCells[si][sj], rNew);
-				DoubleValue doubleSoHValue = new DoubleValue(
-						Double.parseDouble(DF.format(powerCells[si][sj].getSoh())));
+				DoubleValue doubleSoHValue = new DoubleValue(scaleSocSohForChannel(powerCells[si][sj].getSoh()));
 				Record sohRecord = new Record(doubleSoHValue, now, Flag.VALID);
 				channels[si][sj][5].setLatestRecord(sohRecord);
 				// }catch(NullPointerException e) {
@@ -377,6 +431,15 @@ public final class SimpleDemoApp {
 				// }
 			}
 		}
+	}
+
+	private void clearCellMeasurements(PowerCell powerCell) {
+		powerCell.setCurrent(0);
+		powerCell.setVoltage(0);
+		powerCell.setTemp(0);
+		powerCell.setResistance(0);
+		powerCell.setSoc(0);
+		powerCell.setSoh(0);
 	}
 
 	private void updateLatestSaveChannelNames(int[] stringIds) {
@@ -549,83 +612,127 @@ public final class SimpleDemoApp {
 				averageTemp[i] = Helper.getAverageTemperatureBattery(i, cellNumbers, powerCells);
 				averageVoltage[i] = Helper.getAverageVoltageBattery(i, cellNumbers, powerCells);
 				long now = System.currentTimeMillis();
-				DoubleValue doubleStrVolValue = new DoubleValue(Double.parseDouble(DF.format(strVoltage[i])));
+				short stringAlarm = calculateStringAlarm(strId, i);
+				DoubleValue doubleStrVolValue = new DoubleValue(formatChannelValue(strVoltage[i]));
 				Record record = new Record(doubleStrVolValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "string_vol").setLatestRecord(record);
+				if (!setLatestRecord(base + "string_vol", record)) {
+					continue;
+				}
 
 				IntValue intMaxVoltageIndex = new IntValue(maxVoltageIndex[i]);
 				record = new Record(intMaxVoltageIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_voltage_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "max_voltage_cell_id", record)) {
+					continue;
+				}
 
 				IntValue intMinVoltageIndex = new IntValue(minVoltageIndex[i]);
 				record = new Record(intMinVoltageIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_voltage_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_voltage_cell_id", record)) {
+					continue;
+				}
 
 				IntValue intMaxTempIndex = new IntValue(maxTempIndex[i]);
 				record = new Record(intMaxTempIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_temp_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "max_temp_cell_id", record)) {
+					continue;
+				}
 
 				IntValue intMinTempIndex = new IntValue(minTempIndex[i]);
 				record = new Record(intMinTempIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_temp_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_temp_cell_id", record)) {
+					continue;
+				}
 
 				IntValue intMaxResistanceIndex = new IntValue(maxResistanceIndex[i]);
 				record = new Record(intMaxResistanceIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_rst_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "max_rst_cell_id", record)) {
+					continue;
+				}
 
 				IntValue intMinResistanceIndex = new IntValue(minResistanceIndex[i]);
 				record = new Record(intMinResistanceIndex, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_rst_cell_id").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_rst_cell_id", record)) {
+					continue;
+				}
 
-				DoubleValue doubleMaxVoltageValue = new DoubleValue(Double.parseDouble(DF.format(maxVoltage[i])));
+				DoubleValue doubleMaxVoltageValue = new DoubleValue(scaleForChannel(maxVoltage[i], VOLTAGE_CHANNEL_SCALE));
 				record = new Record(doubleMaxVoltageValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_voltage_value").setLatestRecord(record);
+				if (!setLatestRecord(base + "max_voltage_value", record)) {
+					continue;
+				}
 
-				DoubleValue doubleMinVoltageValue = new DoubleValue(Double.parseDouble(DF.format(minVoltage[i])));
+				DoubleValue doubleMinVoltageValue = new DoubleValue(scaleForChannel(minVoltage[i], VOLTAGE_CHANNEL_SCALE));
 				record = new Record(doubleMinVoltageValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_voltage_value").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_voltage_value", record)) {
+					continue;
+				}
 
-				DoubleValue doubleMaxTempValue = new DoubleValue(Double.parseDouble(DF.format(maxTemp[i])));
+				DoubleValue doubleMaxTempValue = new DoubleValue(scaleForChannel(maxTemp[i], TEMPERATURE_CHANNEL_SCALE));
 				record = new Record(doubleMaxTempValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_temp_value").setLatestRecord(record);
+				if (!setLatestRecord(base + "max_temp_value", record)) {
+					continue;
+				}
 
-				DoubleValue doubleMinTempValue = new DoubleValue(Double.parseDouble(DF.format(minTemp[i])));
+				DoubleValue doubleMinTempValue = new DoubleValue(scaleForChannel(minTemp[i], TEMPERATURE_CHANNEL_SCALE));
 				record = new Record(doubleMinTempValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_temp_value").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_temp_value", record)) {
+					continue;
+				}
 
-				DoubleValue doubleMaxResistanceValue = new DoubleValue(Double.parseDouble(DF.format(maxResistance[i])));
+				DoubleValue doubleMaxResistanceValue = new DoubleValue(scaleForChannel(maxResistance[i], RESISTANCE_CHANNEL_SCALE));
 				record = new Record(doubleMaxResistanceValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "max_rst_value").setLatestRecord(record);
-				DoubleValue doubleMinResistanceValue = new DoubleValue(Double.parseDouble(DF.format(minResistance[i])));
+				if (!setLatestRecord(base + "max_rst_value", record)) {
+					continue;
+				}
+				DoubleValue doubleMinResistanceValue = new DoubleValue(scaleForChannel(minResistance[i], RESISTANCE_CHANNEL_SCALE));
 				record = new Record(doubleMinResistanceValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "min_rst_value").setLatestRecord(record);
+				if (!setLatestRecord(base + "min_rst_value", record)) {
+					continue;
+				}
 
 				DoubleValue doubleAverageResistanceValue = new DoubleValue(
-						Double.parseDouble(DF.format(averageResistance[i])));
+						scaleForChannel(averageResistance[i], RESISTANCE_CHANNEL_SCALE));
 				record = new Record(doubleAverageResistanceValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "average_rst").setLatestRecord(record);
+				if (!setLatestRecord(base + "average_rst", record)) {
+					continue;
+				}
 
-				DoubleValue doubleAverageTempValue = new DoubleValue(Double.parseDouble(DF.format(averageTemp[i])));
+				DoubleValue doubleAverageTempValue = new DoubleValue(scaleForChannel(averageTemp[i], TEMPERATURE_CHANNEL_SCALE));
 				record = new Record(doubleAverageTempValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "average_temp").setLatestRecord(record);
+				if (!setLatestRecord(base + "average_temp", record)) {
+					continue;
+				}
 
 				DoubleValue doubleAverageVoltageValue = new DoubleValue(
-						Double.parseDouble(DF.format(averageVoltage[i])));
+						scaleForChannel(averageVoltage[i], VOLTAGE_CHANNEL_SCALE));
 				record = new Record(doubleAverageVoltageValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "average_vol").setLatestRecord(record);
+				if (!setLatestRecord(base + "average_vol", record)) {
+					continue;
+				}
 
 				DoubleValue doubleAverageRstValue = new DoubleValue(
-						Double.parseDouble(DF.format(averageResistance[i])));
+						scaleForChannel(averageResistance[i], RESISTANCE_CHANNEL_SCALE));
 				record = new Record(doubleAverageRstValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "average_rst").setLatestRecord(record);
+				if (!setLatestRecord(base + "average_rst", record)) {
+					continue;
+				}
 
-				DoubleValue doubleStrSOHValue = new DoubleValue(Double.parseDouble(DF.format(strSOH[i])));
+				DoubleValue doubleStrSOHValue = new DoubleValue(scaleSocSohForChannel(strSOH[i]));
 				record = new Record(doubleStrSOHValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "string_SOH").setLatestRecord(record);
+				if (!setLatestRecord(base + "string_SOH", record)) {
+					continue;
+				}
 
-				DoubleValue doubleStrSOCValue = new DoubleValue(Double.parseDouble(DF.format(strSOC[i])));
+				DoubleValue doubleStrSOCValue = new DoubleValue(scaleSocSohForChannel(strSOC[i]));
 				record = new Record(doubleStrSOCValue, now, Flag.VALID);
-				dataAccessService.getChannel(base + "string_SOC").setLatestRecord(record);
+				if (!setLatestRecord(base + "string_SOC", record)) {
+					continue;
+				}
+
+				record = new Record(new ShortValue(stringAlarm), now, Flag.VALID);
+				if (!setLatestRecord(base + "string_alarm", record)) {
+					continue;
+				}
 
 			} catch (NullPointerException e) {
 				logger.warn(
@@ -634,6 +741,72 @@ public final class SimpleDemoApp {
 			}
 		}
 
+	}
+
+	private double scaleSocSohForChannel(double value) {
+		return scaleForChannel(value, SOC_SOH_CHANNEL_SCALE);
+	}
+
+	private double scaleForChannel(double value, double scale) {
+		return formatChannelValue(value * scale);
+	}
+
+	private double formatChannelValue(double value) {
+		return Double.parseDouble(DF.format(value));
+	}
+
+	private short calculateStringAlarm(int stringId, int stringIndex) {
+		String base = "str" + stringId + "_";
+		double highResistanceThreshold = readPositiveDoubleThreshold(base + "alarm_high_rst");
+		double highTemperatureThreshold = readPositiveDoubleThreshold(base + "alarm_high_temp");
+		double lowVoltageThreshold = readPositiveDoubleThreshold(base + "alarm_low_voltage");
+		double highVoltageThreshold = readPositiveDoubleThreshold(base + "alarm_high_voltage");
+
+		for (int j = 0; j < cellNumbers[stringIndex]; j++) {
+			PowerCell cell = powerCells[stringIndex][j];
+			if (isAboveThreshold(cell.getResistance(), highResistanceThreshold)
+					|| isAboveThreshold(cell.getTemp(), highTemperatureThreshold)
+					|| isBelowThreshold(cell.getVoltage(), lowVoltageThreshold)
+					|| isAboveThreshold(cell.getVoltage(), highVoltageThreshold)) {
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	private double readPositiveDoubleThreshold(String channelId) {
+		Double channelValue = readChannelDouble(channelId);
+		if (channelValue != null && channelValue > 0) {
+			return channelValue;
+		}
+
+		Double dbValue = LatestValuesDao.findDouble(channelId);
+		if (dbValue != null && dbValue > 0) {
+			return dbValue;
+		}
+
+		return 0;
+	}
+
+	private Double readChannelDouble(String channelId) {
+		try {
+			Channel channel = dataAccessService.getChannel(channelId);
+			if (channel == null || channel.getLatestRecord() == null || channel.getLatestRecord().getValue() == null) {
+				return null;
+			}
+			return channel.getLatestRecord().getValue().asDouble();
+		} catch (Exception e) {
+			logger.debug("Could not read alarm threshold {}: {}", channelId, e.toString());
+			return null;
+		}
+	}
+
+	private boolean isAboveThreshold(double value, double threshold) {
+		return value > 0 && threshold > 0 && value >= threshold;
+	}
+
+	private boolean isBelowThreshold(double value, double threshold) {
+		return value > 0 && threshold > 0 && value <= threshold;
 	}
 
     private void initDbUpdateTimer(){
@@ -762,6 +935,7 @@ public final class SimpleDemoApp {
 	    TimerTask task = new TimerTask() {
 	        @Override
 	        public void run() {
+				try {
 				// logger.info("-------------------- Run Update Task for MODBUS-------------------");
 				if(!isRestored) {
 					List<String> allChannelId = dataAccessService.getAllIds();
@@ -798,6 +972,9 @@ public final class SimpleDemoApp {
 					// }
 				}
 				// setFirstOverallStringValue(stringNumber);
+				} catch (RuntimeException e) {
+					logger.error("Unhandled exception in SimpleDemoApp update timer", e);
+				}
 			}
 		};
 		updateTimer.scheduleAtFixedRate(task, (long) 1 * 1000, (long) 1 * 1000);
@@ -839,7 +1016,12 @@ public final class SimpleDemoApp {
 			String cellNumberChannelName = "str" + strId + "_cell_qty";
 
 			try {
-				Record cellNumberRecord = dataAccessService.getChannel(cellNumberChannelName).getLatestRecord();
+				Record cellNumberRecord = getLatestRecord(cellNumberChannelName);
+				if (cellNumberRecord == null || cellNumberRecord.getValue() == null) {
+					logger.warn("There is no value yet with this channel: {}, skipping get cell dimension this cycle.",
+							cellNumberChannelName);
+					continue;
+				}
 				cellNumbers[i] = cellNumberRecord.getValue().asInt();
 				// logger.info("String {} has cell number: {}", i+1, cellNumbers[i]);
 				if (maxCellNumber < cellNumbers[i]) {
@@ -887,7 +1069,7 @@ public final class SimpleDemoApp {
 			RecordListener listener = listeners.computeIfAbsent(channelID, id -> (record -> {
 				if (record.getValue() != null) {
 					// setFirstOverallStringValue(stringNumber);
-					if((channelID.startsWith("str") && channelID.contains("_cell_qty")) || channelID.equals("dev_serial_comm_number") || (channelID.startsWith("str") && channelID.contains("_Cnominal")) || (channelID.startsWith("str") && channelID.contains("_Vcutoff")) || (channelID.startsWith("str") && channelID.contains("_Vfloat"))){
+					if (isPersistedDoubleChannel(channelID)) {
 						LatestValuesDao.updateDouble(id, record.getValue().asDouble());
 						if (channelID.startsWith("str") && channelID.contains("_cell_qty")) {
 							// getCellDimension();
@@ -918,5 +1100,19 @@ public final class SimpleDemoApp {
 			channel.removeListener(listener);
 			channel.addListener(listener);
 		}
+	}
+
+	private boolean isPersistedDoubleChannel(String channelID) {
+		return channelID.equals("dev_serial_comm_number")
+				|| (channelID.startsWith("str")
+				&& (channelID.contains("_cell_qty")
+				|| channelID.contains("_Cnominal")
+				|| channelID.contains("_Vcutoff")
+				|| channelID.contains("_Vfloat")
+				|| channelID.contains("_R_new")
+				|| channelID.contains("_alarm_high_rst")
+				|| channelID.contains("_alarm_high_temp")
+				|| channelID.contains("_alarm_low_voltage")
+				|| channelID.contains("_alarm_high_voltage")));
 	}
 }

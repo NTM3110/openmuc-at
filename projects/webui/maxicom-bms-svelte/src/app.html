@@ -3,6 +3,98 @@
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script>
+			(function () {
+				if (typeof window.globalThis === 'undefined') {
+					window.globalThis = window;
+				}
+
+				if (typeof window.queueMicrotask !== 'function') {
+					window.queueMicrotask = function (callback) {
+						Promise.resolve()
+							.then(callback)
+							.catch(function (error) {
+								setTimeout(function () {
+									throw error;
+								}, 0);
+							});
+					};
+				}
+
+				if (!String.prototype.replaceAll) {
+					String.prototype.replaceAll = function (search, replacement) {
+						if (search instanceof RegExp) {
+							if (!search.global) {
+								throw new TypeError('replaceAll requires a global regular expression');
+							}
+							return this.replace(search, replacement);
+						}
+						return this.split(search).join(replacement);
+					};
+				}
+
+				if (!Object.fromEntries) {
+					Object.fromEntries = function (entries) {
+						var result = {};
+						for (var i = 0; i < entries.length; i += 1) {
+							result[entries[i][0]] = entries[i][1];
+						}
+						return result;
+					};
+				}
+
+				if (typeof window.IntersectionObserver !== 'function') {
+					window.IntersectionObserver = function (callback) {
+						this.callback = callback;
+					};
+					window.IntersectionObserver.prototype.observe = function (element) {
+						this.callback([{ target: element, isIntersecting: false, intersectionRatio: 0 }], this);
+					};
+					window.IntersectionObserver.prototype.unobserve = function () {};
+					window.IntersectionObserver.prototype.disconnect = function () {};
+				}
+
+				if (typeof window.ResizeObserver !== 'function') {
+					window.ResizeObserver = function (callback) {
+						var observer = this;
+						this.callback = callback;
+						this.elements = [];
+						this.onresize = function () {
+							observer.notify();
+						};
+						window.addEventListener('resize', this.onresize);
+					};
+					window.ResizeObserver.prototype.notify = function () {
+						var entries = [];
+						for (var i = 0; i < this.elements.length; i += 1) {
+							entries.push({
+								target: this.elements[i],
+								contentRect: this.elements[i].getBoundingClientRect()
+							});
+						}
+						if (entries.length) {
+							this.callback(entries, this);
+						}
+					};
+					window.ResizeObserver.prototype.observe = function (element) {
+						if (this.elements.indexOf(element) === -1) {
+							this.elements.push(element);
+						}
+						this.notify();
+					};
+					window.ResizeObserver.prototype.unobserve = function (element) {
+						var index = this.elements.indexOf(element);
+						if (index !== -1) {
+							this.elements.splice(index, 1);
+						}
+					};
+					window.ResizeObserver.prototype.disconnect = function () {
+						window.removeEventListener('resize', this.onresize);
+						this.elements = [];
+					};
+				}
+			})();
+		</script>
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

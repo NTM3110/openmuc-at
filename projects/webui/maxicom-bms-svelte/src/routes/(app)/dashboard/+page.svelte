@@ -4,6 +4,7 @@
 
     import { getDashboardStatus } from "$lib/services/openmuc";
     import { stringsState } from "$lib/services/battery-string";
+    import { getPrimaryAlarmLabel, getStringAlarmReasons } from "$lib/services/alarm";
     import type { DashboardItem } from "$lib/interfaces/dashboard.interface";
 
     import { getSiteName, setSiteName } from "$lib/services/site";
@@ -83,11 +84,24 @@
                 const stringConfig = $stringsState.find(
                     (s) => s.stringIndex === stringIndex
                 );
+                const derivedAlarmReasons = stringConfig
+                    ? getStringAlarmReasons(item, stringConfig)
+                    : [];
+                const alarm = item.stringAlarm ?? (derivedAlarmReasons.length > 0);
+                const alarmReasons = alarm
+                    ? derivedAlarmReasons.length > 0
+                        ? derivedAlarmReasons
+                        : ["String alarm"]
+                    : [];
 
                 return {
                     ...item,
                     stringName:
-                        stringConfig?.stringName || item.stringName
+                        stringConfig?.stringName || item.stringName,
+                    totalCells:
+                        stringConfig?.cellQty || item.totalCells,
+                    alarm,
+                    alarmReasons
                 };
             });
         });
@@ -151,16 +165,17 @@
         <div class="string-summary">
             {#each items as it (it.id)}
                 {@const isLowSoh = (it.soH ?? 100) < 80}
+                {@const alarmLabel = getPrimaryAlarmLabel(it.alarmReasons)}
 
                 <div class="summary-pill">
                     <div class="pill-left">
                         <span>🔋</span>
                         <strong>{it.stringName}</strong>
-                        <span>{it.totalCells ?? 110} cells</span>
+                        <span>{it.totalCells ?? "N/A"} cells</span>
                     </div>
 
-                    <span class={"pill-pin " + (isLowSoh ? "low" : "ok")}>
-                        {isLowSoh ? "LOW" : "OK"}
+                    <span class={"pill-pin " + (it.alarm || isLowSoh ? "low" : "ok")}>
+                        {it.alarm ? `ALARM ${alarmLabel}` : isLowSoh ? "LOW" : "OK"}
                     </span>
                 </div>
             {/each}
@@ -193,6 +208,7 @@
                 <thead>
                     <tr>
                         <th>String Name</th>
+                        <th>Status</th>
                         <th>Cell Vol</th>
                         <th>Cell Rst</th>
                         <th>String Vol</th>
@@ -206,11 +222,16 @@
 
                 <tbody>
                     {#each items as item (item.id)}
+                        {@const alarmLabel = getPrimaryAlarmLabel(item.alarmReasons)}
                         <tr
                             class="table-row"
                             on:click={() => goToStringDetail(item.id)}
                         >
                             <td class="link">{item.stringName}</td>
+                            <td title={item.alarmReasons.join(", ")}>
+                                <span class={"status " + (item.alarm ? "alarm blinking" : "on")}></span>
+                                {item.alarm ? `Alarm (${alarmLabel})` : "Normal"}
+                            </td>
                             <td><span class={statusClass(item.cellVol)}></span>{item.cellVol}</td>
                             <td><span class={statusClass(item.cellRst)}></span>{item.cellRst}</td>
                             <td><span class={statusClass(item.stringVol)}></span>{item.stringVol}</td>
@@ -413,6 +434,26 @@ td.link {
 
 .status.off {
     background: #ef4444;
+}
+
+.status.alarm {
+    background: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.18);
+}
+
+.status.blinking {
+    animation: alarmBlink 1s ease-in-out infinite;
+}
+
+@keyframes alarmBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.18; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .status.blinking {
+        animation: none;
+    }
 }
 
 /* ---------- Empty ---------- */
