@@ -668,6 +668,38 @@
         }
     }
 
+    async function silenceGpioAlarm() {
+        gpioRequestRunning = true;
+        try {
+            const response = await fetch("/rest/gpio-alarm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    string1Direction: "input",
+                    string2Direction: "input",
+                }),
+            });
+            const result = await response.json();
+            gpioAlarmStatus = result.data ?? gpioAlarmStatus;
+            if (response.ok) {
+                gpioString1Direction = "input";
+                gpioString2Direction = "input";
+                gpioSettingsDirty = false;
+            }
+            showToast(
+                result.description ||
+                    (response.ok ? "GPIO alarm silenced" : "GPIO alarm silence failed"),
+                response.ok ? "success" : "error",
+            );
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            showToast(`GPIO alarm silence failed: ${message}`, "error");
+        } finally {
+            gpioRequestRunning = false;
+            getGpioAlarmStatus();
+        }
+    }
+
     function gpioStateFor(stringIndex: number): GpioOutputState | null {
         return gpioAlarmStatus?.strings?.[String(stringIndex)] ?? null;
     }
@@ -1219,7 +1251,6 @@
                                 <select
                                     bind:value={gpioString1Direction}
                                     onchange={() => (gpioSettingsDirty = true)}
-                                    use:kbd
                                 >
                                     <option value="output">Output</option>
                                     <option value="input">Input</option>
@@ -1230,7 +1261,6 @@
                                 <select
                                     bind:value={gpioString1AlarmValue}
                                     onchange={() => (gpioSettingsDirty = true)}
-                                    use:kbd
                                 >
                                     <option value={1}>1</option>
                                     <option value={0}>0</option>
@@ -1283,7 +1313,6 @@
                                 <select
                                     bind:value={gpioString2Direction}
                                     onchange={() => (gpioSettingsDirty = true)}
-                                    use:kbd
                                 >
                                     <option value="output">Output</option>
                                     <option value="input">Input</option>
@@ -1294,7 +1323,6 @@
                                 <select
                                     bind:value={gpioString2AlarmValue}
                                     onchange={() => (gpioSettingsDirty = true)}
-                                    use:kbd
                                 >
                                     <option value={1}>1</option>
                                     <option value={0}>0</option>
@@ -1343,6 +1371,14 @@
                     >
                         <i class="bi bi-arrow-repeat"></i>
                         Refresh Status
+                    </button>
+                    <button
+                        class="btn-warn"
+                        onclick={silenceGpioAlarm}
+                        disabled={gpioRequestRunning}
+                    >
+                        <i class="bi bi-stop-fill"></i>
+                        {gpioRequestRunning ? "Silencing..." : "Silence Alarm"}
                     </button>
                     <button
                         class="btn-primary"

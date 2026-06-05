@@ -1,4 +1,0 @@
-Bundle-Name=OpenMUC Data Logger - MQTT
-Bundle-SymbolicName=org.openmuc.framework.openmuc-datalogger-mqtt
-Bundle-Vendor=Fraunhofer ISE
-Export-Package=dagger.internal;version\="2.20", dagger;version\="2.20", javax.inject;version\="1"

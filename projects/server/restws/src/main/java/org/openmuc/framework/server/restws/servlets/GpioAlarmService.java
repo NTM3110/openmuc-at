@@ -99,7 +99,7 @@ public class GpioAlarmService {
                 } catch (Exception e) {
                     state.lastError = e.getMessage();
                     state.updatedAt = System.currentTimeMillis();
-                    logger.warn("GPIO direction update failed for string {}: {}", stringIndex, e.toString());
+                    // logger.warn("GPIO direction update failed for string {}: {}", stringIndex, e.toString());
                 }
                 continue;
             }

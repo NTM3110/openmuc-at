@@ -54,7 +54,7 @@ public class LatestValueRepoImpl {
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            logger.info("Connected to DB: Finding latest value for channelId {}", channelId);
+            // logger.info("Connected to DB: Finding latest value for channelId {}", channelId);
 
             ps.setString(1, channelId);
 
@@ -80,7 +80,7 @@ public class LatestValueRepoImpl {
         try (Connection conn = DriverManager.getConnection(url, user, password);
                 PreparedStatement ps = conn.prepareStatement(sql)) {
 
-            logger.info("Connected to DB: Deleting latest values with channelId starting with {}", prefix);
+            // logger.info("Connected to DB: Deleting latest values with channelId starting with {}", prefix);
 
             ps.setString(1, prefix + "%");
 

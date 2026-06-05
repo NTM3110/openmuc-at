@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Iec60870ReadListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-iec60870</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.iec60870</a> &gt; <span class="el_source">Iec60870ReadListener.java</span></div><h1>Iec60870ReadListener.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.iec60870;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.driver.iec60870.settings.ChannelAddress;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.j60870.ASdu;
+import org.openmuc.j60870.Connection;
+import org.openmuc.j60870.ConnectionEventListener;
+import org.openmuc.j60870.ie.InformationObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+class Iec60870ReadListener implements ConnectionEventListener {
+
+    private List&lt;ChannelRecordContainer&gt; containers;
+<span class="nc" id="L43">    private final HashMap&lt;String, ChannelAddress&gt; channelAddressMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L44">    private final HashMap&lt;String, Record&gt; recordMap = new HashMap&lt;&gt;();</span>
+
+    private long timeout;
+
+<span class="nc" id="L48">    private IOException ioException = null;</span>
+<span class="nc" id="L49">    private boolean isReadyReading = false;</span>
+
+<span class="nc" id="L51">    private static final Logger logger = LoggerFactory.getLogger(Iec60870ReadListener.class);</span>
+
+<span class="nc" id="L53">    public Iec60870ReadListener(Connection clientConnection) {</span>
+<span class="nc" id="L54">    }</span>
+
+    synchronized void setContainer(List&lt;ChannelRecordContainer&gt; containers) {
+
+<span class="nc" id="L58">        this.containers = containers;</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (ChannelRecordContainer channelRecordContainer : containers) {</span>
+            try {
+<span class="nc" id="L62">                ChannelAddress channelAddress = new ChannelAddress(channelRecordContainer.getChannelAddress());</span>
+<span class="nc" id="L63">                channelAddressMap.put(channelRecordContainer.getChannel().getId(), channelAddress);</span>
+<span class="nc" id="L64">            } catch (ArgumentSyntaxException e) {</span>
+<span class="nc" id="L65">                logger.error(</span>
+<span class="nc" id="L66">                        &quot;ChannelId: &quot; + channelRecordContainer.getChannel().getId() + &quot;; Message: &quot; + e.getMessage());</span>
+<span class="nc" id="L67">            }</span>
+<span class="nc" id="L68">        }</span>
+<span class="nc" id="L69">    }</span>
+
+    void setReadTimeout(long timeout) {
+<span class="nc" id="L72">        this.timeout = timeout;</span>
+<span class="nc" id="L73">    }</span>
+
+    @Override
+    public synchronized void newASdu(org.openmuc.j60870.Connection jConnectionASdu, ASdu aSdu) {
+<span class="nc" id="L77">        logger.debug(&quot;Got new ASdu&quot;);</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (logger.isTraceEnabled()) {</span>
+<span class="nc" id="L79">            logger.trace(aSdu.toString());</span>
+        }
+<span class="nc" id="L81">        long timestamp = System.currentTimeMillis();</span>
+
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (!aSdu.isTestFrame()) {</span>
+
+<span class="nc" id="L85">            Set&lt;String&gt; keySet = channelAddressMap.keySet();</span>
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">            for (String channelId : keySet) {</span>
+<span class="nc" id="L88">                ChannelAddress channelAddress = channelAddressMap.get(channelId);</span>
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                if (aSdu.getCommonAddress() == channelAddress.commonAddress()</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">                        &amp;&amp; aSdu.getTypeIdentification().getId() == channelAddress.typeId()) {</span>
+<span class="nc" id="L92">                    processRecords(aSdu, timestamp, channelId, channelAddress);</span>
+                }
+<span class="nc" id="L94">            }</span>
+<span class="nc" id="L95">            isReadyReading = true;</span>
+        }
+<span class="nc" id="L97">    }</span>
+
+    @Override
+    public void connectionClosed(org.openmuc.j60870.Connection jConnectionASdu, IOException e) {
+<span class="nc" id="L101">        logger.info(&quot;Connection was closed by server.&quot;);</span>
+<span class="nc" id="L102">        ioException = e;</span>
+<span class="nc" id="L103">    }</span>
+
+    @Override
+    public void dataTransferStateChanged(org.openmuc.j60870.Connection jConnectionASdu, boolean stopped) {
+<span class="nc" id="L107">        logger.info(&quot;Data transfer state was changed to {}.&quot;, stopped);</span>
+<span class="nc" id="L108">    }</span>
+
+    void read() throws IOException {
+<span class="nc" id="L111">        long sleepTime = 100;</span>
+<span class="nc" id="L112">        long time = 0;</span>
+
+<span class="nc bnc" id="L114" title="All 6 branches missed.">        while (ioException == null &amp;&amp; time &lt; timeout &amp;&amp; !isReadyReading) {</span>
+            try {
+<span class="nc" id="L116">                Thread.sleep(sleepTime);</span>
+<span class="nc" id="L117">            } catch (InterruptedException e) {</span>
+<span class="nc" id="L118">                logger.error(&quot;&quot;, e);</span>
+<span class="nc" id="L119">            }</span>
+<span class="nc" id="L120">            time += sleepTime;</span>
+        }
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (ioException != null) {</span>
+<span class="nc" id="L124">            throw ioException;</span>
+        }
+
+<span class="nc bnc" id="L127" title="All 2 branches missed.">        for (ChannelRecordContainer channelRecordContainer : containers) {</span>
+<span class="nc" id="L128">            String channelId = channelRecordContainer.getChannel().getId();</span>
+<span class="nc" id="L129">            Record record = recordMap.get(channelId);</span>
+<span class="nc bnc" id="L130" title="All 4 branches missed.">            if (record == null || record.getFlag() != Flag.VALID) {</span>
+<span class="nc" id="L131">                channelRecordContainer.setRecord(new Record(Flag.DRIVER_ERROR_TIMEOUT));</span>
+            }
+            else {
+<span class="nc" id="L134">                channelRecordContainer.setRecord(record);</span>
+            }
+<span class="nc" id="L136">        }</span>
+<span class="nc" id="L137">        isReadyReading = false;</span>
+<span class="nc" id="L138">    }</span>
+
+    private void processRecords(ASdu aSdu, long timestamp, String channelId, ChannelAddress channelAddress) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        for (InformationObject informationObject : aSdu.getInformationObjects()) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            if (informationObject.getInformationObjectAddress() == channelAddress.ioa()) {</span>
+<span class="nc" id="L143">                Record record = Iec60870DataHandling.handleInformationObject(aSdu, timestamp, channelAddress,</span>
+                        informationObject);
+<span class="nc" id="L145">                recordMap.put(channelId, record);</span>
+            }
+        }
+<span class="nc" id="L148">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

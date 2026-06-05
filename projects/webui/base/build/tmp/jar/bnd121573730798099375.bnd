@@ -1,5 +1,0 @@
-Bundle-ClassPath=.,lib/gson-2.8.9.jar
-Bundle-Name=OpenMUC WebUI - Base
-Bundle-SymbolicName=org.openmuc.framework.openmuc-webui-base
-Bundle-Vendor=Fraunhofer ISE
-Import-Package=\!com.google.gson.*,*;version\=0

@@ -1,0 +1,3 @@
+)testDeviceSettings_OK: mft =123;cfl =321
+$testDeviceAddress_OK: h=192.168.1.5
+;testDeviceAddress_OK: p =1265;h =  192.168.1.5;   ca    =5

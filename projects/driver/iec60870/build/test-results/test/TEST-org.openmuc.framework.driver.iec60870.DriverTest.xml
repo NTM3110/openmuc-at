@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.driver.iec60870.DriverTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-06-04T08:10:22.159Z" hostname="shou-ThinkPad-E14-Gen-5" time="0.102">
+  <properties/>
+  <testcase name="testDeviceSettings_OK()" classname="org.openmuc.framework.driver.iec60870.DriverTest" time="0.084"/>
+  <testcase name="testDeviceAddress_OK_with_one_option()" classname="org.openmuc.framework.driver.iec60870.DriverTest" time="0.007"/>
+  <testcase name="testDeviceAddress_OK()" classname="org.openmuc.framework.driver.iec60870.DriverTest" time="0.003"/>
+  <testcase name="test_syntax()" classname="org.openmuc.framework.driver.iec60870.DriverTest" time="0.001"/>
+  <system-out><![CDATA[testDeviceSettings_OK: mft =123;cfl =321
+testDeviceAddress_OK: h=192.168.1.5
+testDeviceAddress_OK: p =1265;h =  192.168.1.5;   ca    =5
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

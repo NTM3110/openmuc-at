@@ -68,6 +68,15 @@ public final class SimpleDemoApp {
 	private static final double RESISTANCE_CHANNEL_SCALE = 1.0;
 	private static final DecimalFormatSymbols DFS = DecimalFormatSymbols.getInstance(Locale.US);
 	private static final DecimalFormat DF = new DecimalFormat("#0.000", DFS);
+	private static final String[] IEC60870_DEMO_CHANNEL_IDS = {
+			"iec60870_demo_me_nb_100",
+			"iec60870_demo_me_nb_101",
+			"iec60870_demo_me_nb_102",
+			"iec60870_demo_sp_104",
+			"iec60870_demo_sp_105",
+			"iec60870_demo_me_nb_110"
+	};
+	private static final long IEC60870_DEMO_LOG_INTERVAL_MS = 5000L;
 
 	List<String> latestSaveChannelNames = new ArrayList<>();
 	private final Map<String, RecordListener> listeners = new HashMap<>();
@@ -95,6 +104,7 @@ public final class SimpleDemoApp {
 	private Timer updateTimer;
     private Timer updateDbTimer;
 	private Timer csvLoggerTimer;
+	private Timer iec60870DemoLoggerTimer;
 	private SoCEngine socEngine;
 	private SoCEngine[] socEngines;
 	// private SoHEngine sohEngine;
@@ -129,6 +139,7 @@ public final class SimpleDemoApp {
         initiate();
         initDbUpdateTimer();
 		initCsvLoggerTimer();
+		initIec60870DemoLoggerTimer();
 	}
 
 	@Deactivate
@@ -145,6 +156,10 @@ public final class SimpleDemoApp {
 		if (csvLoggerTimer != null) {
 			csvLoggerTimer.cancel();
 			csvLoggerTimer.purge();
+		}
+		if (iec60870DemoLoggerTimer != null) {
+			iec60870DemoLoggerTimer.cancel();
+			iec60870DemoLoggerTimer.purge();
 		}
 	}
 
@@ -841,6 +856,46 @@ public final class SimpleDemoApp {
 			}
 		};
 		csvLoggerTimer.scheduleAtFixedRate(task, 60000, 60000);
+	}
+
+	private void initIec60870DemoLoggerTimer() {
+		logger.info("Initializing IEC60870 demo logger timer (5s interval)");
+		iec60870DemoLoggerTimer = new Timer("IEC60870 Demo Logger");
+		TimerTask task = new TimerTask() {
+			@Override
+			public void run() {
+				logIec60870DemoValues();
+			}
+		};
+		iec60870DemoLoggerTimer.scheduleAtFixedRate(task, IEC60870_DEMO_LOG_INTERVAL_MS,
+				IEC60870_DEMO_LOG_INTERVAL_MS);
+	}
+
+	private void logIec60870DemoValues() {
+		StringBuilder message = new StringBuilder("IEC60870 demo values:");
+		for (String channelId : IEC60870_DEMO_CHANNEL_IDS) {
+			message.append(' ').append(channelId).append('=').append(readIec60870DemoValue(channelId));
+		}
+		logger.info(message.toString());
+	}
+
+	private String readIec60870DemoValue(String channelId) {
+		Channel channel = dataAccessService.getChannel(channelId);
+		if (channel == null) {
+			return "missing-channel";
+		}
+
+		Record record = channel.getLatestRecord();
+		if (record == null) {
+			return "no-record";
+		}
+		if (record.getFlag() != Flag.VALID) {
+			return "flag=" + record.getFlag();
+		}
+		if (record.getValue() == null) {
+			return "no-value";
+		}
+		return record.getValue().toString();
 	}
 
 	private void saveDataToCsv() {

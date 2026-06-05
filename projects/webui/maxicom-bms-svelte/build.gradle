@@ -1,5 +1,79 @@
 def projectName = "OpenMUC WebUI - Maxicom BMS"
 def projectDescription = "Maxicom BMS Angular Dashboard"
+def minimumNodeVersion = [22, 12, 0]
+
+def parseNodeVersion = { String version ->
+    def matcher = version.trim() =~ /^v?(\d+)\.(\d+)\.(\d+).*/
+    if (!matcher.matches()) {
+        throw new GradleException("Could not parse Node.js version: ${version}")
+    }
+    [matcher[0][1] as int, matcher[0][2] as int, matcher[0][3] as int]
+}
+
+def isAtLeastNodeVersion = { List<Integer> actual, List<Integer> minimum ->
+    for (int i = 0; i < minimum.size(); i++) {
+        if (actual[i] != minimum[i]) {
+            return actual[i] > minimum[i]
+        }
+    }
+    true
+}
+
+def candidateNodeBinDirs = {
+    def dirs = []
+    ['NODE_HOME', 'NVM_BIN'].each { name ->
+        def value = System.getenv(name)
+        if (value) {
+            def dir = name == 'NODE_HOME' ? new File(value, 'bin') : new File(value)
+            dirs << dir
+        }
+    }
+
+    def nvmRoot = System.getenv('NVM_DIR') ?: new File(System.getProperty('user.home'), '.nvm').absolutePath
+    def nvmVersions = new File(nvmRoot, 'versions/node')
+    if (nvmVersions.directory) {
+        nvmVersions.listFiles({ File file -> file.directory } as FileFilter)
+                ?.sort { a, b -> b.name <=> a.name }
+                ?.each { dirs << new File(it, 'bin') }
+    }
+
+    System.getenv('PATH')?.split(File.pathSeparator)?.each { dirs << new File(it) }
+    dirs.unique { it.absolutePath }
+}
+
+def findCompatibleNodeTools = {
+    def executableSuffix = System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows') ? '.cmd' : ''
+    def checked = []
+
+    for (File binDir : candidateNodeBinDirs()) {
+        def node = new File(binDir, "node${executableSuffix}")
+        def npm = new File(binDir, "npm${executableSuffix}")
+        if (!node.canExecute() || !npm.canExecute()) {
+            continue
+        }
+
+        def output = new ByteArrayOutputStream()
+        def result = exec {
+            executable node.absolutePath
+            args '--version'
+            standardOutput = output
+            errorOutput = new ByteArrayOutputStream()
+            ignoreExitValue = true
+        }
+        if (result.exitValue != 0) {
+            continue
+        }
+
+        def versionText = output.toString().trim()
+        checked << "${node.absolutePath} (${versionText})"
+        def version = parseNodeVersion(versionText)
+        if (isAtLeastNodeVersion(version, minimumNodeVersion)) {
+            return [node: node.absolutePath, npm: npm.absolutePath, binDir: binDir.absolutePath, version: versionText]
+        }
+    }
+
+    throw new GradleException("Node.js ${minimumNodeVersion.join('.')} or newer is required for this Svelte/Vite build. Checked: ${checked.join(', ')}")
+}
 
 dependencies {
     implementation project(':openmuc-core-api')
@@ -11,23 +85,25 @@ dependencies {
 task npmInstall(type: Exec) {
     group = "node"
     description = "Installs node dependencies"
-    
-    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-        commandLine 'cmd', '/c', 'npm', 'install'
-    } else {
-        commandLine 'npm', 'install'
+
+    doFirst {
+        def nodeTools = findCompatibleNodeTools()
+        environment 'PATH', "${nodeTools.binDir}${File.pathSeparator}${System.getenv('PATH') ?: ''}"
+        logger.lifecycle("Using Node.js ${nodeTools.version} for ${path} via ${nodeTools.npm}")
+        commandLine nodeTools.npm, 'install'
     }
 }
 
 task npmBuild(type: Exec) {
     group = "node"
-    description = "Builds the Angular application"
+    description = "Builds the Svelte application"
     dependsOn npmInstall
-    
-    if (System.getProperty('os.name').toLowerCase(Locale.ROOT).contains('windows')) {
-        commandLine 'cmd', '/c', 'npm', 'run', 'build'
-    } else {
-        commandLine 'npm', 'run', 'build'
+
+    doFirst {
+        def nodeTools = findCompatibleNodeTools()
+        environment 'PATH', "${nodeTools.binDir}${File.pathSeparator}${System.getenv('PATH') ?: ''}"
+        logger.lifecycle("Using Node.js ${nodeTools.version} for ${path} via ${nodeTools.npm}")
+        commandLine nodeTools.npm, 'run', 'build'
     }
 }
 

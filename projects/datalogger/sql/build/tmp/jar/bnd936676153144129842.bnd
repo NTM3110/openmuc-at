@@ -1,6 +1,0 @@
-Bundle-ClassPath=.,lib/org.osgi.service.jdbc-1.1.0.jar
-Bundle-Name=OpenMUC Data Logger - SQL
-Bundle-SymbolicName=org.openmuc.framework.openmuc-datalogger-sql
-Bundle-Vendor=Fraunhofer ISE
-Export-Package=org.osgi.service.jdbc,org.openmuc.framework.datalogger.sql.*
-Import-Package=org.postgresql,javax.sql,org.h2.tools,org.openmuc.framework.*,org.osgi.*,org.slf4j,\!org.osgi.service.jdbc,;version\=0

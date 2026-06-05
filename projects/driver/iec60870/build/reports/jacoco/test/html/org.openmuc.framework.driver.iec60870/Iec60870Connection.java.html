@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Iec60870Connection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-iec60870</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.iec60870</a> &gt; <span class="el_source">Iec60870Connection.java</span></div><h1>Iec60870Connection.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.iec60870;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.List;
+
+import org.openmuc.framework.config.ArgumentSyntaxException;
+import org.openmuc.framework.config.ChannelScanInfo;
+import org.openmuc.framework.config.ScanException;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.TypeConversionException;
+import org.openmuc.framework.driver.iec60870.settings.ChannelAddress;
+import org.openmuc.framework.driver.iec60870.settings.DeviceAddress;
+import org.openmuc.framework.driver.iec60870.settings.DeviceSettings;
+import org.openmuc.framework.driver.spi.ChannelRecordContainer;
+import org.openmuc.framework.driver.spi.ChannelValueContainer;
+import org.openmuc.framework.driver.spi.Connection;
+import org.openmuc.framework.driver.spi.ConnectionException;
+import org.openmuc.framework.driver.spi.RecordsReceivedListener;
+import org.openmuc.j60870.CauseOfTransmission;
+import org.openmuc.j60870.ClientConnectionBuilder;
+import org.openmuc.j60870.ie.IeQualifierOfInterrogation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public final class Iec60870Connection implements Connection {
+
+    private org.openmuc.j60870.Connection clientConnection;
+
+<span class="nc" id="L51">    private static final Logger logger = LoggerFactory.getLogger(Iec60870Connection.class);</span>
+
+    private final DeviceAddress deviceAddress;
+    private final DeviceSettings deviceSettings;
+    private final String driverId;
+
+<span class="nc" id="L57">    private final Iec60870ListenerList iec60870listener = new Iec60870ListenerList();</span>
+<span class="nc" id="L58">    private final Iec60870ReadListener readListener = new Iec60870ReadListener(clientConnection);</span>
+
+    public Iec60870Connection(DeviceAddress deviceAddress, DeviceSettings deviceSettings, String driverId)
+<span class="nc" id="L61">            throws ConnectionException {</span>
+<span class="nc" id="L62">        this.deviceAddress = deviceAddress;</span>
+<span class="nc" id="L63">        this.deviceSettings = deviceSettings;</span>
+<span class="nc" id="L64">        this.driverId = driverId;</span>
+
+<span class="nc" id="L66">        ClientConnectionBuilder clientConnectionBuilder = new ClientConnectionBuilder(this.deviceAddress.hostAddress());</span>
+
+<span class="nc" id="L68">        int port = this.deviceAddress.port();</span>
+<span class="nc" id="L69">        String hostAddress = this.deviceAddress.hostAddress().getHostAddress();</span>
+
+        try {
+<span class="nc" id="L72">            setupClientSap(clientConnectionBuilder, deviceSettings);</span>
+<span class="nc" id="L73">            connect(clientConnectionBuilder, port, hostAddress);</span>
+<span class="nc" id="L74">            startListenIec60870(deviceSettings, port, hostAddress);</span>
+<span class="nc" id="L75">        } catch (IOException e) {</span>
+<span class="nc" id="L76">            throw new ConnectionException(MessageFormat.format(&quot;Was not able to connect to {0}:{1}. {2}&quot;,</span>
+<span class="nc" id="L77">                    this.deviceAddress.hostAddress().getHostName(), port, e.getMessage()));</span>
+<span class="nc" id="L78">        }</span>
+<span class="nc" id="L79">    }</span>
+
+    private void startListenIec60870(DeviceSettings deviceSettings, int port, String hostAddress) throws IOException {
+<span class="nc" id="L82">        clientConnection.startDataTransfer();</span>
+<span class="nc" id="L83">        iec60870listener.addListener(readListener);</span>
+<span class="nc" id="L84">        logger.debug(&quot;Driver-IEC60870: successful sent startDT act to {}{}{}{}&quot;, hostAddress, &quot;:&quot;, port,</span>
+                &quot;and got startDT con.&quot;);
+<span class="nc" id="L86">    }</span>
+
+    private void connect(ClientConnectionBuilder clientConnectionBuilder, int port, String hostAddress)
+            throws IOException {
+<span class="nc" id="L90">        logger.debug(&quot;Try to connect to: {}{}{}&quot;, hostAddress, ':', port);</span>
+<span class="nc" id="L91">        clientConnection = clientConnectionBuilder.setConnectionEventListener(iec60870listener).build();</span>
+<span class="nc" id="L92">        logger.info(&quot;Driver-IEC60870: successful connected to {}{}{}&quot;, hostAddress, &quot;:&quot;, port);</span>
+<span class="nc" id="L93">    }</span>
+
+    @Override
+    public List&lt;ChannelScanInfo&gt; scanForChannels(String settings)
+            throws UnsupportedOperationException, ArgumentSyntaxException, ScanException, ConnectionException {
+<span class="nc" id="L98">        throw new UnsupportedOperationException();</span>
+    }
+
+    @Override
+    public Object read(List&lt;ChannelRecordContainer&gt; containers, Object containerListHandle, String samplingGroup)
+            throws UnsupportedOperationException, ConnectionException {
+        // TODO: read specific values, not only general interrogation
+<span class="nc" id="L105">        readListener.setContainer(containers);</span>
+<span class="nc" id="L106">        readListener.setReadTimeout(deviceSettings.readTimeout());</span>
+        try {
+<span class="nc" id="L108">            clientConnection.interrogation(1, CauseOfTransmission.ACTIVATION, new IeQualifierOfInterrogation(20));</span>
+<span class="nc" id="L109">            readListener.read();</span>
+<span class="nc" id="L110">        } catch (IOException e) {</span>
+<span class="nc" id="L111">            throw new ConnectionException(e);</span>
+<span class="nc" id="L112">        } catch (UnsupportedOperationException e) {</span>
+<span class="nc" id="L113">            logger.error(e.getMessage());</span>
+<span class="nc" id="L114">            throw e;</span>
+<span class="nc" id="L115">        }</span>
+<span class="nc" id="L116">        return null;</span>
+    }
+
+    @Override
+    public synchronized void startListening(List&lt;ChannelRecordContainer&gt; containers, RecordsReceivedListener listener)
+            throws ConnectionException {
+<span class="nc" id="L122">        Iec60870Listener iec60870Listen = new Iec60870Listener();</span>
+<span class="nc" id="L123">        iec60870Listen.registerOpenMucListener(containers, listener, driverId, this);</span>
+<span class="nc" id="L124">        iec60870listener.addListener(iec60870Listen);</span>
+<span class="nc" id="L125">    }</span>
+
+    @Override
+    public Object write(List&lt;ChannelValueContainer&gt; containers, Object containerListHandle) throws ConnectionException {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (!clientConnection.isStopped()) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">            for (ChannelValueContainer channelValueContainer : containers) {</span>
+                ChannelAddress channelAddress;
+                try {
+<span class="nc" id="L133">                    channelAddress = new ChannelAddress(channelValueContainer.getChannelAddress());</span>
+<span class="nc" id="L134">                    Record record = new Record(channelValueContainer.getValue(), System.currentTimeMillis(),</span>
+                            Flag.VALID);
+<span class="nc" id="L136">                    Iec60870DataHandling.writeSingleCommand(record, channelAddress, clientConnection);</span>
+<span class="nc" id="L137">                    channelValueContainer.setFlag(Flag.VALID);</span>
+<span class="nc" id="L138">                } catch (ArgumentSyntaxException e) {</span>
+<span class="nc" id="L139">                    channelValueContainer.setFlag(Flag.DRIVER_ERROR_CHANNEL_ADDRESS_SYNTAX_INVALID);</span>
+<span class="nc" id="L140">                    logger.error(e.getMessage());</span>
+<span class="nc" id="L141">                    throw new UnsupportedOperationException(e);</span>
+<span class="nc" id="L142">                } catch (IOException e) {</span>
+<span class="nc" id="L143">                    channelValueContainer.setFlag(Flag.CONNECTION_EXCEPTION);</span>
+<span class="nc" id="L144">                    throw new ConnectionException(e);</span>
+<span class="nc" id="L145">                } catch (TypeConversionException e) {</span>
+<span class="nc" id="L146">                    channelValueContainer.setFlag(Flag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION);</span>
+<span class="nc" id="L147">                    logger.error(e.getMessage());</span>
+<span class="nc" id="L148">                } catch (UnsupportedOperationException e) {</span>
+<span class="nc" id="L149">                    channelValueContainer.setFlag(Flag.DRIVER_ERROR_CHANNEL_ADDRESS_SYNTAX_INVALID);</span>
+<span class="nc" id="L150">                    logger.error(e.getMessage());</span>
+<span class="nc" id="L151">                    throw e;</span>
+<span class="nc" id="L152">                }</span>
+<span class="nc" id="L153">            }</span>
+        }
+        else {
+<span class="nc" id="L156">            logger.error(&quot;Client connection is in stopped state, sending messages are not allowed.&quot;);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            for (ChannelValueContainer channelValueContainer : containers) {</span>
+<span class="nc" id="L158">                channelValueContainer.setFlag(Flag.DRIVER_ERROR_CHANNEL_TEMPORARILY_NOT_ACCESSIBLE);</span>
+<span class="nc" id="L159">            }</span>
+        }
+<span class="nc" id="L161">        return null;</span>
+    }
+
+    @Override
+    public void disconnect() {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (clientConnection != null) {</span>
+<span class="nc" id="L167">            clientConnection.close();</span>
+        }
+<span class="nc" id="L169">        iec60870listener.removeAllListener();</span>
+<span class="nc" id="L170">        logger.info(&quot;Disconnected IEC 60870 driver.&quot;);</span>
+<span class="nc" id="L171">    }</span>
+
+    private void setupClientSap(ClientConnectionBuilder clientSap, DeviceSettings deviceSettings) {
+<span class="nc" id="L174">        clientSap.setPort(this.deviceAddress.port());</span>
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        if (deviceSettings.commonAddressFieldLength() &gt; 0) {</span>
+<span class="nc" id="L177">            clientSap.setCommonAddressFieldLength(deviceSettings.commonAddressFieldLength());</span>
+        }
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        else if (deviceSettings.cotFieldLength() &gt; 0) {</span>
+<span class="nc" id="L180">            clientSap.setCotFieldLength(deviceSettings.cotFieldLength());</span>
+        }
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        else if (deviceSettings.ioaFieldLength() &gt; 0) {</span>
+<span class="nc" id="L183">            clientSap.setIoaFieldLength(deviceSettings.ioaFieldLength());</span>
+        }
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        else if (deviceSettings.maxIdleTime() &gt; 0) {</span>
+<span class="nc" id="L186">            clientSap.setMaxIdleTime(deviceSettings.maxIdleTime());</span>
+        }
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        else if (deviceSettings.maxTimeNoAckReceived() &gt; 0) {</span>
+<span class="nc" id="L189">            clientSap.setMaxTimeNoAckReceived(deviceSettings.maxTimeNoAckReceived());</span>
+        }
+<span class="nc bnc" id="L191" title="All 2 branches missed.">        else if (deviceSettings.maxTimeNoAckSent() &gt; 0) {</span>
+<span class="nc" id="L192">            clientSap.setMaxTimeNoAckSent(deviceSettings.maxTimeNoAckSent());</span>
+        }
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        else if (deviceSettings.maxUnconfirmedIPdusReceived() &gt; 0) {</span>
+<span class="nc" id="L195">            clientSap.setMaxUnconfirmedIPdusReceived(deviceSettings.maxUnconfirmedIPdusReceived());</span>
+        }
+<span class="nc" id="L197">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

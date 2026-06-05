@@ -57,4 +57,54 @@
     </device>
   </driver>
   <driver id="modbus"/>
+  <driver id="iec60870">
+    <device id="lib60870_demo_server">
+      <description>lib60870-C CS104 demo server on localhost:2404</description>
+      <deviceAddress>h=192.168.4.58;p=2404;ca=1</deviceAddress>
+      <settings>rt=5000</settings>
+      <disabled>false</disabled>
+      <channel id="iec60870_demo_me_nb_100">
+        <description>Measured scaled value IOA 100</description>
+        <channelAddress>ca=1;t=11;ioa=100</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec60870_demo_me_nb_101">
+        <description>Measured scaled value IOA 101</description>
+        <channelAddress>ca=1;t=11;ioa=101</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec60870_demo_me_nb_102">
+        <description>Measured scaled value IOA 102</description>
+        <channelAddress>ca=1;t=11;ioa=102</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec60870_demo_sp_104">
+        <description>Single point IOA 104</description>
+        <channelAddress>ca=1;t=1;ioa=104</channelAddress>
+        <valueType>BOOLEAN</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec60870_demo_sp_105">
+        <description>Single point IOA 105</description>
+        <channelAddress>ca=1;t=1;ioa=105</channelAddress>
+        <valueType>BOOLEAN</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec60870_demo_me_nb_110">
+        <description>Periodic measured scaled value IOA 110</description>
+        <channelAddress>ca=1;t=11;ioa=110</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+    </device>
+  </driver>
 </configuration>

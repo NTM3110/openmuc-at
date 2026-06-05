@@ -1,0 +1,755 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Iec60870DataHandling.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">openmuc-driver-iec60870</a> &gt; <a href="index.source.html" class="el_package">org.openmuc.framework.driver.iec60870</a> &gt; <span class="el_source">Iec60870DataHandling.java</span></div><h1>Iec60870DataHandling.java</h1><pre class="source lang-java linenums">/*
+ * Copyright 2011-2024 Fraunhofer ISE
+ *
+ * This file is part of OpenMUC.
+ * For more information visit http://www.openmuc.org
+ *
+ * OpenMUC is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * OpenMUC is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with OpenMUC. If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ *
+ */
+package org.openmuc.framework.driver.iec60870;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Set;
+
+import javax.naming.ConfigurationException;
+
+import org.openmuc.framework.data.BooleanValue;
+import org.openmuc.framework.data.ByteArrayValue;
+import org.openmuc.framework.data.DoubleValue;
+import org.openmuc.framework.data.Flag;
+import org.openmuc.framework.data.IntValue;
+import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.TypeConversionException;
+import org.openmuc.framework.data.Value;
+import org.openmuc.framework.driver.iec60870.settings.ChannelAddress;
+import org.openmuc.j60870.ASdu;
+import org.openmuc.j60870.ASduType;
+import org.openmuc.j60870.CauseOfTransmission;
+import org.openmuc.j60870.Connection;
+import org.openmuc.j60870.ie.IeBinaryCounterReading;
+import org.openmuc.j60870.ie.IeBinaryStateInformation;
+import org.openmuc.j60870.ie.IeDoubleCommand;
+import org.openmuc.j60870.ie.IeDoubleCommand.DoubleCommandState;
+import org.openmuc.j60870.ie.IeDoublePointWithQuality;
+import org.openmuc.j60870.ie.IeNormalizedValue;
+import org.openmuc.j60870.ie.IeProtectionQuality;
+import org.openmuc.j60870.ie.IeQualifierOfCounterInterrogation;
+import org.openmuc.j60870.ie.IeQualifierOfInterrogation;
+import org.openmuc.j60870.ie.IeQualifierOfResetProcessCommand;
+import org.openmuc.j60870.ie.IeQualifierOfSetPointCommand;
+import org.openmuc.j60870.ie.IeQuality;
+import org.openmuc.j60870.ie.IeRegulatingStepCommand;
+import org.openmuc.j60870.ie.IeRegulatingStepCommand.StepCommandState;
+import org.openmuc.j60870.ie.IeScaledValue;
+import org.openmuc.j60870.ie.IeShortFloat;
+import org.openmuc.j60870.ie.IeSingleCommand;
+import org.openmuc.j60870.ie.IeSinglePointWithQuality;
+import org.openmuc.j60870.ie.IeTestSequenceCounter;
+import org.openmuc.j60870.ie.IeTime16;
+import org.openmuc.j60870.ie.IeTime56;
+import org.openmuc.j60870.ie.InformationElement;
+import org.openmuc.j60870.ie.InformationObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class Iec60870DataHandling {
+
+    private static final String ONLY_BYTE_ARRAY_WITH_LENGTH = &quot;): Only byte array with length &quot;;
+
+<span class="nc" id="L72">    private static final Logger logger = LoggerFactory.getLogger(Iec60870DataHandling.class);</span>
+
+    private static final int INT32_BYTE_LENGTH = 4;
+
+    static void writeSingleCommand(Record record, ChannelAddress channelAddress, Connection clientConnection)
+            throws IOException, UnsupportedOperationException, TypeConversionException {
+
+<span class="nc" id="L79">        int commonAddress = channelAddress.commonAddress();</span>
+<span class="nc" id="L80">        boolean qualifierSelect = channelAddress.select();</span>
+<span class="nc" id="L81">        int informationObjectAddress = channelAddress.ioa();</span>
+<span class="nc" id="L82">        ASduType typeId = ASduType.typeFor(channelAddress.typeId());</span>
+
+<span class="nc" id="L84">        Flag flag = record.getFlag();</span>
+<span class="nc" id="L85">        Value value = record.getValue();</span>
+<span class="nc" id="L86">        IeTime56 timestamp = new IeTime56(record.getTimestamp());</span>
+
+<span class="nc" id="L88">        CauseOfTransmission cot = CauseOfTransmission.ACTIVATION;</span>
+
+<span class="nc bnc" id="L90" title="All 4 branches missed.">        if (flag == Flag.VALID &amp;&amp; value != null) {</span>
+<span class="nc bnc" id="L91" title="All 23 branches missed.">            switch (typeId) {</span>
+            case C_DC_NA_1:
+<span class="nc bnc" id="L93" title="All 2 branches missed.">                DoubleCommandState doubleCommandState = value.asBoolean() ? DoubleCommandState.ON</span>
+<span class="nc" id="L94">                        : DoubleCommandState.OFF;</span>
+<span class="nc" id="L95">                clientConnection.doubleCommand(commonAddress, cot, informationObjectAddress,</span>
+                        new IeDoubleCommand(doubleCommandState, 0, false));
+<span class="nc" id="L97">                break;</span>
+            case C_DC_TA_1:
+<span class="nc bnc" id="L99" title="All 2 branches missed.">                doubleCommandState = value.asBoolean() ? DoubleCommandState.ON : DoubleCommandState.OFF;</span>
+<span class="nc" id="L100">                clientConnection.doubleCommandWithTimeTag(commonAddress, cot, informationObjectAddress,</span>
+                        new IeDoubleCommand(doubleCommandState, 0, false), timestamp);
+<span class="nc" id="L102">                break;</span>
+            case C_BO_NA_1:
+<span class="nc" id="L104">                IeBinaryStateInformation binaryStateInformation = new IeBinaryStateInformation(value.asInt());</span>
+<span class="nc" id="L105">                clientConnection.bitStringCommand(commonAddress, cot, informationObjectAddress, binaryStateInformation);</span>
+<span class="nc" id="L106">                break;</span>
+            case C_BO_TA_1:
+<span class="nc" id="L108">                binaryStateInformation = new IeBinaryStateInformation(value.asInt());</span>
+<span class="nc" id="L109">                clientConnection.bitStringCommandWithTimeTag(commonAddress, cot, informationObjectAddress,</span>
+                        binaryStateInformation, timestamp);
+<span class="nc" id="L111">                break;</span>
+            case C_CD_NA_1: // Writes only the current time, no values
+<span class="nc" id="L113">                IeTime16 time16 = new IeTime16(record.getTimestamp());</span>
+<span class="nc" id="L114">                clientConnection.delayAcquisitionCommand(commonAddress, cot, time16);</span>
+<span class="nc" id="L115">                break;</span>
+            case C_CI_NA_1: // Uses ByteArray Value [request, freeze]
+<span class="nc" id="L117">                byte[] baQualifier = value.asByteArray();</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">                if (baQualifier.length == 2) {</span>
+<span class="nc" id="L119">                    IeQualifierOfCounterInterrogation qualifier = new IeQualifierOfCounterInterrogation(baQualifier[0],</span>
+                            baQualifier[1]);
+<span class="nc" id="L121">                    clientConnection.counterInterrogation(commonAddress, cot, qualifier);</span>
+<span class="nc" id="L122">                }</span>
+                else {
+<span class="nc" id="L124">                    throw new TypeConversionException(typeId + &quot;(&quot; + typeId.getId()</span>
+                            + &quot;): Only byte array with length 2 allowed. byte[0]=request, byte[1]=freeze]&quot;);
+                }
+                break;
+            case C_CS_NA_1: // Writes only the current time, no values
+<span class="nc" id="L129">                clientConnection.synchronizeClocks(commonAddress, new IeTime56(System.currentTimeMillis()));</span>
+<span class="nc" id="L130">                break;</span>
+            case C_IC_NA_1:
+<span class="nc" id="L132">                IeQualifierOfInterrogation ieQualifierOfInterrogation = new IeQualifierOfInterrogation(value.asInt());</span>
+<span class="nc" id="L133">                clientConnection.interrogation(commonAddress, cot, ieQualifierOfInterrogation);</span>
+<span class="nc" id="L134">                break;</span>
+            case C_RC_NA_1:
+<span class="nc" id="L136">                IeRegulatingStepCommand regulatingStepCommand = getIeRegulatingStepCommand(typeId, value);</span>
+<span class="nc" id="L137">                clientConnection.regulatingStepCommand(commonAddress, cot, informationObjectAddress,</span>
+                        regulatingStepCommand);
+<span class="nc" id="L139">                break;</span>
+            case C_RC_TA_1:
+                try {
+<span class="nc" id="L142">                    regulatingStepCommand = getIeRegulatingStepCommand(typeId, value);</span>
+<span class="nc" id="L143">                    clientConnection.regulatingStepCommandWithTimeTag(commonAddress, cot, informationObjectAddress,</span>
+                            regulatingStepCommand, timestamp);
+<span class="nc" id="L145">                } catch (Exception e) {</span>
+<span class="nc" id="L146">                    logger.error(&quot;&quot;, e);</span>
+<span class="nc" id="L147">                }</span>
+<span class="nc" id="L148">                break;</span>
+            case C_RD_NA_1:
+<span class="nc" id="L150">                clientConnection.readCommand(commonAddress, informationObjectAddress);</span>
+<span class="nc" id="L151">                break;</span>
+            case C_RP_NA_1:
+<span class="nc" id="L153">                clientConnection.resetProcessCommand(commonAddress,</span>
+<span class="nc" id="L154">                        new IeQualifierOfResetProcessCommand(value.asInt()));</span>
+<span class="nc" id="L155">                break;</span>
+            case C_SC_NA_1:
+<span class="nc" id="L157">                IeSingleCommand singleCommand = getIeSingeleCommand(typeId, value);</span>
+<span class="nc" id="L158">                clientConnection.singleCommand(commonAddress, cot, informationObjectAddress, singleCommand);</span>
+<span class="nc" id="L159">                break;</span>
+            case C_SC_TA_1:
+<span class="nc" id="L161">                singleCommand = getIeSingeleCommand(typeId, value);</span>
+<span class="nc" id="L162">                clientConnection.singleCommandWithTimeTag(commonAddress, cot, informationObjectAddress, singleCommand,</span>
+                        timestamp);
+<span class="nc" id="L164">                break;</span>
+            case C_SE_NA_1:
+<span class="nc" id="L166">                byte[] values = value.asByteArray();</span>
+<span class="nc" id="L167">                int arrayLength = 6;</span>
+<span class="nc" id="L168">                int valueLength = 4;</span>
+<span class="nc" id="L169">                checkLength(typeId, values, arrayLength,</span>
+                        &quot;byte[0-3]=command state, byte[4]=qualifier of command, byte[5]=execute/select&quot;);
+<span class="nc" id="L171">                IeQualifierOfSetPointCommand ieQualifierOfSetPointCommand = getIeQualifierSetPointCommand(values,</span>
+                        arrayLength);
+<span class="nc" id="L173">                IeNormalizedValue ieNormalizedValue = new IeNormalizedValue(</span>
+<span class="nc" id="L174">                        bytesToSignedInt32(values, valueLength, false));</span>
+
+<span class="nc" id="L176">                clientConnection.setNormalizedValueCommand(commonAddress, cot, informationObjectAddress,</span>
+                        ieNormalizedValue, ieQualifierOfSetPointCommand);
+<span class="nc" id="L178">                break;</span>
+            case C_SE_NB_1:
+<span class="nc" id="L180">                values = value.asByteArray();</span>
+<span class="nc" id="L181">                arrayLength = 4;</span>
+<span class="nc" id="L182">                checkLength(typeId, values, arrayLength,</span>
+                        &quot;byte[0-1]=command state, byte[2]=qualifier of command, byte[3]=execute/select&quot;);
+<span class="nc" id="L184">                ieQualifierOfSetPointCommand = getIeQualifierSetPointCommand(values, arrayLength);</span>
+<span class="nc" id="L185">                IeScaledValue scaledValue = new IeScaledValue(bytesToSignedInt32(values, 2, false));</span>
+<span class="nc" id="L186">                clientConnection.setScaledValueCommand(commonAddress, cot, informationObjectAddress, scaledValue,</span>
+                        ieQualifierOfSetPointCommand);
+<span class="nc" id="L188">                break;</span>
+            case C_SE_NC_1:
+<span class="nc" id="L190">                IeShortFloat shortFloat = new IeShortFloat(value.asFloat());</span>
+<span class="nc" id="L191">                IeQualifierOfSetPointCommand qualifier = new IeQualifierOfSetPointCommand(0, qualifierSelect);</span>
+<span class="nc" id="L192">                clientConnection.setShortFloatCommand(commonAddress, cot, informationObjectAddress, shortFloat,</span>
+                        qualifier);
+<span class="nc" id="L194">                break;</span>
+            case C_SE_TA_1:
+<span class="nc" id="L196">                values = value.asByteArray();</span>
+<span class="nc" id="L197">                arrayLength = 6;</span>
+<span class="nc" id="L198">                valueLength = 4;</span>
+<span class="nc" id="L199">                checkLength(typeId, values, arrayLength,</span>
+                        &quot;byte[0-3]=command state, byte[4]=qualifier of command, byte[5]=execute/select&quot;);
+<span class="nc" id="L201">                ieQualifierOfSetPointCommand = getIeQualifierSetPointCommand(values, arrayLength);</span>
+<span class="nc" id="L202">                ieNormalizedValue = new IeNormalizedValue(bytesToSignedInt32(values, valueLength, false));</span>
+
+<span class="nc" id="L204">                clientConnection.setNormalizedValueCommandWithTimeTag(commonAddress, cot, informationObjectAddress,</span>
+                        ieNormalizedValue, ieQualifierOfSetPointCommand, timestamp);
+<span class="nc" id="L206">                break;</span>
+            case C_SE_TB_1:
+<span class="nc" id="L208">                values = value.asByteArray();</span>
+<span class="nc" id="L209">                arrayLength = 4;</span>
+<span class="nc" id="L210">                checkLength(typeId, values, arrayLength,</span>
+                        &quot;byte[0-1]=command state, byte[2]=qualifier of command, byte[3]=execute/select&quot;);
+<span class="nc" id="L212">                ieQualifierOfSetPointCommand = getIeQualifierSetPointCommand(values, arrayLength);</span>
+<span class="nc" id="L213">                scaledValue = new IeScaledValue(bytesToSignedInt32(values, 2, false));</span>
+<span class="nc" id="L214">                clientConnection.setScaledValueCommandWithTimeTag(commonAddress, cot, informationObjectAddress,</span>
+                        scaledValue, ieQualifierOfSetPointCommand, timestamp);
+<span class="nc" id="L216">                break;</span>
+            case C_SE_TC_1:
+                // TODO:
+<span class="nc" id="L219">                throw new UnsupportedOperationException(</span>
+<span class="nc" id="L220">                        &quot;TypeID &quot; + typeId + &quot;(&quot; + typeId.getId() + &quot;) is not supported, yet.&quot;);</span>
+            case C_TS_NA_1:
+<span class="nc" id="L222">                clientConnection.testCommand(commonAddress);</span>
+<span class="nc" id="L223">                break;</span>
+            case C_TS_TA_1:
+<span class="nc" id="L225">                clientConnection.testCommandWithTimeTag(commonAddress, new IeTestSequenceCounter(value.asInt()),</span>
+                        timestamp);
+<span class="nc" id="L227">                break;</span>
+            case F_AF_NA_1:
+            case F_DR_TA_1:
+            case F_FR_NA_1:
+            case F_LS_NA_1:
+            case F_SC_NA_1:
+            case F_SC_NB_1:
+            case F_SG_NA_1:
+            case F_SR_NA_1:
+            case M_BO_NA_1:
+            case M_BO_TA_1:
+            case M_BO_TB_1:
+            case M_DP_NA_1:
+            case M_DP_TA_1:
+            case M_DP_TB_1:
+            case M_EI_NA_1:
+            case M_EP_TA_1:
+            case M_EP_TB_1:
+            case M_EP_TC_1:
+            case M_EP_TD_1:
+            case M_EP_TE_1:
+            case M_EP_TF_1:
+            case M_IT_NA_1:
+            case M_IT_TA_1:
+            case M_IT_TB_1:
+            case M_ME_NA_1:
+            case M_ME_NB_1:
+            case M_ME_NC_1:
+            case M_ME_ND_1:
+            case M_ME_TA_1:
+            case M_ME_TB_1:
+            case M_ME_TC_1:
+            case M_ME_TD_1:
+            case M_ME_TE_1:
+            case M_ME_TF_1:
+            case M_PS_NA_1:
+            case M_SP_NA_1:
+            case M_SP_TA_1:
+            case M_SP_TB_1:
+            case M_ST_NA_1:
+            case M_ST_TA_1:
+            case M_ST_TB_1:
+            case P_AC_NA_1:
+            case P_ME_NA_1:
+            case P_ME_NB_1:
+            case P_ME_NC_1:
+            case PRIVATE_128:
+            case PRIVATE_129:
+            case PRIVATE_130:
+            case PRIVATE_131:
+            case PRIVATE_132:
+            case PRIVATE_133:
+            case PRIVATE_134:
+            case PRIVATE_135:
+            case PRIVATE_136:
+            case PRIVATE_137:
+            case PRIVATE_138:
+            case PRIVATE_139:
+            case PRIVATE_140:
+            case PRIVATE_141:
+            case PRIVATE_142:
+            case PRIVATE_143:
+            case PRIVATE_144:
+            case PRIVATE_145:
+            case PRIVATE_146:
+            case PRIVATE_147:
+            case PRIVATE_148:
+            case PRIVATE_149:
+            case PRIVATE_150:
+            case PRIVATE_151:
+            case PRIVATE_152:
+            case PRIVATE_153:
+            case PRIVATE_154:
+            case PRIVATE_155:
+            case PRIVATE_156:
+            case PRIVATE_157:
+            case PRIVATE_158:
+            case PRIVATE_159:
+            case PRIVATE_160:
+            case PRIVATE_161:
+            case PRIVATE_162:
+            case PRIVATE_163:
+            case PRIVATE_164:
+            case PRIVATE_165:
+            case PRIVATE_166:
+            case PRIVATE_167:
+            case PRIVATE_168:
+            case PRIVATE_169:
+            case PRIVATE_170:
+            case PRIVATE_171:
+            case PRIVATE_172:
+            case PRIVATE_173:
+            case PRIVATE_174:
+            case PRIVATE_175:
+            case PRIVATE_176:
+            case PRIVATE_177:
+            case PRIVATE_178:
+            case PRIVATE_179:
+            case PRIVATE_180:
+            case PRIVATE_181:
+            case PRIVATE_182:
+            case PRIVATE_183:
+            case PRIVATE_184:
+            case PRIVATE_185:
+            case PRIVATE_186:
+            case PRIVATE_187:
+            case PRIVATE_188:
+            case PRIVATE_189:
+            case PRIVATE_190:
+            case PRIVATE_191:
+            case PRIVATE_192:
+            case PRIVATE_193:
+            case PRIVATE_194:
+            case PRIVATE_195:
+            case PRIVATE_196:
+            case PRIVATE_197:
+            case PRIVATE_198:
+            case PRIVATE_199:
+            case PRIVATE_200:
+            case PRIVATE_201:
+            case PRIVATE_202:
+            case PRIVATE_203:
+            case PRIVATE_204:
+            case PRIVATE_205:
+            case PRIVATE_206:
+            case PRIVATE_207:
+            case PRIVATE_208:
+            case PRIVATE_209:
+            case PRIVATE_210:
+            case PRIVATE_211:
+            case PRIVATE_212:
+            case PRIVATE_213:
+            case PRIVATE_214:
+            case PRIVATE_215:
+            case PRIVATE_216:
+            case PRIVATE_217:
+            case PRIVATE_218:
+            case PRIVATE_219:
+            case PRIVATE_220:
+            case PRIVATE_221:
+            case PRIVATE_222:
+            case PRIVATE_223:
+            case PRIVATE_224:
+            case PRIVATE_225:
+            case PRIVATE_226:
+            case PRIVATE_227:
+            case PRIVATE_228:
+            case PRIVATE_229:
+            case PRIVATE_230:
+            case PRIVATE_231:
+            case PRIVATE_232:
+            case PRIVATE_233:
+            case PRIVATE_234:
+            case PRIVATE_235:
+            case PRIVATE_236:
+            case PRIVATE_237:
+            case PRIVATE_238:
+            case PRIVATE_239:
+            case PRIVATE_240:
+            case PRIVATE_241:
+            case PRIVATE_242:
+            case PRIVATE_243:
+            case PRIVATE_244:
+            case PRIVATE_245:
+            case PRIVATE_246:
+            case PRIVATE_247:
+            case PRIVATE_248:
+            case PRIVATE_249:
+            case PRIVATE_250:
+            case PRIVATE_251:
+            case PRIVATE_252:
+            case PRIVATE_253:
+            case PRIVATE_254:
+            case PRIVATE_255:
+            default:
+<span class="nc" id="L402">                throw new UnsupportedOperationException(</span>
+<span class="nc" id="L403">                        &quot;TypeID &quot; + typeId + &quot;(&quot; + typeId.getId() + &quot;) is not supported, yet.&quot;);</span>
+            }
+        }
+<span class="nc" id="L406">    }</span>
+
+    private static void checkLength(ASduType typeId, byte[] values, int maxLength, String commands)
+            throws TypeConversionException {
+<span class="nc" id="L410">        int length = values.length;</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">        if (length != maxLength) {</span>
+<span class="nc" id="L412">            throw new UnsupportedOperationException(</span>
+<span class="nc" id="L413">                    typeId + &quot;(&quot; + typeId.getId() + ONLY_BYTE_ARRAY_WITH_LENGTH + maxLength + &quot; allowed. &quot; + commands);</span>
+        }
+<span class="nc" id="L415">    }</span>
+
+    private static IeQualifierOfSetPointCommand getIeQualifierSetPointCommand(byte[] values, int maxLength) {
+<span class="nc" id="L418">        int qualifier = values[maxLength - 2];</span>
+<span class="nc bnc" id="L419" title="All 2 branches missed.">        boolean select = values[maxLength - 1] &gt;= 0;</span>
+<span class="nc" id="L420">        return new IeQualifierOfSetPointCommand(qualifier, select);</span>
+    }
+
+    private static IeSingleCommand getIeSingeleCommand(ASduType typeId, Value value) throws TypeConversionException {
+<span class="nc" id="L424">        byte[] values = value.asByteArray();</span>
+        boolean commandStateOn;
+        boolean select;
+<span class="nc" id="L427">        int length = 3;</span>
+
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        if (values.length == length) {</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">            commandStateOn = values[0] &gt;= 0;</span>
+<span class="nc bnc" id="L431" title="All 2 branches missed.">            select = values[1] &gt;= 0;</span>
+        }
+        else {
+<span class="nc" id="L434">            throw new TypeConversionException(typeId + &quot;(&quot; + typeId.getId() + ONLY_BYTE_ARRAY_WITH_LENGTH + length</span>
+                    + &quot; allowed. byte[0]=command state on, byte[1]=execute/select, byte[2]=qualifier of command&quot;);
+        }
+<span class="nc" id="L437">        return new IeSingleCommand(commandStateOn, values[2], select);</span>
+    }
+
+    private static IeRegulatingStepCommand getIeRegulatingStepCommand(ASduType typeId, Value value)
+            throws TypeConversionException {
+<span class="nc" id="L442">        byte[] values = value.asByteArray();</span>
+        StepCommandState commandState;
+        boolean select;
+<span class="nc" id="L445">        int length = 3;</span>
+
+<span class="nc bnc" id="L447" title="All 2 branches missed.">        if (values.length == length) {</span>
+<span class="nc" id="L448">            commandState = StepCommandState.getInstance(values[0]);</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">            select = values[1] &gt;= 0;</span>
+        }
+        else {
+<span class="nc" id="L452">            throw new TypeConversionException(typeId + &quot;(&quot; + typeId.getId() + ONLY_BYTE_ARRAY_WITH_LENGTH + length</span>
+                    + &quot; allowed. byte[0]=command state, byte[1]=execute/select, byte[2]=qualifier of command &quot;);
+        }
+<span class="nc" id="L455">        return new IeRegulatingStepCommand(commandState, values[2], select);</span>
+    }
+
+    static Record handleInformationObject(ASdu aSdu, long timestamp, ChannelAddress channelAddress,
+            InformationObject informationObject) {
+        Record record;
+
+<span class="nc bnc" id="L462" title="All 2 branches missed.">        if (channelAddress.multiple() &gt; 1) {</span>
+<span class="nc" id="L463">            record = handleMultipleElementObjects(aSdu, timestamp, channelAddress, informationObject);</span>
+        }
+        else {
+            InformationElement[] informationElements;
+            try {
+<span class="nc" id="L468">                informationElements = handleSingleElementObject(aSdu, timestamp, channelAddress, informationObject);</span>
+<span class="nc" id="L469">            } catch (ConfigurationException e) {</span>
+<span class="nc" id="L470">                logger.warn(e.getMessage());</span>
+<span class="nc" id="L471">                return new Record(Flag.DRIVER_ERROR_CHANNEL_ADDRESS_SYNTAX_INVALID);</span>
+<span class="nc" id="L472">            }</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">            if (informationElements != null) {</span>
+<span class="nc" id="L474">                record = Iec60870DataHandling.creatNewRecord(informationElements, aSdu.getTypeIdentification(),</span>
+                        channelAddress, timestamp);
+            }
+            else {
+<span class="nc" id="L478">                record = new Record(Flag.UNKNOWN_ERROR);</span>
+            }
+        }
+<span class="nc" id="L481">        return record;</span>
+    }
+
+    private static Record creatNewRecord(InformationElement[] informationElements, ASduType typeId,
+            ChannelAddress channelAddress, long timestamp) {
+<span class="nc bnc" id="L486" title="All 2 branches missed.">        if (!channelAddress.dataType().equals(&quot;v&quot;)) {</span>
+<span class="nc" id="L487">            return getQualityDescriptorAsRecord(channelAddress.dataType(), informationElements, typeId, timestamp);</span>
+        }
+        else {
+<span class="nc bnc" id="L490" title="All 8 branches missed.">            switch (typeId) {</span>
+            case M_ME_NA_1:
+            case M_ME_TA_1:
+            case M_ME_ND_1:
+            case M_ME_TD_1:
+            case C_SE_NA_1:
+            case P_ME_NA_1:
+<span class="nc" id="L497">                IeNormalizedValue normalizedValue = (IeNormalizedValue) informationElements[0]; // TODO: is 0 correct?</span>
+<span class="nc" id="L498">                return new Record(new DoubleValue(normalizedValue.getNormalizedValue()), timestamp);</span>
+            case M_ME_NB_1:
+            case M_ME_TB_1:
+            case M_ME_TE_1:
+            case C_SE_NB_1:
+            case P_ME_NB_1:
+<span class="nc" id="L504">                IeScaledValue scaledValue = (IeScaledValue) informationElements[0];// TODO: is 0 correct?</span>
+<span class="nc" id="L505">                return new Record(new IntValue(scaledValue.getUnnormalizedValue()), timestamp); // test this</span>
+            case M_ME_NC_1:
+            case M_ME_TC_1:
+            case M_ME_TF_1:
+            case C_SE_NC_1:
+            case P_ME_NC_1:
+<span class="nc" id="L511">                IeShortFloat shortFloat = (IeShortFloat) informationElements[0];</span>
+<span class="nc" id="L512">                return new Record(new DoubleValue(shortFloat.getValue()), timestamp);</span>
+            case M_BO_NA_1:
+            case M_BO_TA_1:
+            case M_BO_TB_1:
+<span class="nc" id="L516">                IeBinaryStateInformation binaryStateInformation = (IeBinaryStateInformation) informationElements[0];</span>
+<span class="nc" id="L517">                return new Record(</span>
+<span class="nc" id="L518">                        new ByteArrayValue(ByteBuffer.allocate(4).putInt(binaryStateInformation.getValue()).array()),</span>
+<span class="nc" id="L519">                        timestamp);</span>
+            case M_SP_NA_1:
+            case M_SP_TA_1:
+            case M_PS_NA_1:
+            case M_SP_TB_1:
+            case M_ST_NA_1:
+                // TODO: test this!!! It's not really a SinglePointInformation
+            case M_ST_TA_1:
+                // TODO: test this!!! It's not really a SinglePointInformation
+            case M_ST_TB_1:
+                // TODO: test this!!! It's not really a SinglePointInformation
+<span class="nc" id="L530">                IeSinglePointWithQuality singlePointWithQuality = (IeSinglePointWithQuality) informationElements[0];</span>
+<span class="nc" id="L531">                return new Record(new BooleanValue(singlePointWithQuality.isOn()), timestamp);</span>
+            case M_DP_NA_1:
+            case M_DP_TA_1:
+            case M_DP_TB_1:
+<span class="nc" id="L535">                IeDoublePointWithQuality doublePointWithQuality = (IeDoublePointWithQuality) informationElements[0];</span>
+<span class="nc" id="L536">                return new Record(new IntValue(doublePointWithQuality.getDoublePointInformation().ordinal()),</span>
+<span class="nc" id="L537">                        timestamp); // TODO: check this solution. Is Enum to int correct?</span>
+            case M_IT_NA_1:
+            case M_IT_TA_1:
+            case M_IT_TB_1:
+<span class="nc" id="L541">                IeBinaryCounterReading binaryCounterReading = (IeBinaryCounterReading) informationElements[0];</span>
+                // TODO: change to String because of more values e.g. getSequenceNumber, isCarry, ... ?
+<span class="nc" id="L543">                return new Record(new IntValue(binaryCounterReading.getCounterReading()), timestamp);</span>
+            default:
+<span class="nc" id="L545">                logger.debug(&quot;Not supported Type Identification.&quot;);</span>
+<span class="nc" id="L546">                return new Record(Flag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION);</span>
+            }
+        }
+    }
+
+    private static Record getQualityDescriptorAsRecord(String dataType, InformationElement[] informationElements,
+            ASduType typeIdentification, long timestamp) {
+<span class="nc" id="L553">        Record record = null;</span>
+<span class="nc" id="L554">        InformationElement informationElement = informationElements[informationElements.length - 1];</span>
+
+<span class="nc bnc" id="L556" title="All 4 branches missed.">        if (typeIdentification.getId() &lt;= 14 || typeIdentification.getId() == 20</span>
+<span class="nc bnc" id="L557" title="All 4 branches missed.">                || typeIdentification.getId() &gt;= 30 &amp;&amp; typeIdentification.getId() &lt;= 36) {</span>
+<span class="nc" id="L558">            record = quality(dataType, timestamp, informationElement);</span>
+        }
+<span class="nc bnc" id="L560" title="All 4 branches missed.">        else if (typeIdentification.getId() &gt;= 15 &amp;&amp; typeIdentification.getId() &lt;= 16</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">                || typeIdentification.getId() == 37) {</span>
+<span class="nc" id="L562">            record = binaryCounterReading(dataType, timestamp, informationElement);</span>
+        }
+<span class="nc bnc" id="L564" title="All 4 branches missed.">        else if (typeIdentification.getId() &gt;= 17 &amp;&amp; typeIdentification.getId() &lt;= 19</span>
+<span class="nc bnc" id="L565" title="All 4 branches missed.">                || typeIdentification.getId() &gt;= 38 &amp;&amp; typeIdentification.getId() &lt;= 40) {</span>
+
+<span class="nc" id="L567">            record = protectionQuality(dataType, timestamp, informationElement);</span>
+        }
+
+<span class="nc bnc" id="L570" title="All 2 branches missed.">        if (record == null) {</span>
+<span class="nc" id="L571">            logger.debug(&quot;Not supported Quality Descriptor.&quot;);</span>
+<span class="nc" id="L572">            record = new Record(Flag.DRIVER_ERROR_CHANNEL_VALUE_TYPE_CONVERSION_EXCEPTION);</span>
+        }
+<span class="nc" id="L574">        return record;</span>
+    }
+
+    private static Record quality(String dataType, long timestamp, InformationElement informationElement) {
+<span class="nc" id="L578">        IeQuality quality = (IeQuality) informationElement;</span>
+<span class="nc" id="L579">        Record record = null;</span>
+
+<span class="nc bnc" id="L581" title="All 5 branches missed.">        switch (dataType) { // iv nt sb bl</span>
+        case &quot;iv&quot;:
+<span class="nc" id="L583">            record = new Record(new BooleanValue(quality.isInvalid()), timestamp);</span>
+<span class="nc" id="L584">            break;</span>
+        case &quot;sb&quot;:
+<span class="nc" id="L586">            record = new Record(new BooleanValue(quality.isSubstituted()), timestamp);</span>
+<span class="nc" id="L587">            break;</span>
+        case &quot;nt&quot;:
+<span class="nc" id="L589">            record = new Record(new BooleanValue(quality.isNotTopical()), timestamp);</span>
+<span class="nc" id="L590">            break;</span>
+        case &quot;bl&quot;:
+<span class="nc" id="L592">            record = new Record(new BooleanValue(quality.isBlocked()), timestamp);</span>
+<span class="nc" id="L593">            break;</span>
+        default:
+        }
+<span class="nc" id="L596">        return record;</span>
+    }
+
+    private static Record protectionQuality(String dataType, long timestamp, InformationElement informationElement) {
+<span class="nc" id="L600">        IeProtectionQuality quality = (IeProtectionQuality) informationElement;</span>
+<span class="nc" id="L601">        Record record = null;</span>
+
+<span class="nc bnc" id="L603" title="All 6 branches missed.">        switch (dataType) { // iv nt sb bl ei</span>
+        case &quot;iv&quot;:
+<span class="nc" id="L605">            record = new Record(new BooleanValue(quality.isInvalid()), timestamp);</span>
+<span class="nc" id="L606">            break;</span>
+        case &quot;sb&quot;:
+<span class="nc" id="L608">            record = new Record(new BooleanValue(quality.isSubstituted()), timestamp);</span>
+<span class="nc" id="L609">            break;</span>
+        case &quot;nt&quot;:
+<span class="nc" id="L611">            record = new Record(new BooleanValue(quality.isNotTopical()), timestamp);</span>
+<span class="nc" id="L612">            break;</span>
+        case &quot;bl&quot;:
+<span class="nc" id="L614">            record = new Record(new BooleanValue(quality.isBlocked()), timestamp);</span>
+<span class="nc" id="L615">            break;</span>
+        case &quot;ei&quot;:
+<span class="nc" id="L617">            record = new Record(new BooleanValue(quality.isElapsedTimeInvalid()), timestamp);</span>
+<span class="nc" id="L618">            break;</span>
+        default:
+        }
+<span class="nc" id="L621">        return record;</span>
+    }
+
+    private static Record binaryCounterReading(String dataType, long timestamp, InformationElement informationElement) {
+<span class="nc" id="L625">        IeBinaryCounterReading quality = (IeBinaryCounterReading) informationElement;</span>
+<span class="nc" id="L626">        Record record = null;</span>
+<span class="nc" id="L627">        Set&lt;org.openmuc.j60870.ie.IeBinaryCounterReading.Flag&gt; flags = quality.getFlags();</span>
+
+<span class="nc bnc" id="L629" title="All 4 branches missed.">        switch (dataType) {// iv ca cy</span>
+        case &quot;iv&quot;:
+<span class="nc" id="L631">            record = new Record(new BooleanValue(flags.contains(IeBinaryCounterReading.Flag.INVALID)), timestamp);</span>
+<span class="nc" id="L632">            break;</span>
+        case &quot;ca&quot;:
+<span class="nc" id="L634">            record = new Record(new BooleanValue(flags.contains(IeBinaryCounterReading.Flag.COUNTER_ADJUSTED)),</span>
+<span class="nc" id="L635">                    timestamp);</span>
+<span class="nc" id="L636">            break;</span>
+        case &quot;cy&quot;:
+<span class="nc" id="L638">            record = new Record(new BooleanValue(flags.contains(IeBinaryCounterReading.Flag.CARRY)), timestamp);</span>
+<span class="nc" id="L639">            break;</span>
+        default:
+        }
+<span class="nc" id="L642">        return record;</span>
+    }
+
+    private static Record handleMultipleElementObjects(ASdu aSdu, long timestamp, ChannelAddress channelAddress,
+            InformationObject informationObject) {
+<span class="nc" id="L647">        int singleSize = sizeOfType(aSdu.getTypeIdentification());</span>
+<span class="nc" id="L648">        int arrayLength = singleSize * channelAddress.multiple();</span>
+<span class="nc" id="L649">        ByteBuffer byteBuffer = ByteBuffer.allocate(arrayLength);</span>
+
+<span class="nc bnc" id="L651" title="All 2 branches missed.">        for (int i = 0; i &lt; channelAddress.multiple(); ++i) {</span>
+            InformationElement[] informationElements;
+            try {
+<span class="nc" id="L654">                informationElements = handleSingleElementObject(aSdu, timestamp, channelAddress, informationObject);</span>
+<span class="nc bnc" id="L655" title="All 4 branches missed.">                if (informationElements != null &amp;&amp; informationElements.length &gt; 0) {</span>
+<span class="nc" id="L656">                    IeBinaryStateInformation binaryStateInformation = (IeBinaryStateInformation) informationElements[0];</span>
+<span class="nc" id="L657">                    byteBuffer.putInt(binaryStateInformation.getValue());</span>
+<span class="nc" id="L658">                }</span>
+                else {
+<span class="nc" id="L660">                    logger.warn(&quot;Information element of IAO {} {}&quot;, channelAddress.ioa(), &quot;is null or empty.&quot;);</span>
+<span class="nc" id="L661">                    return new Record(Flag.UNKNOWN_ERROR);</span>
+                }
+<span class="nc" id="L663">            } catch (ConfigurationException e) {</span>
+<span class="nc" id="L664">                logger.warn(e.getMessage());</span>
+<span class="nc" id="L665">                return new Record(Flag.DRIVER_ERROR_CHANNEL_ADDRESS_SYNTAX_INVALID);</span>
+<span class="nc" id="L666">            }</span>
+        }
+
+<span class="nc" id="L669">        byte[] value = byteBuffer.array();</span>
+
+<span class="nc" id="L671">        return new Record(new ByteArrayValue(value), timestamp);</span>
+    }
+
+    private static InformationElement[] handleSingleElementObject(ASdu aSdu, long timestamp,
+            ChannelAddress channelAddress, InformationObject informationObject) throws ConfigurationException {
+<span class="nc" id="L676">        InformationElement[] informationElements = null;</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">        if (channelAddress.ioa() == informationObject.getInformationObjectAddress()) {</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">            if (aSdu.isSequenceOfElements()) {</span>
+<span class="nc" id="L679">                informationElements = sequenceOfElements(aSdu, timestamp, channelAddress, informationObject);</span>
+            }
+            else {
+<span class="nc" id="L682">                informationElements = informationObject.getInformationElements()[0];</span>
+            }
+        }
+<span class="nc" id="L685">        return informationElements;</span>
+    }
+
+    private static InformationElement[] sequenceOfElements(ASdu aSdu, long timestamp, ChannelAddress channelAddress,
+            InformationObject informationObject) throws ConfigurationException {
+<span class="nc" id="L690">        InformationElement[] informationElements = null;</span>
+
+<span class="nc bnc" id="L692" title="All 2 branches missed.">        if (channelAddress.index() &gt;= -1) {</span>
+<span class="nc" id="L693">            informationElements = informationObject.getInformationElements()[channelAddress.index()];</span>
+        }
+        else {
+<span class="nc" id="L696">            throw new ConfigurationException(</span>
+                    &quot;Got ASdu with same TypeId, Common Address and IOA, but it is a Sequence Of Elements. For this index in ChannelAddress is needed.&quot;);
+        }
+<span class="nc" id="L699">        return informationElements;</span>
+    }
+
+    private static int sizeOfType(ASduType typeIdentification) {
+<span class="nc" id="L703">        int size = -1; // size in byte</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">        switch (typeIdentification) {</span>
+        case M_BO_NA_1:
+        case M_BO_TA_1:
+        case M_BO_TB_1:
+<span class="nc" id="L708">            size = 4;</span>
+<span class="nc" id="L709">            break;</span>
+        default:
+<span class="nc" id="L711">            logger.debug(&quot;Not able to set Data Type {}  as multiple IOAs or Indices.&quot;, typeIdentification);</span>
+            break;
+        }
+<span class="nc" id="L714">        return size;</span>
+    }
+
+    private static int bytesToSignedInt32(byte[] bytes, int length, boolean isLitteleEndian) {
+<span class="nc bnc" id="L718" title="All 2 branches missed.">        if (length &lt;= INT32_BYTE_LENGTH) {</span>
+<span class="nc" id="L719">            int returnValue = 0;</span>
+<span class="nc" id="L720">            int lengthLoop = bytes.length - 1;</span>
+
+<span class="nc bnc" id="L722" title="All 2 branches missed.">            if (isLitteleEndian) {</span>
+<span class="nc" id="L723">                reverseByteOrder(bytes);</span>
+            }
+
+<span class="nc bnc" id="L726" title="All 2 branches missed.">            for (int i = 0; i &lt;= lengthLoop; ++i) {</span>
+<span class="nc" id="L727">                int shift = length - i &lt;&lt; 3;</span>
+<span class="nc" id="L728">                returnValue |= (long) (bytes[i] &amp; 0xff) &lt;&lt; shift;</span>
+            }
+<span class="nc" id="L730">            return returnValue;</span>
+        }
+        else {
+<span class="nc" id="L733">            throw new IllegalArgumentException(</span>
+                    &quot;Unable to convert bytes due to wrong number of bytes. Minimum 1 byte, maximum &quot; + INT32_BYTE_LENGTH
+                            + &quot; bytes needed for conversion.&quot;);
+        }
+    }
+
+    private static void reverseByteOrder(byte[] bytes) {
+<span class="nc" id="L740">        int indexLength = bytes.length - 1;</span>
+<span class="nc" id="L741">        int halfLength = bytes.length / 2;</span>
+<span class="nc bnc" id="L742" title="All 2 branches missed.">        for (int i = 0; i &lt; halfLength; i++) {</span>
+<span class="nc" id="L743">            int index = indexLength - i;</span>
+<span class="nc" id="L744">            byte temp = bytes[i];</span>
+<span class="nc" id="L745">            bytes[i] = bytes[index];</span>
+<span class="nc" id="L746">            bytes[index] = temp;</span>
+        }
+<span class="nc" id="L748">    }</span>
+
+    private Iec60870DataHandling() {
+        // Hide this constructor.
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

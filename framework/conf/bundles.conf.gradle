@@ -53,6 +53,7 @@ dependencies {
 
     osgibundles group: 'org.openmuc.framework', name: 'openmuc-driver-modbus', version: openmucVersion
     osgibundles group: 'org.openmuc.framework', name: 'openmuc-driver-mqtt', version: openmucVersion
+    osgibundles group: 'org.openmuc.framework', name: 'openmuc-driver-iec60870', version: openmucVersion
 
     osgibundles group: 'org.openmuc.framework', name: 'openmuc-app-simpledemo', version: openmucVersion
     // osgibundles group: "org.openmuc.framework", name: "openmuc-app-bms",version: openmucVersion
