@@ -32,6 +32,7 @@ import org.openmuc.framework.data.DoubleValue;
 import org.openmuc.framework.data.Flag;
 import org.openmuc.framework.data.IntValue;
 import org.openmuc.framework.data.Record;
+import org.openmuc.framework.data.StringValue;
 import org.openmuc.framework.data.TypeConversionException;
 import org.openmuc.framework.data.Value;
 import org.openmuc.framework.driver.iec60870.settings.ChannelAddress;
@@ -58,6 +59,7 @@ import org.openmuc.j60870.ie.IeShortFloat;
 import org.openmuc.j60870.ie.IeSingleCommand;
 import org.openmuc.j60870.ie.IeSinglePointWithQuality;
 import org.openmuc.j60870.ie.IeTestSequenceCounter;
+import org.openmuc.j60870.ie.IeValueWithTransientState;
 import org.openmuc.j60870.ie.IeTime16;
 import org.openmuc.j60870.ie.IeTime56;
 import org.openmuc.j60870.ie.InformationElement;
@@ -459,6 +461,10 @@ public class Iec60870DataHandling {
             InformationObject informationObject) {
         Record record;
 
+        if ("actcon".equals(channelAddress.dataType())) {
+            return createActivationConfirmationRecord(aSdu, timestamp, channelAddress, informationObject);
+        }
+
         if (channelAddress.multiple() > 1) {
             record = handleMultipleElementObjects(aSdu, timestamp, channelAddress, informationObject);
         }
@@ -479,6 +485,24 @@ public class Iec60870DataHandling {
             }
         }
         return record;
+    }
+
+    private static Record createActivationConfirmationRecord(ASdu aSdu, long timestamp, ChannelAddress channelAddress,
+            InformationObject informationObject) {
+        if (aSdu.getCauseOfTransmission() != CauseOfTransmission.ACTIVATION_CON
+                || informationObject.getInformationObjectAddress() != channelAddress.ioa()) {
+            return new Record(Flag.NO_VALUE_RECEIVED_YET);
+        }
+
+        String value = "{"
+                + "\"cot\":\"" + aSdu.getCauseOfTransmission().name() + "\","
+                + "\"negative\":" + aSdu.isNegativeConfirm() + ","
+                + "\"typeId\":" + aSdu.getTypeIdentification().getId() + ","
+                + "\"type\":\"" + aSdu.getTypeIdentification().name() + "\","
+                + "\"commonAddress\":" + aSdu.getCommonAddress() + ","
+                + "\"ioa\":" + informationObject.getInformationObjectAddress()
+                + "}";
+        return new Record(new StringValue(value), timestamp, Flag.VALID);
     }
 
     private static Record creatNewRecord(InformationElement[] informationElements, ASduType typeId,
@@ -521,14 +545,13 @@ public class Iec60870DataHandling {
             case M_SP_TA_1:
             case M_PS_NA_1:
             case M_SP_TB_1:
-            case M_ST_NA_1:
-                // TODO: test this!!! It's not really a SinglePointInformation
-            case M_ST_TA_1:
-                // TODO: test this!!! It's not really a SinglePointInformation
-            case M_ST_TB_1:
-                // TODO: test this!!! It's not really a SinglePointInformation
                 IeSinglePointWithQuality singlePointWithQuality = (IeSinglePointWithQuality) informationElements[0];
                 return new Record(new BooleanValue(singlePointWithQuality.isOn()), timestamp);
+            case M_ST_NA_1:
+            case M_ST_TA_1:
+            case M_ST_TB_1:
+                IeValueWithTransientState valueWithTransientState = (IeValueWithTransientState) informationElements[0];
+                return new Record(new IntValue(valueWithTransientState.getValue()), timestamp);
             case M_DP_NA_1:
             case M_DP_TA_1:
             case M_DP_TB_1:

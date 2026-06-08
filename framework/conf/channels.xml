@@ -60,7 +60,7 @@
   <driver id="iec60870">
     <device id="lib60870_demo_server">
       <description>lib60870-C CS104 demo server on localhost:2404</description>
-      <deviceAddress>h=192.168.4.58;p=2404;ca=1</deviceAddress>
+      <deviceAddress>h=localhost;p=2404;ca=1</deviceAddress>
       <settings>rt=5000</settings>
       <disabled>false</disabled>
       <channel id="iec60870_demo_me_nb_100">
@@ -102,6 +102,195 @@
         <description>Periodic measured scaled value IOA 110</description>
         <channelAddress>ca=1;t=11;ioa=110</channelAddress>
         <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_sp_1">
+        <description>IEC104 Test Type 1 M_SP_NA single point IOA 1001</description>
+        <channelAddress>ca=1;t=1;ioa=1001</channelAddress>
+        <valueType>BOOLEAN</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_dp_3">
+        <description>IEC104 Test Type 3 M_DP_NA double point IOA 1003</description>
+        <channelAddress>ca=1;t=3;ioa=1003</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_st_5">
+        <description>IEC104 Test Type 5 M_ST_NA step position IOA 1005</description>
+        <channelAddress>ca=1;t=5;ioa=1005</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_bo_7">
+        <description>IEC104 Test Type 7 M_BO_NA bitstring IOA 1007</description>
+        <channelAddress>ca=1;t=7;ioa=1007</channelAddress>
+        <valueType length="4">BYTE_ARRAY</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_me_na_9">
+        <description>IEC104 Test Type 9 M_ME_NA normalized measurement IOA 1009</description>
+        <channelAddress>ca=1;t=9;ioa=1009</channelAddress>
+        <valueType>DOUBLE</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_me_nb_11">
+        <description>IEC104 Test Type 11 M_ME_NB scaled measurement IOA 1011</description>
+        <channelAddress>ca=1;t=11;ioa=1011</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_me_nc_13">
+        <description>IEC104 Test Type 13 M_ME_NC float measurement IOA 1013</description>
+        <channelAddress>ca=1;t=13;ioa=1013</channelAddress>
+        <valueType>DOUBLE</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_test_it_15">
+        <description>IEC104 Test Type 15 M_IT_NA integrated total IOA 1015</description>
+        <channelAddress>ca=1;t=15;ioa=1015</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_sc_45">
+        <description>IEC104 Test Type 45 C_SC_NA single command IOA 2045</description>
+        <channelAddress>ca=1;t=45;ioa=2045</channelAddress>
+        <valueType length="3">BYTE_ARRAY</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_dc_46">
+        <description>IEC104 Test Type 46 C_DC_NA double command IOA 2046</description>
+        <channelAddress>ca=1;t=46;ioa=2046</channelAddress>
+        <valueType>BOOLEAN</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_rc_47">
+        <description>IEC104 Test Type 47 C_RC_NA regulating step command IOA 2047</description>
+        <channelAddress>ca=1;t=47;ioa=2047</channelAddress>
+        <valueType length="3">BYTE_ARRAY</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_se_na_48">
+        <description>IEC104 Test Type 48 C_SE_NA normalized setpoint IOA 2048</description>
+        <channelAddress>ca=1;t=48;ioa=2048</channelAddress>
+        <valueType length="6">BYTE_ARRAY</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_se_nc_50">
+        <description>IEC104 Test Type 50 C_SE_NC float setpoint IOA 2050</description>
+        <channelAddress>ca=1;t=50;ioa=2050</channelAddress>
+        <valueType>FLOAT</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_bo_51">
+        <description>IEC104 Test Type 51 C_BO_NA bitstring command IOA 2051</description>
+        <channelAddress>ca=1;t=51;ioa=2051</channelAddress>
+        <valueType>INTEGER</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_cmd_invalid_45">
+        <description>IEC104 Test invalid Type 45 C_SC_NA command IOA 9999 for negative activation confirmation</description>
+        <channelAddress>ca=1;t=45;ioa=9999</channelAddress>
+        <valueType length="3">BYTE_ARRAY</valueType>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_sc_45">
+        <description>IEC104 activation confirmation for C_SC_NA command IOA 2045</description>
+        <channelAddress>ca=1;t=45;ioa=2045;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_dc_46">
+        <description>IEC104 activation confirmation for C_DC_NA command IOA 2046</description>
+        <channelAddress>ca=1;t=46;ioa=2046;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_rc_47">
+        <description>IEC104 activation confirmation for C_RC_NA command IOA 2047</description>
+        <channelAddress>ca=1;t=47;ioa=2047;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_se_na_48">
+        <description>IEC104 activation confirmation for C_SE_NA command IOA 2048</description>
+        <channelAddress>ca=1;t=48;ioa=2048;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_se_nc_50">
+        <description>IEC104 activation confirmation for C_SE_NC command IOA 2050</description>
+        <channelAddress>ca=1;t=50;ioa=2050;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_bo_51">
+        <description>IEC104 activation confirmation for C_BO_NA command IOA 2051</description>
+        <channelAddress>ca=1;t=51;ioa=2051;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_confirm_invalid_45">
+        <description>IEC104 negative activation confirmation for invalid C_SC_NA command IOA 9999</description>
+        <channelAddress>ca=1;t=45;ioa=9999;dt=actcon</channelAddress>
+        <valueType length="256">STRING</valueType>
+        <listening>true</listening>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_sc_45">
+        <description>IEC104 Test feedback for C_SC_NA command IOA 1045</description>
+        <channelAddress>ca=1;t=1;ioa=1045</channelAddress>
+        <valueType>BOOLEAN</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_dc_46">
+        <description>IEC104 Test feedback for C_DC_NA command IOA 1046</description>
+        <channelAddress>ca=1;t=3;ioa=1046</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_rc_47">
+        <description>IEC104 Test feedback for C_RC_NA command IOA 1047</description>
+        <channelAddress>ca=1;t=5;ioa=1047</channelAddress>
+        <valueType>INTEGER</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_se_na_48">
+        <description>IEC104 Test feedback for C_SE_NA command IOA 1048</description>
+        <channelAddress>ca=1;t=9;ioa=1048</channelAddress>
+        <valueType>DOUBLE</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_se_nc_50">
+        <description>IEC104 Test feedback for C_SE_NC command IOA 1050</description>
+        <channelAddress>ca=1;t=13;ioa=1050</channelAddress>
+        <valueType>DOUBLE</valueType>
+        <samplingInterval>5s</samplingInterval>
+        <disabled>false</disabled>
+      </channel>
+      <channel id="iec104_feedback_bo_51">
+        <description>IEC104 Test feedback for C_BO_NA command IOA 1051</description>
+        <channelAddress>ca=1;t=7;ioa=1051</channelAddress>
+        <valueType length="4">BYTE_ARRAY</valueType>
         <samplingInterval>5s</samplingInterval>
         <disabled>false</disabled>
       </channel>

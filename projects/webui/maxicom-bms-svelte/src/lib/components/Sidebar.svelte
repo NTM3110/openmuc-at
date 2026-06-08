@@ -10,6 +10,7 @@
 
   const menuItems: MenuItem[] = [
     { label: 'Dashboard', icon: 'speedometer2', route: '/dashboard' },
+    { label: 'IEC104 Test', icon: 'diagram-3', route: '/iec104-test' },
     { label: 'Strings', icon: 'battery-charging', route: '/setting/strings' },
     { label: 'Serial', icon: 'usb-symbol', route: '/setting/serial' },
     { label: 'Network', icon: 'wifi', route: '/setting/network' },

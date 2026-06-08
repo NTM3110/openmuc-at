@@ -24,52 +24,52 @@ import org.openmuc.framework.config.ArgumentSyntaxException;
 
 public class ChannelAddress extends GenericSetting {
 
-<span class="nc" id="L27">    protected int common_address = 1;</span>
-<span class="nc" id="L28">    protected int type_id = 0;</span>
-<span class="nc" id="L29">    protected int ioa = 0;</span>
-<span class="nc" id="L30">    protected String data_type = &quot;v&quot;;</span>
-<span class="nc" id="L31">    protected int index = -1;</span>
-<span class="nc" id="L32">    protected int multiple = 1;</span>
-<span class="nc" id="L33">    protected boolean select = false;</span>
+<span class="fc" id="L27">    protected int common_address = 1;</span>
+<span class="fc" id="L28">    protected int type_id = 0;</span>
+<span class="fc" id="L29">    protected int ioa = 0;</span>
+<span class="fc" id="L30">    protected String data_type = &quot;v&quot;;</span>
+<span class="fc" id="L31">    protected int index = -1;</span>
+<span class="fc" id="L32">    protected int multiple = 1;</span>
+<span class="fc" id="L33">    protected boolean select = false;</span>
 
-<span class="nc" id="L35">    protected enum Option implements OptionI {</span>
-<span class="nc" id="L36">        COMMON_ADDRESS(&quot;ca&quot;, Integer.class, true),</span>
-<span class="nc" id="L37">        TYPE_ID(&quot;t&quot;, Integer.class, true),</span>
-<span class="nc" id="L38">        IOA(&quot;ioa&quot;, Integer.class, true),</span>
-<span class="nc" id="L39">        DATA_TYPE(&quot;dt&quot;, String.class, false),</span>
-<span class="nc" id="L40">        INDEX(&quot;i&quot;, Integer.class, false),</span>
-<span class="nc" id="L41">        MULTIPLE(&quot;m&quot;, Integer.class, false),</span>
-<span class="nc" id="L42">        SELECT(&quot;s&quot;, Boolean.class, false);</span>
+<span class="fc" id="L35">    protected enum Option implements OptionI {</span>
+<span class="fc" id="L36">        COMMON_ADDRESS(&quot;ca&quot;, Integer.class, true),</span>
+<span class="fc" id="L37">        TYPE_ID(&quot;t&quot;, Integer.class, true),</span>
+<span class="fc" id="L38">        IOA(&quot;ioa&quot;, Integer.class, true),</span>
+<span class="fc" id="L39">        DATA_TYPE(&quot;dt&quot;, String.class, false),</span>
+<span class="fc" id="L40">        INDEX(&quot;i&quot;, Integer.class, false),</span>
+<span class="fc" id="L41">        MULTIPLE(&quot;m&quot;, Integer.class, false),</span>
+<span class="fc" id="L42">        SELECT(&quot;s&quot;, Boolean.class, false);</span>
 
         private String prefix;
         private Class&lt;?&gt; type;
         private boolean mandatory;
 
-<span class="nc" id="L48">        private Option(String prefix, Class&lt;?&gt; type, boolean mandatory) {</span>
-<span class="nc" id="L49">            this.prefix = prefix;</span>
-<span class="nc" id="L50">            this.type = type;</span>
-<span class="nc" id="L51">            this.mandatory = mandatory;</span>
-<span class="nc" id="L52">        }</span>
+<span class="fc" id="L48">        private Option(String prefix, Class&lt;?&gt; type, boolean mandatory) {</span>
+<span class="fc" id="L49">            this.prefix = prefix;</span>
+<span class="fc" id="L50">            this.type = type;</span>
+<span class="fc" id="L51">            this.mandatory = mandatory;</span>
+<span class="fc" id="L52">        }</span>
 
         @Override
         public String prefix() {
-<span class="nc" id="L56">            return this.prefix;</span>
+<span class="fc" id="L56">            return this.prefix;</span>
         }
 
         @Override
         public Class&lt;?&gt; type() {
-<span class="nc" id="L61">            return this.type;</span>
+<span class="fc" id="L61">            return this.type;</span>
         }
 
         @Override
         public boolean mandatory() {
-<span class="nc" id="L66">            return this.mandatory;</span>
+<span class="fc" id="L66">            return this.mandatory;</span>
         }
     }
 
-<span class="nc" id="L70">    public ChannelAddress(String channelAddress) throws ArgumentSyntaxException {</span>
-<span class="nc" id="L71">        parseFields(channelAddress, Option.class);</span>
-<span class="nc" id="L72">    }</span>
+<span class="fc" id="L70">    public ChannelAddress(String channelAddress) throws ArgumentSyntaxException {</span>
+<span class="fc" id="L71">        parseFields(channelAddress, Option.class);</span>
+<span class="fc" id="L72">    }</span>
 
     /**
      * Type Identification
@@ -86,7 +86,7 @@ public class ChannelAddress extends GenericSetting {
      * @return IOA as integer
      */
     public int ioa() {
-<span class="nc" id="L89">        return ioa;</span>
+<span class="fc" id="L89">        return ioa;</span>
     }
 
     /**
@@ -107,7 +107,7 @@ public class ChannelAddress extends GenericSetting {
      * @return the data type as string
      */
     public String dataType() {
-<span class="nc" id="L110">        return data_type;</span>
+<span class="fc" id="L110">        return data_type;</span>
     }
 
     /**

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.openmuc.framework.driver.iec60870.Iec60870CommandConfirmationTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-06-05T04:15:52.072Z" hostname="shou-ThinkPad-E14-Gen-5" time="0.02">
+  <properties/>
+  <testcase name="activationConfirmationCreatesStringRecord()" classname="org.openmuc.framework.driver.iec60870.Iec60870CommandConfirmationTest" time="0.018"/>
+  <testcase name="activationRequestDoesNotCreateConfirmationRecord()" classname="org.openmuc.framework.driver.iec60870.Iec60870CommandConfirmationTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

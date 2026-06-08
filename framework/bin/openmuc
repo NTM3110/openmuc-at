@@ -339,6 +339,9 @@ case "$1" in
 
         ./gradlew :openmuc-datalogger-sql:clean :openmuc-datalogger-sql:build -x test
         cp ./build/libs-all/openmuc-datalogger-sql-0.20.0.jar ./framework/bundle/
+
+        ./gradlew :openmuc-driver-iec60870:clean :openmuc-driver-iec60870:build -x test
+        cp ./build/libs-all/openmuc-driver-iec60870-0.20.0.jar ./framework/bundle/
         ;;
     *)
         echo "Usage:" # openmuc {start|stop|restart|reload|update-bundles|remote-shell}"

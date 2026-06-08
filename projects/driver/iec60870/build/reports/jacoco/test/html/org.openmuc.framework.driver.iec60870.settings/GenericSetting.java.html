@@ -168,7 +168,7 @@ import org.slf4j.LoggerFactory;
 <span class="fc" id="L168">                        String[] pair = setting.split(PAIR_SEP);</span>
 <span class="fc" id="L169">                        int pairLength = pair.length;</span>
 
-<span class="pc bpc" id="L171" title="3 of 4 branches missed.">                        if (mandatory &amp;&amp; pairLength != 2) {</span>
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">                        if (mandatory &amp;&amp; pairLength != 2) {</span>
 <span class="nc" id="L172">                            throw new ArgumentSyntaxException(&quot;Parameter in &quot; + enclosingClassName</span>
                                     + &quot; is not a pair of prefix and value: &lt;prefix&gt;&quot; + PAIR_SEP + &quot;&lt;value&gt; &quot;);
                         }
@@ -207,7 +207,7 @@ import org.slf4j.LoggerFactory;
 <span class="fc" id="L207">        String optionName = enumName.toLowerCase(LOCALE);</span>
 <span class="fc" id="L208">        value = value.trim();</span>
 
-<span class="pc bpc" id="L210" title="8 of 10 branches missed.">        switch (type.getSimpleName()) {</span>
+<span class="pc bpc" id="L210" title="7 of 10 branches missed.">        switch (type.getSimpleName()) {</span>
         case &quot;Boolean&quot;:
 <span class="nc" id="L212">            options.getDeclaringClass().getDeclaredField(optionName).setBoolean(this, extractBoolean(value, enumName));</span>
 <span class="nc" id="L213">            break;</span>
@@ -227,8 +227,8 @@ import org.slf4j.LoggerFactory;
 <span class="nc" id="L227">            options.getDeclaringClass().getDeclaredField(optionName).setDouble(this, extractDouble(value, enumName));</span>
 <span class="nc" id="L228">            break;</span>
         case &quot;String&quot;:
-<span class="nc" id="L230">            options.getDeclaringClass().getDeclaredField(optionName).set(this, value);</span>
-<span class="nc" id="L231">            break;</span>
+<span class="fc" id="L230">            options.getDeclaringClass().getDeclaredField(optionName).set(this, value);</span>
+<span class="fc" id="L231">            break;</span>
         case &quot;byte[]&quot;:
 <span class="nc" id="L233">            options.getDeclaringClass().getDeclaredField(optionName).set(this, extractByteArray(value, enumName));</span>
 <span class="nc" id="L234">            break;</span>
